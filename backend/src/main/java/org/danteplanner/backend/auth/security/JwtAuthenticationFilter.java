@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
@@ -34,7 +35,6 @@ import jakarta.servlet.DispatcherType;
 import org.slf4j.MDC;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.dao.DataAccessException;
@@ -127,10 +127,6 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
 
         record Presented(String token) implements CookieToken {
         }
-
-        static CookieToken of(Optional<String> cookie) {
-            return cookie.<CookieToken>map(Presented::new).orElseGet(Absent::new);
-        }
     }
 
     private record RefreshToken(String token, RefreshClaims claims) {
@@ -170,15 +166,16 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
             };
         }
 
-        private static RefreshCheck ofUser(RefreshToken presented, Optional<UserSummary> active) {
-            return active.<RefreshCheck>map(user -> new NeedRotation(presented, user))
-                    .orElseGet(() -> new Abandon(presented.claims().userId(), AbandonReason.USER_GONE));
+        private static RefreshCheck ofUser(RefreshToken presented, Option<UserSummary> active) {
+            return active.fold(user -> new NeedRotation(presented, user),
+                    () -> new Abandon(presented.claims().userId(), AbandonReason.USER_GONE));
         }
     }
 
     private SessionOutcome establishAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        return switch (CookieToken.of(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN))) {
+        return switch (cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .<CookieToken>map(CookieToken.Presented::new).orElseGet(CookieToken.Absent::new)) {
             case CookieToken.Absent absent -> refreshOrReportOutage(request, response);
             case CookieToken.Presented access -> switch (accessTokenAuthenticator.authenticate(access.token(), request)) {
                 case AUTHENTICATED -> new SessionOutcome.Authenticated();
@@ -220,7 +217,8 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
 
     private SessionOutcome attemptAutoRefresh(HttpServletRequest request, HttpServletResponse response) {
         try {
-            return switch (CookieToken.of(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN))) {
+            return switch (cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
+                    .<CookieToken>map(CookieToken.Presented::new).orElseGet(CookieToken.Absent::new)) {
                 case CookieToken.Absent absent -> {
                     log.debug("No refresh token available for auto-refresh");
                     yield new SessionOutcome.Guest();

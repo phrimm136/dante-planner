@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator;
 import org.danteplanner.backend.user.service.UserService;
 
@@ -120,11 +121,10 @@ class UserServiceTest {
                     .thenReturn(Optional.of(testUser));
 
             // Act
-            Optional<User> result = userService.findActiveById(testUser.getId()).value();
+            Option<User> result = userService.findActiveById(testUser.getId()).value();
 
             // Assert
-            assertThat(result).isPresent();
-            assertThat(result.get()).isEqualTo(testUser);
+            assertThat(result).isEqualTo(new Option.Some<>(testUser));
         }
 
         @Test
@@ -134,10 +134,10 @@ class UserServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act
-            Optional<User> result = userService.findActiveById(testUser.getId()).value();
+            Option<User> result = userService.findActiveById(testUser.getId()).value();
 
             // Assert
-            assertThat(result).isEmpty();
+            assertThat(result).isInstanceOf(Option.None.class);
         }
 
         @Test
@@ -148,10 +148,10 @@ class UserServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act
-            Optional<User> result = userService.findActiveById(nonExistentId).value();
+            Option<User> result = userService.findActiveById(nonExistentId).value();
 
             // Assert
-            assertThat(result).isEmpty();
+            assertThat(result).isInstanceOf(Option.None.class);
         }
     }
 
@@ -172,9 +172,9 @@ class UserServiceTest {
         void findActiveById_WhenNoActiveUserMatches_StillScopesTheAskedUser() {
             when(userRepository.findByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
 
-            ScopedRead<Optional<User>> read = userService.findActiveById(999L);
+            ScopedRead<Option<User>> read = userService.findActiveById(999L);
 
-            assertThat(read.value()).isEmpty();
+            assertThat(read.value()).isInstanceOf(Option.None.class);
             assertThat(read.scopes()).containsExactly(new FreshnessScope.User(999L));
         }
 
@@ -183,9 +183,9 @@ class UserServiceTest {
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, PROVIDER_ID))
                     .thenReturn(Optional.of(testUser));
 
-            ScopedRead<Optional<User>> read = userService.findActiveByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+            ScopedRead<Option<User>> read = userService.findActiveByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
 
-            assertThat(read.value()).contains(testUser);
+            assertThat(read.value()).isEqualTo(new Option.Some<>(testUser));
             assertThat(read.scopes()).containsExactly(new FreshnessScope.User(123L));
         }
 
@@ -194,9 +194,9 @@ class UserServiceTest {
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, PROVIDER_ID))
                     .thenReturn(Optional.empty());
 
-            ScopedRead<Optional<User>> read = userService.findActiveByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+            ScopedRead<Option<User>> read = userService.findActiveByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
 
-            assertThat(read.value()).isEmpty();
+            assertThat(read.value()).isInstanceOf(Option.None.class);
             assertThat(read.scopes()).isEmpty();
         }
 
@@ -205,9 +205,9 @@ class UserServiceTest {
             when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
                     .thenReturn(Optional.of(testUser));
 
-            ScopedRead<Optional<User>> read = userService.findByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+            ScopedRead<Option<User>> read = userService.findByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
 
-            assertThat(read.value()).contains(testUser);
+            assertThat(read.value()).isEqualTo(new Option.Some<>(testUser));
             assertThat(read.scopes()).containsExactly(new FreshnessScope.User(123L));
         }
 
@@ -216,9 +216,9 @@ class UserServiceTest {
             when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
                     .thenReturn(Optional.empty());
 
-            ScopedRead<Optional<User>> read = userService.findByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+            ScopedRead<Option<User>> read = userService.findByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
 
-            assertThat(read.value()).isEmpty();
+            assertThat(read.value()).isInstanceOf(Option.None.class);
             assertThat(read.scopes()).isEmpty();
         }
 

@@ -1,11 +1,12 @@
 package org.danteplanner.backend.user.api;
 
-import java.util.Optional;
 import java.util.UUID;
+
+import org.danteplanner.backend.shared.failure.Option;
 
 public interface RestrictionReasonProvider {
 
-    Optional<String> latestBanReason(UUID targetPublicId);
+    Option<String> latestBanReason(UUID targetPublicId);
 
-    Optional<String> latestTimeoutReason(UUID targetPublicId);
+    Option<String> latestTimeoutReason(UUID targetPublicId);
 }

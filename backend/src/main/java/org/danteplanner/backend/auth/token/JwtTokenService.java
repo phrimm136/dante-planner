@@ -24,7 +24,6 @@ import java.time.Clock;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -137,9 +136,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
     }
 
     private static UserRole roleOf(Claims claims) {
-        return Optional.ofNullable(claims.get(CLAIM_ROLE, String.class))
-                .flatMap(UserRole::parse)
-                .orElse(UserRole.NORMAL);
+        return UserRole.fromClaim(claims.get(CLAIM_ROLE, String.class));
     }
 
     private static Date expirationOf(Claims claims) {

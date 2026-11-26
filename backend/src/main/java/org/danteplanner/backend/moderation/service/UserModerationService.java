@@ -132,8 +132,6 @@ public class UserModerationService {
     }
 
     private Long targetIdBySuffix(String usernameSuffix) {
-        return userService.findActiveBySuffix(usernameSuffix)
-                .orElseThrow(() -> new UserNotFoundException(usernameSuffix))
-                .getId();
+        return userService.findActiveBySuffix(usernameSuffix).getId();
     }
 }

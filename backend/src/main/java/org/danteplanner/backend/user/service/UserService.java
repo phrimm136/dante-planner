@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.exception.ConstraintViolationClassifier;
 import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.user.api.dto.UserResponse;
@@ -34,7 +35,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -144,14 +144,12 @@ public class UserService {
             case Restriction.Banned banned -> {
                 builder.isBanned(true)
                         .bannedAt(banned.at());
-                restrictionReasonProvider.latestBanReason(user.getPublicId())
-                        .ifPresent(builder::banReason);
+                restrictionReasonProvider.latestBanReason(user.getPublicId()).ifSome(builder::banReason);
             }
             case Restriction.TimedOut timedOut -> {
                 builder.isTimedOut(true)
                         .timeoutUntil(timedOut.until());
-                restrictionReasonProvider.latestTimeoutReason(user.getPublicId())
-                        .ifPresent(builder::timeoutReason);
+                restrictionReasonProvider.latestTimeoutReason(user.getPublicId()).ifSome(builder::timeoutReason);
             }
         }
 
@@ -171,8 +169,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public Optional<User> findOptionalById(Long id) {
-        return userRepository.findById(id);
+    public Option<User> findOptionalById(Long id) {
+        return Option.from(userRepository.findById(id));
     }
 
     @FreshnessExempt(reason = "startup sentinel check runs with no request bound")
@@ -182,36 +180,36 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ScopedRead<Optional<User>> findActiveById(Long userId) {
-        return new ScopedRead<>(userRepository.findByIdAndDeletedAtIsNull(userId),
+    public ScopedRead<Option<User>> findActiveById(Long userId) {
+        return new ScopedRead<>(Option.from(userRepository.findByIdAndDeletedAtIsNull(userId)),
                 Set.of(new FreshnessScope.User(userId)));
     }
 
     @Transactional
-    public Optional<User> findActiveByIdFromPrimary(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNull(userId);
+    public Option<User> findActiveByIdFromPrimary(Long userId) {
+        return Option.from(userRepository.findByIdAndDeletedAtIsNull(userId));
     }
 
     @Transactional(readOnly = true)
-    public ScopedRead<Optional<User>> findActiveByProvider(AuthProviderType providerType, String providerId) {
+    public ScopedRead<Option<User>> findActiveByProvider(AuthProviderType providerType, String providerId) {
         return scopedByFoundUser(
-                userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId));
+                Option.from(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId)));
     }
 
     @Transactional(readOnly = true)
-    public ScopedRead<Optional<User>> findByProvider(AuthProviderType providerType, String providerId) {
-        return scopedByFoundUser(userRepository.findByProviderAndProviderId(providerType, providerId));
+    public ScopedRead<Option<User>> findByProvider(AuthProviderType providerType, String providerId) {
+        return scopedByFoundUser(Option.from(userRepository.findByProviderAndProviderId(providerType, providerId)));
     }
 
-    private static ScopedRead<Optional<User>> scopedByFoundUser(Optional<User> found) {
+    private static ScopedRead<Option<User>> scopedByFoundUser(Option<User> found) {
         return new ScopedRead<>(found, found
-                .<Set<FreshnessScope>>map(user -> Set.of(new FreshnessScope.User(user.getId())))
-                .orElse(Set.of()));
+                .<Set<FreshnessScope>>fold(user -> Set.of(new FreshnessScope.User(user.getId())), Set::of));
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public Optional<User> findActiveBySuffix(String usernameSuffix) {
-        return userRepository.findByUsernameSuffixAndDeletedAtIsNull(usernameSuffix);
+    public User findActiveBySuffix(String usernameSuffix) {
+        return userRepository.findByUsernameSuffixAndDeletedAtIsNull(usernameSuffix)
+                .orElseThrow(() -> new UserNotFoundException(usernameSuffix));
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)

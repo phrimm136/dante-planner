@@ -7,13 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -94,19 +94,19 @@ public class ModerationAuditService implements ModerationAudit, RestrictionReaso
 
     @Override
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public Optional<String> latestBanReason(UUID targetPublicId) {
+    public Option<String> latestBanReason(UUID targetPublicId) {
         return latestReason(targetPublicId, ModerationActionType.BAN);
     }
 
     @Override
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public Optional<String> latestTimeoutReason(UUID targetPublicId) {
+    public Option<String> latestTimeoutReason(UUID targetPublicId) {
         return latestReason(targetPublicId, ModerationActionType.TIMEOUT);
     }
 
-    private Optional<String> latestReason(UUID targetPublicId, ModerationActionType type) {
-        return moderationActionRepository
-                .findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(targetPublicId.toString(), type)
-                .map(ModerationAction::getReason);
+    private Option<String> latestReason(UUID targetPublicId, ModerationActionType type) {
+        return Option.from(moderationActionRepository
+                        .findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(targetPublicId.toString(), type))
+                .flatMap(action -> Option.fromNullable(action.getReason()));
     }
 }

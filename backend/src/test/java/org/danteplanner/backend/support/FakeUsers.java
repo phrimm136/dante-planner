@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 import org.springframework.test.util.ReflectionTestUtils;
 
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.LastAdministratorException;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
@@ -36,13 +37,13 @@ public class FakeUsers implements Users {
 
     private static final RestrictionReasonProvider NO_RECORDED_REASONS = new RestrictionReasonProvider() {
         @Override
-        public Optional<String> latestBanReason(UUID targetPublicId) {
-            return Optional.empty();
+        public Option<String> latestBanReason(UUID targetPublicId) {
+            return new Option.None<>();
         }
 
         @Override
-        public Optional<String> latestTimeoutReason(UUID targetPublicId) {
-            return Optional.empty();
+        public Option<String> latestTimeoutReason(UUID targetPublicId) {
+            return new Option.None<>();
         }
     };
 
@@ -82,8 +83,8 @@ public class FakeUsers implements Users {
     }
 
     @Override
-    public Optional<UserSummary> findActiveById(Long userId) {
-        return active(userId).map(UsersApiAdapter::toSummary);
+    public Option<UserSummary> findActiveById(Long userId) {
+        return Option.from(active(userId).map(UsersApiAdapter::toSummary));
     }
 
     @Override
@@ -100,14 +101,14 @@ public class FakeUsers implements Users {
     }
 
     @Override
-    public Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
-        return first(byProvider(providerType, providerId)).map(UsersApiAdapter::toSummary);
+    public Option<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
+        return Option.from(first(byProvider(providerType, providerId)).map(UsersApiAdapter::toSummary));
     }
 
     @Override
-    public Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
-        return first(byProvider(providerType, providerId).and(user -> !user.isDeleted()))
-                .map(UsersApiAdapter::toSummary);
+    public Option<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
+        return Option.from(first(byProvider(providerType, providerId).and(user -> !user.isDeleted()))
+                .map(UsersApiAdapter::toSummary));
     }
 
     @Override
@@ -122,12 +123,6 @@ public class FakeUsers implements Users {
             throw new UserMiss(id);
         }
         return responses.toResponse(user);
-    }
-
-    @Override
-    public Optional<UserSummary> findActiveBySuffix(String usernameSuffix) {
-        return first(user -> !user.isDeleted() && usernameSuffix.equalsIgnoreCase(user.getUsernameSuffix()))
-                .map(UsersApiAdapter::toSummary);
     }
 
     @Override
@@ -158,8 +153,8 @@ public class FakeUsers implements Users {
     }
 
     @Override
-    public Optional<UserSummary> findOptionalById(Long id) {
-        return Optional.ofNullable(rows.get(id)).map(UsersApiAdapter::toSummary);
+    public Option<UserSummary> findOptionalById(Long id) {
+        return Option.fromNullable(rows.get(id)).map(UsersApiAdapter::toSummary);
     }
 
     @Override
