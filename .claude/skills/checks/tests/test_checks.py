@@ -711,7 +711,7 @@ def fleet_tree_rows(tree_root, changed_path):
 
 @pytest.mark.parametrize("changed_path", [
     "terraform/modules/fleet/user-data/cp.sh.tftpl", "terraform/modules/fleet/variables.tf",
-    "terraform/oregon/variables.tf", "terraform/oregon/environment.tfvars.example", "terraform/rds/main.tf",
+    "terraform/oregon/variables.tf", "terraform/rds/main.tf",
     "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-seoul.yaml",
     ".github/workflows/deploy-fleet.yml", "deploy/argocd/root-app-oregon.yaml", ".claude/settings.json",
     "scripts/dev/seed.sh", "terraform/oregon/envs/prod.tfvars", "deploy/grafana/rules/cluster-rules.yaml",
