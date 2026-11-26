@@ -10,6 +10,7 @@ import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
@@ -26,7 +27,6 @@ import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.shared.util.LogValues;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 
@@ -184,7 +184,7 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
                 case AUTHENTICATED -> new SessionOutcome.Authenticated();
                 case EXPIRED -> refreshExpiredSession(request, response);
                 case SENTINEL_BLOCKED, REVOKED, REJECTED -> {
-                    SecurityContextHolder.clearContext();
+                    SpringContextAdapter.signOut();
                     yield new SessionOutcome.Guest();
                 }
             };
@@ -197,8 +197,8 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
 
         SessionOutcome outcome = refreshOrReportOutage(request, response);
         switch (outcome) {
-            case SessionOutcome.Guest guest -> SecurityContextHolder.clearContext();
-            case SessionOutcome.Abandoned abandoned -> SecurityContextHolder.clearContext();
+            case SessionOutcome.Guest guest -> SpringContextAdapter.signOut();
+            case SessionOutcome.Abandoned abandoned -> SpringContextAdapter.signOut();
             case SessionOutcome.Authenticated authenticated -> { }
             case SessionOutcome.OutageReported outage -> { }
         }

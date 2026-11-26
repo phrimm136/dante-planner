@@ -214,13 +214,13 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
 
     private long measureThread(Planner planner) {
         ThreadStatementCounter.start();
-        commentQueryService.getCommentTree(planner.getId(), Viewer.of(viewerId));
+        commentQueryService.getCommentTree(planner.getId(), new Viewer.Member(viewerId));
         return ThreadStatementCounter.stop();
     }
 
     private long measure(CatalogQuery catalogQuery, Pageable pageable) {
         ThreadStatementCounter.start();
-        publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, Viewer.of(viewerId));
+        publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, new Viewer.Member(viewerId));
         return ThreadStatementCounter.stop();
     }
 
@@ -233,7 +233,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
      */
     private void assertFixedStatementCount(Supplier<CatalogQuery> catalogQuery, long expected) {
         assertThat(publishedPlannerQueryService
-                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, Viewer.of(viewerId)).value().getContent())
+                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, new Viewer.Member(viewerId)).value().getContent())
                 .as("the measured page carries a row")
                 .isNotEmpty();
         long count = measure(catalogQuery.get(), ONE_ROW_PAGE);

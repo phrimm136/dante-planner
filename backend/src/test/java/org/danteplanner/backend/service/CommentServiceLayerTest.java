@@ -446,7 +446,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Collections.emptyList());
 
             // Act
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, Viewer.of(testUser.getId())).value();
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, new Viewer.Member(testUser.getId())).value();
 
             // Assert
             assertThat(comments).isEmpty();
@@ -467,7 +467,7 @@ class CommentServiceLayerTest {
                     .thenReturn(List.of(byActive, byDeactivated));
             users.add(deactivated);
 
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, Viewer.of(testUser.getId())).value();
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, new Viewer.Member(testUser.getId())).value();
 
             CommentTreeNode active = comments.stream()
                     .filter(c -> c.id().equals(byActive.publicId())).findFirst().orElseThrow();
@@ -493,7 +493,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.of(new PlannerThread(plannerId, 1L, true, false)));
             when(commentRepository.findByPlannerId(plannerId)).thenReturn(thread);
 
-            assertThat(queryService.getCommentTree(plannerId, Viewer.of(null)).scopes()).containsExactlyInAnyOrder(
+            assertThat(queryService.getCommentTree(plannerId, new Viewer.Guest()).scopes()).containsExactlyInAnyOrder(
                     new FreshnessScope.Planner(plannerId), new FreshnessScope.User(1L),
                     new FreshnessScope.User(2L), new FreshnessScope.User(3L));
         }
@@ -505,7 +505,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertRejected(() -> queryService.getCommentTree(plannerId, Viewer.of(testUser.getId())))
+            assertRejected(() -> queryService.getCommentTree(plannerId, new Viewer.Member(testUser.getId())))
                     .withCode("PLANNER_NOT_FOUND");
         }
     }

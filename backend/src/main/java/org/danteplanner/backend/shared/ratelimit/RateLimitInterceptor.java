@@ -7,8 +7,6 @@ import java.util.function.Supplier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -22,7 +20,6 @@ import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
@@ -32,6 +29,8 @@ import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RoleGated;
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 
 /**
@@ -221,44 +220,15 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private long authenticatedUserId() {
-        return switch (SignIn.of(SecurityContextHolder.getContext().getAuthentication())) {
-            case SignIn.Absent absent -> throw unauthenticatedCharge();
-            case SignIn.Present present -> switch (Payer.of(present.authentication().getPrincipal())) {
-                case Payer.User user -> user.userId();
-                case Payer.Unidentified unidentified -> throw unauthenticatedCharge();
-            };
+        return switch (SpringContextAdapter.viewer()) {
+            case Viewer.Guest guest -> throw unauthenticatedCharge();
+            case Viewer.Member member -> member.userId();
         };
     }
 
     private static IllegalStateException unauthenticatedCharge() {
         return new IllegalStateException(
                 "A user-keyed rate-limit policy was charged without an authenticated principal");
-    }
-
-    private sealed interface SignIn {
-
-        record Present(Authentication authentication) implements SignIn {
-        }
-
-        record Absent() implements SignIn {
-        }
-
-        static SignIn of(@Nullable Authentication authentication) {
-            return authentication == null ? new Absent() : new Present(authentication);
-        }
-    }
-
-    private sealed interface Payer {
-
-        record User(long userId) implements Payer {
-        }
-
-        record Unidentified() implements Payer {
-        }
-
-        static Payer of(@Nullable Object principal) {
-            return principal instanceof Long userId ? new User(userId) : new Unidentified();
-        }
     }
 
     private boolean deny(HandlerMethod handlerMethod, HttpServletRequest request,

@@ -386,7 +386,7 @@ class TestIsolationConventionTest {
      * <p>Clearing only in setup protects the class that does it and nobody else. The holder's
      * default strategy is a {@code ThreadLocal} that outlives the class, MockMvc runs its filter
      * chain on the calling thread, and {@code JwtAuthenticationFilter} sets a principal only when
-     * none is present — so a leftover authentication makes a later class's request run as this
+     * no user is signed in — so a leftover authentication makes a later class's request run as this
      * test's user, which surfaces as a 403, a 404, or a response carrying a stranger's data.</p>
      */
     private static final java.util.regex.Pattern CLEARS_AFTER_EACH = java.util.regex.Pattern.compile(
