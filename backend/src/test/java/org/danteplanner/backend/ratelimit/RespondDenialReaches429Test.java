@@ -87,7 +87,8 @@ class RespondDenialReaches429Test {
 
         mockMvc.perform(get("/api/fixture/inherited"))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"));
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
+                .andExpect(jsonPath("$.detail").value("Rate limit exceeded for user 7 on endpoint fixture"));
 
         assertThat(rateLimitStore.charges()).extracting(InMemoryProxyManager.Charge::key)
                 .containsExactly("7:fixture");
