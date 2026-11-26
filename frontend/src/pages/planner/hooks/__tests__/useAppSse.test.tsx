@@ -51,9 +51,8 @@ vi.mock('@/shared/auth', async (importOriginal) => ({
   useAuthQueryNonBlocking: () =>
     useQuery({
       queryKey: h.AUTH_KEYS.me,
-      queryFn: () => h.userRef.current,
+      enabled: false,
       initialData: () => h.userRef.current,
-      staleTime: Infinity,
     }),
   authQueryKeys: h.AUTH_KEYS,
   clearSessionOnUnauthorized: (await importOriginal<typeof import('@/shared/auth')>())
