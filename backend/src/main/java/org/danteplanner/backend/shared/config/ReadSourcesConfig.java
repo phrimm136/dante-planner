@@ -138,7 +138,6 @@ public class ReadSourcesConfig {
     @Bean(PROBE_SCHEDULER)
     public ThreadPoolTaskScheduler readSourceProbeScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("read-source-probe-");
         scheduler.setRemoveOnCancelPolicy(true);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);

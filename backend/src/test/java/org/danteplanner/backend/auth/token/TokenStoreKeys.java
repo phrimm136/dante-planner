@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import org.danteplanner.backend.shared.redis.RedisKeyScanner;
+import org.danteplanner.backend.support.RedisKeyScanner;
 
 public final class TokenStoreKeys {
 

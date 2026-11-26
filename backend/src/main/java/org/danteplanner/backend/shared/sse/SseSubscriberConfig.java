@@ -35,7 +35,6 @@ public class SseSubscriberConfig {
     @Bean(SSE_SUBSCRIPTION_WORKER)
     public ThreadPoolTaskScheduler sseSubscriptionWorker() {
         ThreadPoolTaskScheduler worker = new ThreadPoolTaskScheduler();
-        worker.setPoolSize(1);
         worker.setThreadNamePrefix("sse-subscription-");
         worker.setDaemon(true);
         worker.setWaitForTasksToCompleteOnShutdown(false);

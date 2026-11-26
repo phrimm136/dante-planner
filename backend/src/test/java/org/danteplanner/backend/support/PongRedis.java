@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -19,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class PongRedis implements AutoCloseable {
 
     private static final String PING = "PING";
+    private static final String AUTH = "AUTH";
+    private static final String PONG = "PONG";
 
     private final ServerSocket listener;
     private final List<Client> clients = new CopyOnWriteArrayList<>();
@@ -30,6 +33,8 @@ public final class PongRedis implements AutoCloseable {
     private final AtomicBoolean nextPingReplyDelayed = new AtomicBoolean();
     private volatile CompletableFuture<Void> delayedPingReplySent = CompletableFuture.completedFuture(null);
     private final AtomicBoolean nextPingRefused = new AtomicBoolean();
+    private volatile String requiredPassword;
+    private volatile String pingStatus = PONG;
 
     public PongRedis() throws IOException {
         this.listener = new ServerSocket(0, 0, InetAddress.getLoopbackAddress());
@@ -77,6 +82,14 @@ public final class PongRedis implements AutoCloseable {
 
     public void refuseNextPing() {
         nextPingRefused.set(true);
+    }
+
+    public void requirePassword(String password) {
+        requiredPassword = password;
+    }
+
+    public void answerPingsWith(String status) {
+        pingStatus = status;
     }
 
     public void releaseDelayedPingReply() {
@@ -138,13 +151,13 @@ public final class PongRedis implements AutoCloseable {
     private void exchange(Client client) {
         try (InputStream in = new BufferedInputStream(client.socket.getInputStream());
                 OutputStream out = client.socket.getOutputStream()) {
-            String command = readCommandName(in);
+            List<String> command = readCommand(in);
             while (command != null) {
-                awaitDelayedReply(command);
+                awaitDelayedReply(command.getFirst());
                 if (!client.blackholed) {
-                    recordThenReply(out, command);
+                    recordThenReply(out, client, command);
                 }
-                command = readCommandName(in);
+                command = readCommand(in);
             }
         } catch (IOException closed) {
             return;
@@ -157,38 +170,49 @@ public final class PongRedis implements AutoCloseable {
         }
     }
 
-    private void recordThenReply(OutputStream out, String command) throws IOException {
-        if (PING.equalsIgnoreCase(command)) {
+    private void recordThenReply(OutputStream out, Client client, List<String> command) throws IOException {
+        String name = command.getFirst();
+        if (PING.equalsIgnoreCase(name)) {
             answeredPings.incrementAndGet();
         }
-        boolean refused = PING.equalsIgnoreCase(command) && nextPingRefused.compareAndSet(true, false);
-        out.write((refused ? "-ERR ping refused\r\n" : replyTo(command)).getBytes(StandardCharsets.UTF_8));
+        boolean refused = PING.equalsIgnoreCase(name) && nextPingRefused.compareAndSet(true, false);
+        out.write((refused ? "-ERR ping refused\r\n" : replyTo(client, command)).getBytes(StandardCharsets.UTF_8));
         out.flush();
     }
 
-    private static String replyTo(String command) {
-        return switch (command.toUpperCase(Locale.ROOT)) {
+    private String replyTo(Client client, List<String> command) {
+        String password = requiredPassword;
+        return switch (command.getFirst().toUpperCase(Locale.ROOT)) {
             case "HELLO" -> "-ERR unknown command 'HELLO'\r\n";
-            case PING -> "+PONG\r\n";
+            case AUTH -> authenticate(client, password, command.getLast());
+            case PING -> password != null && !client.authenticated
+                    ? "-NOAUTH Authentication required.\r\n"
+                    : "+" + pingStatus + "\r\n";
             default -> "+OK\r\n";
         };
     }
 
-    private static String readCommandName(InputStream in) throws IOException {
+    private static String authenticate(Client client, String requiredPassword, String password) {
+        if (requiredPassword == null) {
+            return "+OK\r\n";
+        }
+        client.authenticated = requiredPassword.equals(password);
+        return client.authenticated ? "+OK\r\n" : "-WRONGPASS invalid username-password pair\r\n";
+    }
+
+    private static List<String> readCommand(InputStream in) throws IOException {
         String header = readLine(in);
         if (header == null) {
             return null;
         }
         int count = Integer.parseInt(header.substring(1));
-        String name = null;
+        List<String> arguments = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             int length = Integer.parseInt(readLine(in).substring(1));
             byte[] bytes = in.readNBytes(length + 2);
-            if (i == 0) {
-                name = new String(bytes, 0, length, StandardCharsets.UTF_8);
-            }
+            arguments.add(new String(bytes, 0, length, StandardCharsets.UTF_8));
         }
-        return name;
+        return arguments;
     }
 
     private static String readLine(InputStream in) throws IOException {
@@ -212,6 +236,7 @@ public final class PongRedis implements AutoCloseable {
         private final Socket socket;
         private volatile boolean blackholed;
         private volatile boolean droppedByServer;
+        private volatile boolean authenticated;
 
         private Client(Socket socket) {
             this.socket = socket;
