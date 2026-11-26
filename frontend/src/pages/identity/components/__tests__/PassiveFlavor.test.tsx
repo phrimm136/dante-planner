@@ -84,11 +84,12 @@ describe('PassiveCard flavor rendering', () => {
     expect(flavorIdx).toBeGreaterThan(descIdx)
   })
 
-  it('preserves multi-line flavor via whitespace-pre-line', () => {
+  it('breaks a multi-line flavor at its newline', () => {
     const multiLine = 'Line one.\nLine two.'
     render(<PassiveCard {...baseProps} flavor={multiLine} />)
     const flavor = screen.getByTestId('passive-flavor')
     expect(flavor).toHaveClass('whitespace-pre-line')
-    expect(flavor.textContent).toBe(multiLine)
+    expect(flavor.querySelectorAll('br')).toHaveLength(1)
+    expect(flavor.textContent).toBe('Line one.Line two.')
   })
 })

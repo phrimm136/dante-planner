@@ -11,6 +11,7 @@ export interface TmpRun {
   color?: string
   mark?: TmpMark
   bold: boolean
+  italic: boolean
   underline: boolean
   strike: boolean
   decorationColor?: string
@@ -323,6 +324,7 @@ class TmpState {
   size = new TagStack<string | undefined>(undefined)
   styles: string[] = []
   bold = 0
+  italic = 0
   underline = 0
   strike = 0
   marks = 0
@@ -350,6 +352,7 @@ class TmpState {
         },
       }),
       bold: this.bold > 0,
+      italic: this.italic > 0,
       underline: this.underline > 0,
       strike: this.strike > 0,
       ...(decoration && { decorationColor: cssColor(decoration) }),
@@ -397,7 +400,10 @@ class TmpState {
         this.bold = Math.max(0, this.bold - 1)
         return true
       case 'I':
+        this.italic += 1
+        return true
       case '/I':
+        this.italic = Math.max(0, this.italic - 1)
         return true
       case 'S':
         this.strike += 1
@@ -484,6 +490,7 @@ function sameState(a: TmpRun, b: TmpRun): boolean {
     a.mark?.rgb === b.mark?.rgb &&
     a.mark?.alphaPct === b.mark?.alphaPct &&
     a.bold === b.bold &&
+    a.italic === b.italic &&
     a.underline === b.underline &&
     a.strike === b.strike &&
     a.decorationColor === b.decorationColor &&

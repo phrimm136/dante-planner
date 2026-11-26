@@ -20,6 +20,7 @@ function runStyle(run: TmpRun): RunStyle {
     ...(run.mark && { '--rt-mark-color': run.mark.rgb, '--rt-mark-alpha': run.mark.alphaPct }),
     ...(run.decorationColor && { '--rt-decoration-color': run.decorationColor }),
     ...(run.bold && { fontWeight: 'bold' }),
+    ...(run.italic && { fontStyle: 'italic' }),
     ...(lines.length > 0 && { textDecorationLine: lines.join(' ') }),
     ...(run.fontSize && { fontSize: run.fontSize }),
   }

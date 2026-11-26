@@ -1,5 +1,6 @@
 import type { EGOPassiveI18n } from '../types/EGOTypes'
 import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
+import { applyTextStyles } from '@/shared/gameText'
 
 interface EGOPassiveDisplayProps {
   passives: EGOPassiveI18n[]
@@ -22,7 +23,7 @@ export function EGOPassiveDisplay({ passives }: EGOPassiveDisplayProps) {
               className="text-sm italic whitespace-pre-line"
               style={{ color: FLAVOR_TEXT_COLOR }}
             >
-              {passive.flavor}
+              {applyTextStyles(passive.flavor)}
             </p>
           )}
         </div>
