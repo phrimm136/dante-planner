@@ -174,7 +174,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .content(contentWith(Set.of("AccelBullet")))
                 .selectedKeywords(Set.of("AccelBullet", "NotAKeyword"))
                 .build();
-        commandService.upsertPlanner(owner.getId(), null, planner.id(), req, WriteMode.CHECKED);
+        commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(), req, WriteMode.CHECKED);
 
         // Stored JSON carries only the normalized current id
         String stored = new JdbcTemplate(dataSource).queryForObject(
@@ -242,7 +242,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         double mismatchesBefore = topLevelCount("mismatch");
 
-        commandService.upsertPlanner(owner.getId(), null, planner.id(),
+        commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner)
                         .title(null)
                         .content(contentWith(Set.of("Sinking")))
@@ -261,9 +261,9 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         double absentBefore = topLevelCount("absent");
         double matchesBefore = topLevelCount("match");
 
-        commandService.upsertPlanner(owner.getId(), null, planner.id(),
+        commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), WriteMode.CHECKED);
-        commandService.upsertPlanner(owner.getId(), null, planner.id(),
+        commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner)
                         .title(null)
                         .content(contentWith(Set.of("Combustion")))
@@ -278,7 +278,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     void upsert_WhenADraftCarriesARenamedAndAnUnknownKeyword_StoresTheCurrentIdAndKeepsTheBlob() {
         StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Rename").save(plannerRepository);
 
-        commandService.upsertPlanner(owner.getId(), null, draft.id(),
+        commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), draft.id(),
                 UpsertRequests.resending(draft)
                         .title(null)
                         .content(contentWith(new java.util.LinkedHashSet<>(java.util.List.of("AccelBullet", "NotAKeyword"))))
@@ -297,7 +297,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .selectedKeywords(Set.of("Sinking"))
                 .save(plannerRepository);
 
-        commandService.upsertPlanner(owner.getId(), null, planner.id(),
+        commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), WriteMode.CHECKED);
 
         assertThat(storedKeywords(planner)).isEqualTo("[\"Burst\"]");

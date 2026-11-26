@@ -497,7 +497,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
         jdbc.execute("DROP PROCEDURE rebuild_planner_filters_scoped");
         try {
-            assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, plannerId, save, WriteMode.CHECKED))
+            assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), plannerId, save, WriteMode.CHECKED))
                     .isInstanceOf(DataAccessException.class)
                     .hasStackTraceContaining("rebuild_planner_filters_scoped does not exist");
         } finally {

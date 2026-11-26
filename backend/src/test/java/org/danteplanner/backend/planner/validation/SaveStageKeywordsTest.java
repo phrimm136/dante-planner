@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 
 import static org.mockito.Mockito.verify;
@@ -106,7 +107,7 @@ class SaveStageKeywordsTest {
         StoredPlanner planner = stored(TestDataFactory.planner(owner).published(true).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.id(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED))
+                        owner.getId(), UUID.randomUUID(), planner.id(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getBody().getProperties()).containsEntry("code", "UNKNOWN_KEYWORD");
@@ -121,7 +122,7 @@ class SaveStageKeywordsTest {
     void upsertPlanner_WhenAnUnpublishedPlannerIsSavedWithAnUnknownKeyword_AcceptsTheDraft() {
         StoredPlanner planner = stored(TestDataFactory.planner(owner).published(false).build());
 
-        SaveOutcome saved = commandService.upsertPlanner(owner.getId(), null, planner.id(),
+        SaveOutcome saved = commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED);
 
         assertThat(saved.planner().content().json()).isEqualTo(UNKNOWN_KEYWORD_CONTENT);

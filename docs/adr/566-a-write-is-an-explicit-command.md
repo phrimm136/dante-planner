@@ -12,7 +12,9 @@ epic: none · pr: none · supersedes: 056 @persistence @convention
   INVARIANT: no `@Modifying` query clears the persistence context, with no list of exceptions — `PersistenceContextClearingTest`.
   INVARIANT: a JPQL `UPDATE` may name an immutable entity (`hibernate.query.immutable_entity_update_query_handling_mode=allow`) — `UserProfileImmutableIT`.
   NON-GOAL: a field written by reflection, as Spring Data auditing does — the rule reads bytecode field writes.
-- @persistence @lists — The lists are one file per module, because one shared list is edited by every unit that converts an entity and conflicts between units that run at the same time.
+
+## Superseded
+- @persistence @lists → 566 — The lists are one file per module, because one shared list is edited by every unit that converts an entity and conflicts between units that run at the same time.
   REJECTED: one list for every module — its adjacent lines are deleted by concurrent units, which then conflict on each merge.
 
 ## Takeaway

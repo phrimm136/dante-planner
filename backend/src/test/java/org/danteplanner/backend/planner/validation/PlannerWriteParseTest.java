@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,6 +50,7 @@ class PlannerWriteParseTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String STATIC_DATA = "../static/data";
     private static final int SCHEMA_VERSION = 2;
+    private static final UUID DEVICE = UUID.fromString("00000000-0000-0000-0000-0000000000d1");
     private static final String UNKNOWN_IDENTITY_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"identity\":{\"id\":\"10101\"", "\"identity\":{\"id\":\"10199\"");
 
@@ -93,14 +95,15 @@ class PlannerWriteParseTest {
     }
 
     private StoredPlanner stored(String content) {
-        StoredPlanner planner = TestDataFactory.planner(owner).content(content).schemaVersion(SCHEMA_VERSION).build();
+        StoredPlanner planner = TestDataFactory.planner(owner).content(content).schemaVersion(SCHEMA_VERSION)
+                .deviceId(DEVICE).build();
         when(plannerRepository.findAggregateForOwner(planner.id(), owner.getId()))
                 .thenReturn(Optional.of(planner));
         return planner;
     }
 
     private SaveOutcome upsert(StoredPlanner planner, UpsertPlannerRequest request) {
-        return commandService.upsertPlanner(owner.getId(), null, planner.id(), request, WriteMode.CHECKED);
+        return commandService.upsertPlanner(owner.getId(), DEVICE, planner.id(), request, WriteMode.CHECKED);
     }
 
     @Test

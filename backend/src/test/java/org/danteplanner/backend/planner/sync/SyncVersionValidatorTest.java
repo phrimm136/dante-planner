@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.sync;
 import org.danteplanner.backend.planner.entity.Device;
 import java.time.Instant;
 import java.util.Set;
+import java.util.UUID;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -32,10 +33,12 @@ class SyncVersionValidatorTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final Device.Known DEVICE = new Device.Known(UUID.fromString("00000000-0000-0000-0000-0000000000d1"));
+
     private final SyncVersionValidator validator = new SyncVersionValidator();
 
     private static StoredContent storedRow() {
-        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), DOCUMENT, 2, 6, 1L, new Device.Unknown(), Instant.EPOCH);
+        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), DOCUMENT, 2, 6, 1L, DEVICE, Instant.EPOCH);
     }
 
     private static PlannerChange identicalChange() {
@@ -54,7 +57,7 @@ class SyncVersionValidatorTest {
                 .content(DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
-                .device(new Device.Unknown())
+                .device(DEVICE)
                 .build();
     }
 
@@ -66,7 +69,7 @@ class SyncVersionValidatorTest {
                 .content(OTHER_DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
-                .device(new Device.Unknown())
+                .device(DEVICE)
                 .build();
     }
 
@@ -116,7 +119,7 @@ class SyncVersionValidatorTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void arbitrate_WhenStaleAndTheStoredDocumentIsUnparseable_Throws() {
-        StoredContent unparseable = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), "{\"equipment\":", 2, 6, 1L, new Device.Unknown(), Instant.EPOCH);
+        StoredContent unparseable = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), "{\"equipment\":", 2, 6, 1L, DEVICE, Instant.EPOCH);
 
         assertRejected(() -> validator.arbitrate(WriteMode.CHECKED, new PlannerConflictException.Requested.Version(4L), 5L,
                 PlannerChange.between(unparseable, identicalWrite(), MAPPER)))

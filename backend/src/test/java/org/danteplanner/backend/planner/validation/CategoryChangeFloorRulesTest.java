@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -131,7 +132,7 @@ class CategoryChangeFloorRulesTest {
         StoredPlanner planner = stored(TestDataFactory.planner(owner).published(true).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.id(), UpsertRequests.resending(planner).category("15F").build(), WriteMode.CHECKED))
+                        owner.getId(), UUID.randomUUID(), planner.id(), UpsertRequests.resending(planner).category("15F").build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class,
                         CategoryChangeFloorRulesTest::assertRejectsFloorsFiveToFourteen);
         verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
@@ -141,7 +142,7 @@ class CategoryChangeFloorRulesTest {
     void upsertPlanner_WhenADraftOverAnUnknownEgoMovesToTenFloors_SkipsTheIdChecks() {
         StoredPlanner planner = stored(TestDataFactory.planner(owner).content(UNKNOWN_EGO_CONTENT).build());
 
-        SaveOutcome saved = commandService.upsertPlanner(owner.getId(), null, planner.id(),
+        SaveOutcome saved = commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner).category("10F").build(), WriteMode.CHECKED);
 
         assertThat(saved.planner().content().category()).isEqualTo("10F");
@@ -154,7 +155,7 @@ class CategoryChangeFloorRulesTest {
                 .content(UNKNOWN_START_BUFF_CONTENT).contentVersion(6).build());
         UpsertPlannerRequest request = UpsertRequests.resending(planner).category("10F").contentVersion(7).build();
 
-        assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, planner.id(), request, WriteMode.CHECKED))
+        assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(), request, WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
@@ -169,7 +170,7 @@ class CategoryChangeFloorRulesTest {
                 .content(FLOOR_SIX_NOT_AN_OBJECT_CONTENT).published(true).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.id(), UpsertRequests.resending(planner).category("15F").build(), WriteMode.CHECKED))
+                        owner.getId(), UUID.randomUUID(), planner.id(), UpsertRequests.resending(planner).category("15F").build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[6]",
@@ -183,7 +184,7 @@ class CategoryChangeFloorRulesTest {
         StoredPlanner planner = stored(TestDataFactory.planner(owner).content(REPEATED_GIFT_CONTENT).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.id(), UpsertRequests.resending(planner).category("10F").build(), WriteMode.CHECKED))
+                        owner.getId(), UUID.randomUUID(), planner.id(), UpsertRequests.resending(planner).category("10F").build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_EGOGIFT", "floorSelections[0].giftIds",
                                 "Duplicate value '9002' in floorSelections[0].giftIds")));
