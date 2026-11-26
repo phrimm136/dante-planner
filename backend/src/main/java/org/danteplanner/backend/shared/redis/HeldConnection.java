@@ -37,7 +37,7 @@ final class HeldConnection {
     }
 
     private CompletableFuture<StatefulRedisConnection<String, String>> reconnect() {
-        var unused = discard();
+        var _ = discard();
         CompletableFuture<StatefulRedisConnection<String, String>> attempt = connector.get();
         state = new State.Held(attempt, false);
         return attempt;
@@ -108,7 +108,7 @@ final class HeldConnection {
 
             Closed withoutSettled() {
                 inFlight.stream().filter(CompletableFuture::isDone).forEach(attempt -> {
-                    var unused = attempt.thenCompose(StatefulRedisConnection::closeAsync);
+                    var _ = attempt.thenCompose(StatefulRedisConnection::closeAsync);
                 });
                 return new Closed(inFlight.stream().filter(attempt -> !attempt.isDone()).toList());
             }

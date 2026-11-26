@@ -65,7 +65,6 @@ public class RedisRoleConfig {
     @Bean(PROBE_SCHEDULER)
     public ThreadPoolTaskScheduler redisRoleProbeScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("redis-role-probe-");
         scheduler.setRemoveOnCancelPolicy(true);
         scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);

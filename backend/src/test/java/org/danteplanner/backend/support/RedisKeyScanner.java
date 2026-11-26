@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.redis;
+package org.danteplanner.backend.support;
 
 import java.util.HashSet;
 import java.util.Set;
