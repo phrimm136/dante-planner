@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -19,8 +20,43 @@ public class PlannerKeywordBackfillRepository {
         this.jdbc = new JdbcTemplate(dataSource);
     }
 
-    public record KeywordBackfillRow(UUID plannerId, long syncVersion, String contentKeywords, String columnKeywords,
-            boolean catalogued, String catalogKeywords, boolean published) {
+    public record KeywordBackfillRow(UUID plannerId, long syncVersion, KeywordColumn contentKeywords,
+            KeywordColumn columnKeywords, CatalogCopy catalog, PublishState publication) {
+    }
+
+    public sealed interface KeywordColumn {
+
+        record Empty() implements KeywordColumn {
+        }
+
+        record Json(String text) implements KeywordColumn {
+        }
+
+        private static KeywordColumn of(@Nullable String text) {
+            return text == null ? new Empty() : new Json(text);
+        }
+    }
+
+    public sealed interface CatalogCopy {
+
+        record Uncatalogued() implements CatalogCopy {
+        }
+
+        record Catalogued(KeywordColumn keywords) implements CatalogCopy {
+        }
+
+        private static CatalogCopy of(boolean catalogued, @Nullable String keywords) {
+            return catalogued ? new Catalogued(KeywordColumn.of(keywords)) : new Uncatalogued();
+        }
+    }
+
+    public enum PublishState {
+        PUBLISHED,
+        UNPUBLISHED;
+
+        private static PublishState of(boolean published) {
+            return published ? PUBLISHED : UNPUBLISHED;
+        }
     }
 
     private static final String KEYWORD_ROW = """
@@ -42,8 +78,9 @@ public class PlannerKeywordBackfillRepository {
 
     private static final RowMapper<KeywordBackfillRow> KEYWORD_ROW_MAPPER = (rs, rowNum) -> new KeywordBackfillRow(
             UUID.fromString(rs.getString("planner_id")), rs.getLong("sync_version"),
-            rs.getString("content_keywords"), rs.getString("column_keywords"),
-            rs.getBoolean("catalogued"), rs.getString("catalog_keywords"), rs.getBoolean("published"));
+            KeywordColumn.of(rs.getString("content_keywords")), KeywordColumn.of(rs.getString("column_keywords")),
+            CatalogCopy.of(rs.getBoolean("catalogued"), rs.getString("catalog_keywords")),
+            PublishState.of(rs.getBoolean("published")));
 
     public List<KeywordBackfillRow> firstKeywordRows(int limit) {
         return jdbc.query(KEYWORD_ROW + PAGE_ORDER, KEYWORD_ROW_MAPPER, limit);
