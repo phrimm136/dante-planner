@@ -65,7 +65,9 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void afterBegin(TransactionExecution transaction, @Nullable Throwable beginFailure) {
-        switch (BeginDecision.of(beginFailure, transaction.isReadOnly(), duty())) {
+        Begin begin = Begin.of(beginFailure);
+        TransactionMode mode = TransactionMode.of(transaction.isReadOnly());
+        switch (BeginDecision.of(begin, mode, duty())) {
             case BeginDecision.CheckUser check -> check(check.userId(), transaction);
             case BeginDecision.Skip skip -> { }
         }
@@ -84,7 +86,8 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void beforeCommit(TransactionExecution transaction) {
-        switch (CommitDecision.of(transaction.isReadOnly(), duty())) {
+        TransactionMode mode = TransactionMode.of(transaction.isReadOnly());
+        switch (CommitDecision.of(mode, duty())) {
             case CommitDecision.Report report -> reportUndecided(report.handler());
             case CommitDecision.Pass pass -> { }
         }
@@ -111,6 +114,24 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
                 new RestrictionDuty.Discharged());
     }
 
+    private enum Begin {
+        BEGUN,
+        FAILED;
+
+        private static Begin of(@Nullable Throwable beginFailure) {
+            return beginFailure == null ? BEGUN : FAILED;
+        }
+    }
+
+    private enum TransactionMode {
+        READ_ONLY,
+        READ_WRITE;
+
+        private static TransactionMode of(boolean readOnly) {
+            return readOnly ? READ_ONLY : READ_WRITE;
+        }
+    }
+
     private sealed interface BeginDecision {
 
         record CheckUser(Long userId) implements BeginDecision {
@@ -119,8 +140,9 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         record Skip() implements BeginDecision {
         }
 
-        private static BeginDecision of(@Nullable Throwable beginFailure, boolean readOnly, RestrictionDuty duty) {
-            return beginFailure == null && !readOnly && duty instanceof RestrictionDuty.CheckDue due
+        private static BeginDecision of(Begin begin, TransactionMode mode, RestrictionDuty duty) {
+            return begin == Begin.BEGUN && mode == TransactionMode.READ_WRITE
+                    && duty instanceof RestrictionDuty.CheckDue due
                     ? new CheckUser(due.userId())
                     : new Skip();
         }
@@ -134,8 +156,8 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         record Pass() implements CommitDecision {
         }
 
-        private static CommitDecision of(boolean readOnly, RestrictionDuty duty) {
-            return !readOnly && duty instanceof RestrictionDuty.DecisionDue due
+        private static CommitDecision of(TransactionMode mode, RestrictionDuty duty) {
+            return mode == TransactionMode.READ_WRITE && duty instanceof RestrictionDuty.DecisionDue due
                     ? new Report(due.handler())
                     : new Pass();
         }

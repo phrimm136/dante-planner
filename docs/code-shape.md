@@ -26,24 +26,25 @@ decision, not a guard: a run of them is a decision table inside an effect method
   repeated checks, or the field and its flag.
 - **T3** Do two types name the same cases, or does a method only translate one into the other?
 - **T4** Does a type exist that makes no wrong combination impossible, whose cases carry no
-  different data, that crosses no module and is switched on in one place only?
+  different data, that crosses no module and is switched on in one place only? A type made on a
+  boundary's receiving line (T6) answers T6, not this question.
 - **T5** Does a wrapper, a case or a recursion exist only so that a rule or a count passes? The
   finding is then against the rule too, and its fix names the ADR to change. Forms met so far: a
   boolean wrapped in an enum to switch on; `switch (x) { case null -> ... }` for `if (x == null)`;
   a lookup named `...Outcome`; a run of early value returns presented as guards; two guards with
   opposite conditions in two helpers or two loops; an `Optional` or stream combinator standing in
   for an `if`.
-- **T6** Does a null or an `Optional` live inside the code instead of at a boundary? A boundary
-  is a framework or library return (`RequestContextHolder.getRequestAttributes()`,
-  `getAuthentication()`, a repository `findBy...`), an entity column, a DTO field. The line that
-  receives it turns it into a named type (`Viewer.Guest`, `RestrictionDuty.Discharged`) or ends it
-  with an invariant; methods, parameters, returns and fields past that line carry no `@Nullable`
-  and no `Optional`. Our own state, columns and returns get their type where they are born (a
-  sealed state, not flags beside an enum). A framework boolean or null that one decision reads goes
-  into that pure decision as a parameter; one that two or more classes read gets its type in
-  `SpringContextAdapter` or the adapter that owns the framework. Evidence: a `@Nullable` or
-  `Optional` on a member that is not the receiving line, or a one-use type for a framework
-  boolean.
+- **T6** Does a boolean, a null or an `Optional` live inside the code instead of at a boundary? A
+  boundary is a framework or library return (`RequestContextHolder.getRequestAttributes()`,
+  `getAuthentication()`, `TransactionExecution.isReadOnly()`, a repository `findBy...`), an HTTP
+  parameter, an entity column, a DTO field. The line that receives it turns it into a named type
+  (`Viewer.Guest`, `RestrictionDuty.Discharged`, `TransactionMode.of(transaction.isReadOnly())`) or
+  ends it with an invariant; methods, parameters, returns and fields past that line carry no
+  boolean that states a fact or a choice, no `@Nullable` and no `Optional`. A predicate (`isPublished()`)
+  read inside the condition that uses it is not such a boolean; passed on or stored, it is. Our own state, columns and returns get their type
+  where they are born (a sealed state, not flags beside an enum); a value two or more classes read
+  gets its type in the adapter that owns the framework (`SpringContextAdapter`). Evidence: a
+  boolean, `@Nullable` or `Optional` parameter, field or return past the receiving line.
 
 ## Calls and names
 - **C1** Does an argument hold more than a name or one short call?
