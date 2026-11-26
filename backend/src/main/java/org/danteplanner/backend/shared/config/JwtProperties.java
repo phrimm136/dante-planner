@@ -1,12 +1,7 @@
 package org.danteplanner.backend.shared.config;
 
-import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.ConstructorBinding;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.validation.annotation.Validated;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,8 +18,6 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 
-@ConfigurationProperties(prefix = "jwt")
-@Validated
 @Getter
 @Slf4j
 public class JwtProperties {
@@ -35,28 +28,15 @@ public class JwtProperties {
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
     private final byte[] encryptionKeyBytes;
-
-    @Min(value = 1, message = "Access token expiry must be positive")
     private final long accessTokenExpiry;
-
-    @Min(value = 1, message = "Refresh token expiry must be positive")
     private final long refreshTokenExpiry;
 
-    @ConstructorBinding
-    public JwtProperties(
-            @DefaultValue("") String privateKeyPath,
-            @DefaultValue("") String publicKeyPath,
-            @DefaultValue("") String encryptionKey,
-            @DefaultValue("900000") long accessTokenExpiry,
-            @DefaultValue("604800000") long refreshTokenExpiry) {
-        requireConfigured(privateKeyPath, "private key path", "JWT_PRIVATE_KEY_PATH");
-        requireConfigured(publicKeyPath, "public key path", "JWT_PUBLIC_KEY_PATH");
-        requireConfigured(encryptionKey, "encryption key", "JWT_ENCRYPTION_KEY");
-
+    public static JwtProperties load(JwtSettings settings) {
+        JwtProperties properties;
         try {
-            this.privateKey = loadPrivateKey(privateKeyPath);
-            this.publicKey = loadPublicKey(publicKeyPath);
-            this.encryptionKeyBytes = decodeEncryptionKey(encryptionKey);
+            properties = new JwtProperties(loadPrivateKey(settings.privateKeyPath()),
+                    loadPublicKey(settings.publicKeyPath()), decodeEncryptionKey(settings.encryptionKey()),
+                    settings.accessTokenExpiry(), settings.refreshTokenExpiry());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load JWT keys from files", e);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -64,10 +44,8 @@ public class JwtProperties {
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Failed to decode encryption key (invalid Base64)", e);
         }
-        this.accessTokenExpiry = accessTokenExpiry;
-        this.refreshTokenExpiry = refreshTokenExpiry;
-
         log.info("JWT keys loaded successfully");
+        return properties;
     }
 
     public JwtProperties(PrivateKey privateKey, PublicKey publicKey, byte[] encryptionKeyBytes,
@@ -98,13 +76,6 @@ public class JwtProperties {
 
     public int getCookieExpirySeconds() {
         return (int) (refreshTokenExpiry / 1000);
-    }
-
-    private static void requireConfigured(String value, String what, String envVar) {
-        if (value.isBlank()) {
-            throw new IllegalStateException(
-                    "JWT " + what + " is required. Set " + envVar + " environment variable.");
-        }
     }
 
     private static PrivateKey loadPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {

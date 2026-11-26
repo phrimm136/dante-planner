@@ -67,7 +67,7 @@ class ReadSourcePropertiesTest {
                 .extracting(ReadSourceProperties.Source::name)
                 .containsExactly(REPLICA, ReadSourceProperties.PRIMARY);
         assertThat(bound.readSources().get(0).url()).isEqualTo(REPLICA_URL);
-        assertThat(bound.readsPrimaryFirst()).isFalse();
+        assertThat(bound.readOrder()).isEqualTo(ReadSourceProperties.ReadOrder.REPLICA_FIRST);
     }
 
     @Test
@@ -89,7 +89,7 @@ class ReadSourcePropertiesTest {
         assertThat(bound.readSources().get(1).url()).isEqualTo(REPLICA_URL);
         assertThat(bound.readSources().get(1).username()).isEqualTo("replicaUser");
         assertThat(bound.readSourceBreaker().minimumNumberOfCalls()).isEqualTo(4);
-        assertThat(bound.readsPrimaryFirst()).isTrue();
+        assertThat(bound.readOrder()).isEqualTo(ReadSourceProperties.ReadOrder.PRIMARY_FIRST);
     }
 
     @Test

@@ -11,6 +11,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 import org.springframework.data.annotation.CreatedDate;
 
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
@@ -19,6 +20,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_reports",
        uniqueConstraints = {

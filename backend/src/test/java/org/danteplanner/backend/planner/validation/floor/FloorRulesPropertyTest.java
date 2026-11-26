@@ -4,6 +4,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.jetbrains.jetCheck.Generator;
 import org.jetbrains.jetCheck.IntDistribution;
 import org.jetbrains.jetCheck.PropertyChecker;

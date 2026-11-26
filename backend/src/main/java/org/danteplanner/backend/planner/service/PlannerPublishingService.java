@@ -9,15 +9,15 @@ import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Listing;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.PublishOutcome;
 import org.danteplanner.backend.planner.entity.WithdrawalOutcome;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerDocument;
@@ -26,6 +26,8 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.LiveOwner;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.OwnedPlanner;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator.Publishable;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -76,10 +78,10 @@ public class PlannerPublishingService {
     public PlannerResponse publish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.holdActiveAccount(userId);
         plannerCommandService.lockForUpsert(userId, plannerId);
-        requireTitleAfterUpsert(userId, plannerId, content);
+        SaveOutcome saved = plannerCommandService.upsertAggregate(userId, deviceId, plannerId, content,
+                WriteMode.CHECKED);
 
-        return applyPublish(ownershipValidator.requireOwner(
-                upserted(userId, deviceId, plannerId, content), userId));
+        return applyPublish(ownershipValidator.requireOwner(saved.planner(), userId));
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -94,61 +96,40 @@ public class PlannerPublishingService {
         plannerRepository.lockContent(owner.plannerId());
     }
 
-    private void requireTitleAfterUpsert(Long userId, UUID plannerId, UpsertPlannerRequest content) {
-        if (content.title() != null) {
-            publishValidator.requireTitle(content.title());
-            return;
-        }
-        plannerRepository.findAggregateForOwner(plannerId, userId)
-                .map(Planner::getTitle)
-                .ifPresent(publishValidator::requireTitle);
-    }
-
-    private Planner upserted(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
-        return plannerCommandService
-                .upsertAggregate(userId, deviceId, plannerId, content, WriteMode.CHECKED)
-                .planner();
-    }
-
     private PlannerResponse applyPublish(OwnedPlanner owned) {
-        Planner planner = owned.planner();
-
-        publishValidator.requireTitle(planner.getTitle());
+        Publishable publishable = publishValidator.requirePublishable(owned.planner());
         MDCategory category;
         try {
-            category = categoryValidator.requireCategoryForType(planner.getPlannerType(), planner.getCategory());
+            category = categoryValidator.requireCategoryForType(owned.planner().plannerType(),
+                    owned.planner().content().category());
         } catch (PlannerValidationException refusal) {
             InvalidCategoryLog.warn(log, refusal);
             throw refusal;
         }
-        PlannerDocument document = contentValidator.parse(planner.getContentJson(), category,
-                contentValidator.season(planner.getContentVersion()), Stage.PUBLISH);
-        switch (ParsedContent.of(document)) {
-            case MIGRATED -> {
-                planner.getContent().replaceContent(document);
-                FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()),
-                        new FreshnessScope.User(planner.getUserId()));
-            }
-            case AS_STORED -> { }
-        }
+        PlannerDocument document = contentValidator.parse(owned.planner().content().json(), category,
+                contentValidator.season(owned.planner().content().gameContentVersion()), Stage.PUBLISH);
+        Instant now = clock.instant();
+        StoredPlanner planner = switch (ParsedContent.of(document)) {
+            case MIGRATED -> plannerCommandService.migrate(owned.planner(), document, now);
+            case AS_STORED -> owned.planner();
+        };
 
-        Publication before = planner.requirePublishable().publication();
-        Instant now = Instant.now(clock);
-        PublishOutcome outcome = publish(planner.getId(), before, now);
+        Publication before = publishable.publication();
+        PublishOutcome outcome = publish(planner.id(), before, now);
         switch (outcome) {
             case NONE -> { }
             case FIRST_PUBLISH -> {
-                list(planner, before.published(now));
-                domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_PUBLISHED, planner.getId(),
-                        Map.of("authorId", planner.getUserId()));
+                list(planner, publishable, before.published(now));
+                domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_PUBLISHED, planner.id(),
+                        Map.of("authorId", planner.userId()));
                 logPublished(planner);
             }
             case REPUBLISH -> {
-                list(planner, before.published(now));
+                list(planner, publishable, before.published(now));
                 logPublished(planner);
             }
         }
-        return PlannerResponse.fromEntity(planner, outcome.after(before, now));
+        return PlannerResponse.from(planner, outcome.after(before, now));
     }
 
     private PublishOutcome publish(UUID plannerId, Publication before, Instant now) {
@@ -170,34 +151,34 @@ public class PlannerPublishingService {
         }
     }
 
-    private void list(Planner planner, Publication.Published publication) {
-        plannerCatalogService.onBecameVisible(planner, publication, planner.listing());
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
-        subscriptionService.createSubscription(planner.getUserId(), planner.getId());
+    private void list(StoredPlanner planner, Publishable publishable, Publication.Published publication) {
+        plannerCatalogService.onBecameVisible(planner, publishable, publication);
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.id()), new FreshnessScope.Global());
+        subscriptionService.createSubscription(planner.userId(), planner.id());
     }
 
-    private static void logPublished(Planner planner) {
-        log.info("Published planner {} by user {}", planner.getId(), planner.getUserId());
+    private static void logPublished(StoredPlanner planner) {
+        log.info("Published planner {} by user {}", planner.id(), planner.userId());
     }
 
     private PlannerResponse applyUnpublish(OwnedPlanner owned) {
-        Planner planner = owned.planner();
+        StoredPlanner planner = owned.planner();
         switch (plannerCommandService.withdraw(planner)) {
             case NONE -> { }
             case WITHDRAWN -> {
-                plannerCatalogService.onBecameInvisible(planner.getId());
-                FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()),
+                plannerCatalogService.onBecameInvisible(planner.id());
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.id()),
                         new FreshnessScope.Global());
-                log.info("Unpublished planner {} by user {}", planner.getId(), planner.getUserId());
+                log.info("Unpublished planner {} by user {}", planner.id(), planner.userId());
             }
         }
-        return PlannerResponse.fromEntity(planner, planner.publicationState().withdrawn());
+        return PlannerResponse.from(planner, planner.publication().withdrawn());
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public ModeratedPlanner withdrawFromPublicView(UUID plannerId, ModeratorAction.Withdrawal action) {
         plannerRepository.lockContent(plannerId);
-        Planner planner = accessGuard.requireAggregate(plannerId);
+        StoredPlanner planner = accessGuard.requireAggregate(plannerId);
 
         switch (withdraw(planner, action)) {
             case NONE -> { }
@@ -206,13 +187,13 @@ public class PlannerPublishingService {
                 FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
             }
         }
-        return moderated(planner, planner.publicationState().withdrawn(), planner.listing());
+        return moderated(planner, planner.publication().withdrawn(), planner.listing());
     }
 
-    private WithdrawalOutcome withdraw(Planner planner, ModeratorAction.Withdrawal action) {
+    private WithdrawalOutcome withdraw(StoredPlanner planner, ModeratorAction.Withdrawal action) {
         return switch (action) {
             case ModeratorAction.TakeDown takeDown -> WithdrawalOutcome.of(
-                            WriteOutcome.of(moderationRepository.takeDown(planner.getId(), clock.instant())))
+                            WriteOutcome.of(moderationRepository.takeDown(planner.id(), clock.instant())))
                     .or(plannerCommandService.withdraw(planner));
             case ModeratorAction.Unpublish unpublish -> plannerCommandService.withdraw(planner);
         };
@@ -220,7 +201,7 @@ public class PlannerPublishingService {
 
     @Transactional
     public ModeratedPlanner changeRecommendedListing(UUID plannerId, ModeratorAction.Relisting action) {
-        Planner planner = accessGuard.requireAggregate(plannerId);
+        StoredPlanner planner = accessGuard.requireAggregate(plannerId);
 
         Listing listing = action.listingAt(clock.instant());
         switch (relist(plannerId, listing)) {
@@ -230,7 +211,7 @@ public class PlannerPublishingService {
             }
             case NOTHING -> throw PlannerAccessGuard.absent(plannerId);
         }
-        return moderated(planner, planner.publicationState(), listing);
+        return moderated(planner, planner.publication(), listing);
     }
 
     private WriteOutcome relist(UUID plannerId, Listing listing) {
@@ -241,12 +222,12 @@ public class PlannerPublishingService {
         };
     }
 
-    private static ModeratedPlanner moderated(Planner planner, Publication publication, Listing listing) {
+    private static ModeratedPlanner moderated(StoredPlanner planner, Publication publication, Listing listing) {
         return switch (listing) {
-            case Listing.Listed listed -> new ModeratedPlanner(planner.getId(), planner.getTitle(),
+            case Listing.Listed listed -> new ModeratedPlanner(planner.id(), planner.content().title(),
                     publication.isPublished(), false, null, null, null);
-            case Listing.Hidden(Long by, String reason, Instant at) -> new ModeratedPlanner(planner.getId(),
-                    planner.getTitle(), publication.isPublished(), true, by, reason, at);
+            case Listing.Hidden(Long by, String reason, Instant at) -> new ModeratedPlanner(planner.id(),
+                    planner.content().title(), publication.isPublished(), true, by, reason, at);
         };
     }
 
@@ -257,31 +238,17 @@ public class PlannerPublishingService {
 
 
     @Transactional
-    public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
+    public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId,
+            NotificationSetting setting) {
         OwnedPlanner owned = ownershipValidator.requireOwner(accessGuard.requireAggregate(plannerId), userId);
 
-        switch (write(owned.planner().getId(), OwnerNotifications.of(enabled))) {
+        switch (WriteOutcome.of(publicationRepository.setOwnerNotifications(owned.planner().id(),
+                setting == NotificationSetting.ON))) {
             case APPLIED -> FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
             case NOTHING -> throw PlannerAccessGuard.absent(plannerId);
         }
 
-        log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
-        return new ToggleOwnerNotificationsResponse(enabled);
-    }
-
-    private WriteOutcome write(UUID plannerId, OwnerNotifications notifications) {
-        return switch (notifications) {
-            case ENABLED -> WriteOutcome.of(publicationRepository.enableOwnerNotifications(plannerId));
-            case DISABLED -> WriteOutcome.of(publicationRepository.disableOwnerNotifications(plannerId));
-        };
-    }
-
-    private enum OwnerNotifications {
-        ENABLED,
-        DISABLED;
-
-        static OwnerNotifications of(boolean enabled) {
-            return enabled ? ENABLED : DISABLED;
-        }
+        log.info("User {} set owner notifications for planner {} to {}", userId, plannerId, setting);
+        return ToggleOwnerNotificationsResponse.of(setting);
     }
 }

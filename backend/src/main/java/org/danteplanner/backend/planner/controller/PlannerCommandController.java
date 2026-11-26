@@ -8,8 +8,8 @@ import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.planner.service.SaveOutcome;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.danteplanner.backend.shared.security.Viewer;
@@ -42,15 +42,15 @@ public class PlannerCommandController {
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        UpsertResult result = plannerCommandService.upsertPlanner(
-                member.userId(), deviceId, id, request, writeMode(force));
+        WriteMode mode = force ? WriteMode.FORCED : WriteMode.CHECKED;
+        SaveOutcome saved = plannerCommandService.upsertPlanner(member.userId(), deviceId, id, request, mode);
 
-        HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
-        return ResponseEntity.status(status).body(result.response());
-    }
-
-    private static WriteMode writeMode(boolean force) {
-        return force ? WriteMode.FORCED : WriteMode.CHECKED;
+        HttpStatus status = switch (saved) {
+            case SaveOutcome.Created created -> HttpStatus.CREATED;
+            case SaveOutcome.Updated updated -> HttpStatus.OK;
+            case SaveOutcome.Acknowledged acknowledged -> HttpStatus.OK;
+        };
+        return ResponseEntity.status(status).body(PlannerResponse.from(saved.planner()));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "delete")

@@ -214,7 +214,7 @@ pitest {
     targetClasses.set(listOf(
         "org.danteplanner.backend.planner.service.*",
         "org.danteplanner.backend.auth.token.*",
-        "org.danteplanner.backend.shared.readpath.*",
+        "org.danteplanner.backend.shared.config.ChosenReadSource*",
         "org.danteplanner.backend.shared.redis.*",
         "org.danteplanner.backend.planner.validation.floor.*",
         "org.danteplanner.backend.planner.validation.sinner.*",
@@ -515,7 +515,6 @@ tasks.jacocoTestReport {
 val freezeShellBranches by tasks.registering(JavaExec::class) {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass = "org.danteplanner.backend.architecture.ShellBranches"
-    args(providers.gradleProperty("freezeReason").map { listOf(it) }.getOrElse(emptyList()))
 }
 
 abstract class RandomOrderSeed : CommandLineArgumentProvider {
@@ -555,9 +554,6 @@ tasks.test {
     inputs.file(layout.projectDirectory.file("config/void-checks.txt"))
     inputs.file(layout.projectDirectory.file("config/flag-parameters.txt"))
     inputs.file(layout.projectDirectory.file("config/self-flip-queries.txt"))
-    inputs.files(fileTree("config") {
-        include("mutable-entities-*.txt", "context-clearing-*.txt")
-    })
     inputs.dir(layout.projectDirectory.dir("src/main/java"))
     inputs.dir(layout.projectDirectory.dir("src/test/java/org/danteplanner/fixture/shellbranch"))
     val randomOrderSeed = objects.newInstance<RandomOrderSeed>()

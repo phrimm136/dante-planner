@@ -7,6 +7,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -15,7 +16,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -33,6 +34,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.fixture.restriction.DeclaredHandlersFixture;
@@ -148,6 +150,45 @@ class RestrictionTransactionHookTest {
     }
 
     @Test
+    void afterBegin_WhenTheCheckRefusedAnEarlierWriteTransaction_ChecksTheNextOneAgain() {
+        bindRequest("restricted", PRINCIPAL);
+        refusal = new UserBannedException(PRINCIPAL, null);
+        RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
+
+        assertThatThrownBy(() -> hook.afterBegin(writeTransaction(), null)).isSameAs(refusal);
+        assertThatThrownBy(() -> hook.afterBegin(writeTransaction(), null)).isSameAs(refusal);
+
+        assertThat(checkedUsers).containsExactly(PRINCIPAL, PRINCIPAL);
+    }
+
+    @Test
+    void afterBegin_WhenTheCheckPasses_StoresTheClearedMember() {
+        bindRequest("restricted", PRINCIPAL);
+
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
+
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.Cleared(member(PRINCIPAL)));
+    }
+
+    @Test
+    void record_WhenARestrictedByStateRequestRecordsAClearance_StoresIt() {
+        bindRequest("byState", PRINCIPAL);
+
+        RestrictionTransactionHook.record(new PrivateWrite());
+
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.Cleared(new PrivateWrite()));
+    }
+
+    @Test
+    void record_WhenTheRequestIsRestricted_LeavesTheCheckDue() {
+        bindRequest("restricted", PRINCIPAL);
+
+        RestrictionTransactionHook.record(new PrivateWrite());
+
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.CheckDue(PRINCIPAL));
+    }
+
+    @Test
     void beforeCommit_WhenARestrictedByStateRequestCommitsWithoutADecision_ThrowsUnderFailFast() {
         bindRequest("byState", PRINCIPAL);
 
@@ -170,7 +211,7 @@ class RestrictionTransactionHookTest {
         bindRequest("byState", PRINCIPAL);
         RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
 
-        RestrictionTransactionHook.recordDecision();
+        RestrictionTransactionHook.record(new PrivateWrite());
 
         assertThatCode(() -> hook.beforeCommit(writeTransaction())).doesNotThrowAnyException();
     }
@@ -190,13 +231,13 @@ class RestrictionTransactionHookTest {
                 RestrictionTransactionHook.class))
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .containsExactly("DeclaredHandlersFixture.byState is @RestrictedByState but committed a write without "
-                        + "calling RestrictionCheck.requireUnrestricted or RestrictionCheck.recordPrivate");
+                        + "calling RestrictionCheck.record");
     }
 
     @Test
     void hook_WhenNoRequestIsBound_DoesNothing() {
         assertThatCode(() -> {
-            RestrictionTransactionHook.recordDecision();
+            RestrictionTransactionHook.record(new PrivateWrite());
             hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
             hook(OnUndeclared.FAIL).beforeCommit(writeTransaction());
         }).doesNotThrowAnyException();
@@ -210,7 +251,7 @@ class RestrictionTransactionHookTest {
         RequestContextHolder.setRequestAttributes(attributes);
 
         assertThatCode(() -> {
-            RestrictionTransactionHook.recordDecision();
+            RestrictionTransactionHook.record(new PrivateWrite());
             hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
             hook(OnUndeclared.FAIL).beforeCommit(writeTransaction());
         }).doesNotThrowAnyException();
@@ -227,9 +268,7 @@ class RestrictionTransactionHookTest {
         hook.afterBegin(transaction(true), null);
         hook.beforeCommit(transaction(true));
 
-        assertThat(RequestContextHolder.currentRequestAttributes()
-                .getAttributeNames(RequestAttributes.SCOPE_REQUEST))
-                .containsExactly(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.CheckDue(PRINCIPAL));
     }
 
     @Test
@@ -237,6 +276,24 @@ class RestrictionTransactionHookTest {
         bindRequest("restricted", PRINCIPAL);
 
         assertThatCode(() -> hook(OnUndeclared.FAIL).beforeCommit(writeTransaction())).doesNotThrowAnyException();
+    }
+
+    @Test
+    void duty_WhenTheHandlerCarriesNeitherDeclaration_IsDischarged() {
+        assertThat(RestrictionDuty.of(handler("read"), new Viewer.Member(PRINCIPAL)))
+                .isEqualTo(new RestrictionDuty.Discharged());
+    }
+
+    @Test
+    void duty_WhenTheHandlerIsNotAHandlerMethod_IsDischarged() {
+        assertThat(RestrictionDuty.of(new ResourceHttpRequestHandler(), new Viewer.Member(PRINCIPAL)))
+                .isEqualTo(new RestrictionDuty.Discharged());
+    }
+
+    @Test
+    void duty_WhenAGuestReachesARestrictedHandler_IsDischarged() {
+        assertThat(RestrictionDuty.of(handler("restricted"), new Viewer.Guest()))
+                .isEqualTo(new RestrictionDuty.Discharged());
     }
 
     @Test
@@ -300,11 +357,22 @@ class RestrictionTransactionHookTest {
             if (refusal != null) {
                 throw refusal;
             }
+            return member(userId);
         };
         beans.addBean("restrictionCheckHandler", handler);
         beans.addBean("transactionManager", manager);
         return new RestrictionTransactionHook(beans.getBeanProvider(RestrictionCheckHandler.class),
                 beans.getBeanProvider(PlatformTransactionManager.class), meterRegistry, onUndecided);
+    }
+
+    private static UnrestrictedMember member(Long userId) {
+        return UnrestrictedMember.parse(userId, new Restriction.Active())
+                .orElseThrow(imposed -> new IllegalStateException("an active restriction refused: " + imposed));
+    }
+
+    private static Object storedDuty() {
+        return RequestContextHolder.currentRequestAttributes()
+                .getAttribute(RestrictionDuty.DUTY_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
     }
 
     private static DefaultTransactionStatus writeTransaction() {
@@ -317,16 +385,19 @@ class RestrictionTransactionHookTest {
 
     private static void bindRequest(String handlerMethod, Long principal) {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        try {
-            request.setAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, new HandlerMethod(
-                    new DeclaredHandlersFixture(), DeclaredHandlersFixture.class.getMethod(handlerMethod)));
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         if (principal != null) {
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(principal, null, List.of()));
+        }
+        new RestrictionDutyInterceptor().preHandle(request, new MockHttpServletResponse(), handler(handlerMethod));
+    }
+
+    private static HandlerMethod handler(String handlerMethod) {
+        try {
+            return new HandlerMethod(new DeclaredHandlersFixture(), DeclaredHandlersFixture.class.getMethod(handlerMethod));
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
         }
     }
 }

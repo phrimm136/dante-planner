@@ -1,5 +1,6 @@
 package org.danteplanner.backend.ratelimit;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.danteplanner.backend.planner.controller.PublishedPlannerController;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
@@ -73,15 +74,15 @@ class PublishedPlannerClientBucketTest {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.unsavedUser(1L);
-        Planner planner = TestDataFactory.planner(owner).id(PLANNER_ID).published(true).build();
+        StoredPlanner planner = TestDataFactory.planner(owner).id(PLANNER_ID).published(true).build();
         when(plannerRepository.findAggregateWithAuthor(PLANNER_ID))
-                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner), Visibility.SHOWN)));
         PublishedPlannerQueryService queryService = new PublishedPlannerQueryService(null, null, null, null, null,
                 null, plannerStatsRepository, new PlannerAccessGuard(null, plannerRepository), null, Clock.systemUTC());
         ObjectMapper objectMapper = TestJsonMappers.springDefaults();
 
         SecurityProperties securityProperties = new SecurityProperties();
-        securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP);
+        securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP + "/32");
         securityProperties.parseTrustedProxyIps();
         DeviceIdResolver deviceIdResolver = new DeviceIdResolver(new CookieUtils(false, "", "Lax"));
 

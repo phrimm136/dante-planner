@@ -352,7 +352,7 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
         context.getBeansOfType(HikariDataSource.class).values()
                 .forEach(pool -> pool.getHikariPoolMXBean().softEvictConnections());
         assertThat(context.getBean(ReadSourceSelector.class).sources())
-                .filteredOn(ReadSourceSelector.Source::authoritative)
+                .filteredOn(source -> source.authority() == ReadSourceSelector.Authority.PRIMARY)
                 .extracting(source -> source.breaker().getState())
                 .as("the Oregon primary breaker must stay closed through the cut")
                 .containsExactly(CircuitBreaker.State.CLOSED);
@@ -505,7 +505,7 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
                 .id(plannerId.toString())
                 .title(REPLICATED_TITLE)
                 .status(PlannerStatus.SAVED)
-                .content(TestDataFactory.planner(session.user()).build().getContentJson())
+                .content(TestDataFactory.planner(session.user()).build().content().json())
                 .build();
     }
 

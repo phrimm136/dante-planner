@@ -45,6 +45,8 @@ spec:
             - secretRef:
                 name: backend-runtime-config
           env:
+            - name: TRUSTED_PROXY_IPS
+              value: "127.0.0.1/32,::1/128,{{ .Values.podCidr }}"
             - name: JWT_PRIVATE_KEY_PATH
               value: /app/keys/private_key.pem
             - name: JWT_PUBLIC_KEY_PATH

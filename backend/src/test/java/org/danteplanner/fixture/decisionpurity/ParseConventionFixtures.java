@@ -11,6 +11,10 @@ import lombok.Builder;
 import lombok.Setter;
 
 import org.danteplanner.backend.shared.failure.Parsed;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 final class ParseConventionFixtures {
 
@@ -146,6 +150,21 @@ final class ParseConventionFixtures {
         }
     }
 
+    interface StoredFlags {
+
+        @Modifying
+        @Query("UPDATE Row r SET r.enabled = :enabled WHERE r.id = :id")
+        int assignEnabled(long id, boolean enabled);
+
+        @Modifying
+        @Query("UPDATE Row r SET r.count = r.count + 1 WHERE r.id = :id AND r.hidden = :hidden")
+        int incrementVisible(long id, boolean hidden);
+
+        @Modifying
+        @Query("UPDATE Row r SET r.state = CASE WHEN :chosen = TRUE THEN 'A' ELSE 'B' END WHERE r.id = :id")
+        int assignChosen(long id, boolean chosen);
+    }
+
     interface Flagged {
 
         void declaredFlag(boolean flag);
@@ -196,6 +215,17 @@ final class ParseConventionFixtures {
     }
 
     record FlagRecord(boolean enabled) {
+    }
+
+    @RestController
+    static final class FlagController {
+
+        public Grade boundRequestFlag(@RequestParam(defaultValue = "false") boolean weighted) {
+            return weighted ? Grade.WITH_BODY : Grade.PLAIN;
+        }
+
+        public void unboundFlag(boolean flag) {
+        }
     }
 
     static final class LibraryFuture extends CompletableFuture<String> {

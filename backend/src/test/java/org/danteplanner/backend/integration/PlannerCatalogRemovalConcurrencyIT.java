@@ -210,7 +210,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     }
 
     private boolean plannerDeleted(Round round) {
-        return contentRepository.findById(round.plannerId()).map(PlannerContent::isDeleted).orElse(false);
+        return contentRepository.findById(round.plannerId()).map(PlannerContent::getDeletedAt).isPresent();
     }
 
     private boolean accountDeleted(Round round) {
@@ -227,7 +227,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
         User owner = TestDataFactory.createTestUser(userRepository, "removal-owner@example.com");
         UUID plannerId = TestDataFactory.planner(owner)
                 .savePublished(plannerRepository, statsRepository, catalogService)
-                .getId();
+                .id();
         return new Round(owner, plannerId);
     }
 

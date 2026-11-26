@@ -27,7 +27,7 @@ All configuration is done via environment variables in the `.env` file.
 | `JWT_SECRET` | JWT signing key | `$(openssl rand -base64 48)` | Min 32 bytes, rotate periodically |
 | `GOOGLE_OAUTH_CLIENT_ID` | Google OAuth Client ID | `123456-abc.apps.googleusercontent.com` | From Google Cloud Console |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth Secret | `GOCSPX-...` | Keep confidential |
-| `TRUSTED_PROXY_IPS` | Trusted proxy IP ranges | `172.18.0.0/16,103.21.244.0/22` | **Critical**: Must include Docker network |
+| `TRUSTED_PROXY_IPS` | Trusted proxies: CIDR ranges, each with a `/prefix`, comma-separated | `172.18.0.0/16` | docker-compose.yml defaults it to the `danteplanner-network` subnet; empty trusts none |
 
 ### Optional Variables (with defaults)
 
@@ -104,20 +104,33 @@ The system detects these as private (Docker NAT):
 
 ### Trusted Proxy Configuration
 
-**Critical**: `TRUSTED_PROXY_IPS` must include nginx container IP range.
+`TRUSTED_PROXY_IPS` sets `security.trusted-proxy-ips`, and `application.properties` hands the same
+list to Tomcat's RemoteIpValve as `server.tomcat.remoteip.internal-proxies`. When the peer is on
+the list, the valve walks `X-Forwarded-For` from the right past listed hops and makes the first
+unlisted hop (or the leftmost, if all are listed) the remote address, and honours
+`X-Forwarded-Proto`; `ClientIpResolver` then trusts `CF-Connecting-IP` or `X-Forwarded-For` only
+when that address is on the list.
+
+- Every entry is a CIDR range with a `/prefix` (`10.0.0.1/32` for one address): the valve reads a
+  value without a `/` as a regular expression. An entry without a prefix, a host name, an
+  impossible prefix or a negative prefix fails startup with an error naming the entry.
+- Empty trusts no proxy: the valve rewrites nothing, both headers are ignored, and a private peer
+  (the nginx container) is keyed by device id.
+- Unset outside Compose, it defaults to `127.0.0.1/32,::1/128`.
 
 ```bash
-# Development (Docker only)
+# Compose (docker-compose.yml default): the pinned danteplanner-network subnet
 TRUSTED_PROXY_IPS=172.18.0.0/16
-
-# Production (Docker + Cloudflare)
-TRUSTED_PROXY_IPS=172.18.0.0/16,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,104.16.0.0/13,108.162.192.0/18,131.0.72.0/22,141.101.64.0/18,162.158.0.0/15,172.64.0.0/13,173.245.48.0/20,188.114.96.0/20,190.93.240.0/20,197.234.240.0/22,198.41.128.0/17
 ```
 
+The k3s fleet does not use the Compose default: the chart sets `TRUSTED_PROXY_IPS` to `127.0.0.1/32`,
+`::1/128` and `podCidr` from `deploy/chart/values.yaml`.
+
 **Why This Matters**:
-- If nginx IP not trusted → backend rejects `X-Forwarded-For` header
-- All requests appear from nginx IP (172.18.0.x)
-- All users share one rate limit bucket (DoS vulnerability)
+- If the nginx subnet is not trusted, every request appears to come from nginx (172.18.0.x), a
+  private address, so callers are keyed by device id instead of IP.
+- A list wider than the real proxies lets any peer on it choose its own rate-limit key by sending
+  `X-Forwarded-For` or `CF-Connecting-IP`.
 
 ### Rate Limit Buckets
 

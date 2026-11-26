@@ -1,6 +1,9 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
+import org.danteplanner.backend.comment.exception.CommentVoteAlreadyExistsException;
 import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
 import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
@@ -9,7 +12,7 @@ import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -19,7 +22,6 @@ import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -112,7 +114,7 @@ class CommentServiceLayerTest {
 
     private User testUser;
     private User otherUser;
-    private Planner publishedPlanner;
+    private StoredPlanner publishedPlanner;
     private UUID plannerId;
 
     @BeforeEach
@@ -129,7 +131,7 @@ class CommentServiceLayerTest {
                 Clock.systemUTC());
         engagementService = new CommentEngagementService(
                 contentRepository, statsRepository, commentVoteRepository, queryService,
-                null, new VoteUniquenessValidator());
+                null);
 
         testUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
 
@@ -168,7 +170,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = CommentRows.insertedAs(100L).answer(i);
@@ -201,7 +203,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(parentComment));
             when(commentRepository.insert(any(PlannerComment.class)))
@@ -242,7 +244,7 @@ class CommentServiceLayerTest {
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.findByPublicId(nonExistentParentId))
                     .thenReturn(Optional.empty());
 
@@ -263,7 +265,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(depth5Parent));
             when(commentRepository.insert(any(PlannerComment.class)))
@@ -441,12 +443,12 @@ class CommentServiceLayerTest {
         void getCommentTree_WhenNoComments_ReturnsEmptyList() {
             // Arrange
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.userId(), publishedPlanner.publication().isPublished() ? Visibility.SHOWN : Visibility.HIDDEN)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(Collections.emptyList());
 
             // Act
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, Viewer.of(testUser.getId())).value();
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, new Viewer.Member(testUser.getId())).value();
 
             // Assert
             assertThat(comments).isEmpty();
@@ -462,12 +464,12 @@ class CommentServiceLayerTest {
             CommentRow byDeactivated = CommentRows.live(11L, UUID.randomUUID(), plannerId, deactivated.getId(), "also still here", null, 0);
 
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.userId(), publishedPlanner.publication().isPublished() ? Visibility.SHOWN : Visibility.HIDDEN)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(List.of(byActive, byDeactivated));
             users.add(deactivated);
 
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, Viewer.of(testUser.getId())).value();
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, new Viewer.Member(testUser.getId())).value();
 
             CommentTreeNode active = comments.stream()
                     .filter(c -> c.id().equals(byActive.publicId())).findFirst().orElseThrow();
@@ -490,10 +492,10 @@ class CommentServiceLayerTest {
                 thread.add(comment);
             }
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, 1L, true, false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, 1L, Visibility.SHOWN)));
             when(commentRepository.findByPlannerId(plannerId)).thenReturn(thread);
 
-            assertThat(queryService.getCommentTree(plannerId, Viewer.of(null)).scopes()).containsExactlyInAnyOrder(
+            assertThat(queryService.getCommentTree(plannerId, new Viewer.Guest()).scopes()).containsExactlyInAnyOrder(
                     new FreshnessScope.Planner(plannerId), new FreshnessScope.User(1L),
                     new FreshnessScope.User(2L), new FreshnessScope.User(3L));
         }
@@ -505,7 +507,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertRejected(() -> queryService.getCommentTree(plannerId, Viewer.of(testUser.getId())))
+            assertRejected(() -> queryService.getCommentTree(plannerId, new Viewer.Member(testUser.getId())))
                     .withCode("PLANNER_NOT_FOUND");
         }
     }
@@ -533,7 +535,9 @@ class CommentServiceLayerTest {
             when(commentVoteRepository.insertIgnore(10L, testUser.getId(), "UP")).thenReturn(0);
 
             assertRejected(() -> engagementService.toggleUpvote(commentPublicId, testUser.getId()))
-                    .withCode("VOTE_ALREADY_EXISTS");
+                    .withCode("VOTE_ALREADY_EXISTS")
+                    .isInstanceOfSatisfying(CommentVoteAlreadyExistsException.class,
+                            refusal -> assertThat(refusal.getCommentPublicId()).isEqualTo(commentPublicId));
             verifyNoInteractions(statsRepository);
         }
 
@@ -566,7 +570,7 @@ class CommentServiceLayerTest {
             CommentRow comment = CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0);
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
-            assertRejected(() -> engagementService.toggleNotification(commentPublicId, otherUser.getId(), false))
+            assertRejected(() -> engagementService.toggleNotification(commentPublicId, otherUser.getId(), NotificationSetting.OFF))
                     .withCode("COMMENT_FORBIDDEN")
                     .satisfies(rejection -> assertThat(rejection.getMessage())
                             .isEqualTo("Only the author can toggle notification settings"));
@@ -580,10 +584,10 @@ class CommentServiceLayerTest {
                     CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0),
                     Instant.now());
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
-            when(contentRepository.disableAuthorNotifications(100L)).thenReturn(1);
+            when(contentRepository.setAuthorNotifications(100L, false)).thenReturn(1);
 
             List<ILoggingEvent> logged = LogCapture.during(
-                    () -> engagementService.toggleNotification(commentPublicId, testUser.getId(), false),
+                    () -> engagementService.toggleNotification(commentPublicId, testUser.getId(), NotificationSetting.OFF),
                     Level.INFO, CommentEngagementService.class);
 
             assertThat(logged).extracting(ILoggingEvent::getFormattedMessage).containsExactly(
@@ -595,9 +599,9 @@ class CommentServiceLayerTest {
             UUID commentPublicId = UUID.randomUUID();
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(
                     CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0)));
-            when(contentRepository.enableAuthorNotifications(100L)).thenReturn(1);
+            when(contentRepository.setAuthorNotifications(100L, true)).thenReturn(1);
 
-            assertThat(engagementService.toggleNotification(commentPublicId, testUser.getId(), true))
+            assertThat(engagementService.toggleNotification(commentPublicId, testUser.getId(), NotificationSetting.ON))
                     .isEqualTo(new ToggleNotificationResponse(true));
         }
 
@@ -606,9 +610,9 @@ class CommentServiceLayerTest {
             UUID commentPublicId = UUID.randomUUID();
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(
                     CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0)));
-            when(contentRepository.disableAuthorNotifications(100L)).thenReturn(0);
+            when(contentRepository.setAuthorNotifications(100L, false)).thenReturn(0);
 
-            assertRejected(() -> engagementService.toggleNotification(commentPublicId, testUser.getId(), false))
+            assertRejected(() -> engagementService.toggleNotification(commentPublicId, testUser.getId(), NotificationSetting.OFF))
                     .withCode("COMMENT_NOT_FOUND");
         }
     }

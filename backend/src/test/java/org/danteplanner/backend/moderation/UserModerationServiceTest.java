@@ -1,7 +1,7 @@
 package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.moderation.service.UserModerationService.RestrictedAccount;
-import org.danteplanner.backend.user.api.Restriction;
+import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;

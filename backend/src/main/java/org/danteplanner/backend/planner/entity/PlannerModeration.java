@@ -2,18 +2,16 @@ package org.danteplanner.backend.planner.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
+import org.springframework.data.domain.Persistable;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
@@ -27,26 +25,18 @@ import java.util.UUID;
 @Immutable
 @Table(name = "planner_moderation")
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class PlannerModeration {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PlannerModeration implements Persistable<UUID> {
 
     @Id
     @Column(name = "planner_id", columnDefinition = "BINARY(16)")
     private UUID plannerId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "planner_id")
-    private Planner planner;
-
     @Column(name = "taken_down_at")
     private @Nullable Instant takenDownAt;
 
     @Column(name = "hidden_from_recommended", nullable = false)
-    @Builder.Default
-    private boolean hiddenFromRecommended = false;
+    private boolean hiddenFromRecommended;
 
     @Column(name = "hidden_by_moderator_id")
     private @Nullable Long hiddenByModeratorId;
@@ -57,7 +47,36 @@ public class PlannerModeration {
     @Column(name = "hidden_at")
     private @Nullable Instant hiddenAt;
 
-    public boolean isTakenDown() {
-        return takenDownAt != null;
+    public PlannerModeration(UUID plannerId, @Nullable Instant takenDownAt, boolean hiddenFromRecommended,
+            @Nullable Long hiddenByModeratorId, @Nullable String hiddenReason, @Nullable Instant hiddenAt) {
+        this.plannerId = plannerId;
+        this.takenDownAt = takenDownAt;
+        this.hiddenFromRecommended = hiddenFromRecommended;
+        this.hiddenByModeratorId = hiddenByModeratorId;
+        this.hiddenReason = hiddenReason;
+        this.hiddenAt = hiddenAt;
+    }
+
+    public static PlannerModeration clear(UUID plannerId) {
+        return new PlannerModeration(plannerId, null, false, null, null, null);
+    }
+
+    @Transient
+    private boolean isNew = true;
+
+    @Override
+    public UUID getId() {
+        return plannerId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    protected void markNotNew() {
+        this.isNew = false;
     }
 }

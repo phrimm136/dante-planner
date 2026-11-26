@@ -1,10 +1,11 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.planner.entity.Device;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilterId;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -119,16 +120,16 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     // published-title-edit-consistent
     @Test
     void publishedTitleEditConsistent_WhenTitleEdited_ListAndDetailImmediateAndFilterIndexUntouched() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Before Edit")
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         PlannerEntityFilter planted = entityFilterRepository.save(
-                new PlannerEntityFilter(ContentEntityType.THEME_PACK, UNREACHABLE_ENTITY_ID, planner.getId()));
-        long filterRowsBefore = entityFilterRows(planner.getId());
+                new PlannerEntityFilter(ContentEntityType.THEME_PACK, UNREACHABLE_ENTITY_ID, planner.id()));
+        long filterRowsBefore = entityFilterRows(planner.id());
         assertThat(filterRowsBefore).isGreaterThan(1);
 
         // Owner edits only the title: the client sends the full document with
@@ -137,7 +138,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .title("After Edit")
                 .status(PlannerStatus.SAVED)
                 .build();
-        mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+        mockMvc.perform(put("/api/planner/md/{id}", planner.id())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
@@ -147,7 +148,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("After Edit"));
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+        mockMvc.perform(get("/api/planner/md/published/{id}", planner.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("After Edit"));
 
@@ -155,13 +156,13 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .as("a title-only edit does not rebuild the entity filter: a rebuild clears every row "
                         + "for the planner, so the planted row would be gone")
                 .isPresent();
-        assertThat(entityFilterRows(planner.getId())).isEqualTo(filterRowsBefore);
+        assertThat(entityFilterRows(planner.id())).isEqualTo(filterRowsBefore);
     }
 
     @Test
     void publishIntentSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
         UUID plannerId = UUID.randomUUID();
-        String content = TestDataFactory.planner(owner).build().getContentJson();
+        String content = TestDataFactory.planner(owner).build().content().json();
         UpsertPlannerRequest publishRequest = UpsertRequests.draft()
                 .id(plannerId.toString())
                 .title("Intent One-Shot")
@@ -229,10 +230,10 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     private long savedPlanner(UUID id, UUID device) throws Exception {
         sendAs(device, put("/api/planner/md/{id}", id), upsertBody(id, "Saved Draft", divergentContent(), null))
                 .andExpect(status().isCreated());
-        return plannerRepository.findAggregateForOwner(id, owner.getId()).orElseThrow().getSyncVersion();
+        return plannerRepository.findAggregateForOwner(id, owner.getId()).orElseThrow().content().syncVersion();
     }
 
-    private Planner stored(UUID id) {
+    private StoredPlanner stored(UUID id) {
         return plannerRepository.findAggregateForOwner(id, owner.getId()).orElseThrow();
     }
 
@@ -295,8 +296,94 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         JsonNode publishProblem = objectMapper.readTree(publishResponse.getContentAsString());
         assertThat(publishProblem.get("code")).isEqualTo(saveProblem.get("code"));
         assertThat(publishProblem.get("serverVersion")).isEqualTo(saveProblem.get("serverVersion"));
-        assertThat(stored(id).isPublished()).as("a refused publish publishes nothing").isFalse();
-        assertThat(stored(id).getTitle()).isEqualTo("Advanced");
+        assertThat(stored(id).publication().isPublished()).as("a refused publish publishes nothing").isFalse();
+        assertThat(stored(id).content().title()).isEqualTo("Advanced");
+    }
+
+    @Test
+    void publishWithContent_WhenTheBodyTitleIsBlank_RefusesTheTitleAndRollsTheSaveBack() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, device);
+        JsonNode before = ownerCopy(id);
+
+        sendAs(device, post("/api/planner/md/{id}/publish", id),
+                upsertBody(id, "  ", TestDataFactory.VALID_CONTENT, version))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.detail").value("Invalid planner content structure"));
+
+        JsonNode after = ownerCopy(id);
+        assertThat(after.get("title")).isEqualTo(before.get("title"));
+        assertThat(after.get("syncVersion").asLong()).isEqualTo(version);
+        assertThat(after.get("lastModifiedAt")).isEqualTo(before.get("lastModifiedAt"));
+        assertThat(after.get("published").asBoolean()).isFalse();
+    }
+
+    @Test
+    void publishedSave_WhenTheBodyTitleIsBlank_RefusesLikeABlankPublishAndKeepsBothTitles() throws Exception {
+        StoredPlanner planner = TestDataFactory.planner(owner)
+                .title("Published Title")
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
+        TestDataFactory.addToCatalog(catalogService, planner);
+
+        for (String blank : List.of("", "   ", "<script>alert('xss')</script>")) {
+            UpsertPlannerRequest blanking = UpsertRequests.resending(planner)
+                    .title(blank)
+                    .status(PlannerStatus.SAVED)
+                    .build();
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id())
+                            .cookie(AuthCookies.accessToken(token))
+                            .with(withCsrf())
+                            .contentType(APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(blanking)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.detail").value("Invalid planner content structure"));
+
+            assertThat(stored(planner.id()).content().title()).as(blank).isEqualTo("Published Title");
+            assertThat(catalogRepository.findById(planner.id()).orElseThrow().getTitle()).as(blank)
+                    .isEqualTo("Published Title");
+        }
+    }
+
+    @Test
+    void publishedSave_WhenRenamed_UpdatesTheContentAndCatalogTitles() throws Exception {
+        StoredPlanner planner = TestDataFactory.planner(owner)
+                .title("Published Title")
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
+        TestDataFactory.addToCatalog(catalogService, planner);
+        UpsertPlannerRequest rename = UpsertRequests.resending(planner)
+                .title("Renamed Title")
+                .status(PlannerStatus.SAVED)
+                .build();
+
+        mockMvc.perform(put("/api/planner/md/{id}", planner.id())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rename)))
+                .andExpect(status().isOk());
+
+        assertThat(stored(planner.id()).content().title()).isEqualTo("Renamed Title");
+        assertThat(catalogRepository.findById(planner.id()).orElseThrow().getTitle()).isEqualTo("Renamed Title");
+    }
+
+    @Test
+    void draftSave_WhenTheBodyTitleIsBlank_SavesTheBlankTitle() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, device);
+
+        sendAs(device, put("/api/planner/md/{id}", id), upsertBody(id, "   ", TestDataFactory.VALID_CONTENT, version))
+                .andExpect(status().isOk());
+
+        assertThat(stored(id).content().title()).isEqualTo("   ");
     }
 
     @Test
@@ -309,12 +396,12 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
         sendAs(secondDevice, post("/api/planner/md/{id}/publish", id), published)
                 .andExpect(status().isOk());
-        assertThat(stored(id).getDeviceId()).isEqualTo(secondDevice);
+        assertThat(stored(id).content().device()).isEqualTo(new Device.Known(secondDevice));
 
         sendAs(firstDevice, post("/api/planner/md/{id}/publish", id), published)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"));
-        assertThat(stored(id).getDeviceId()).isEqualTo(secondDevice);
+        assertThat(stored(id).content().device()).isEqualTo(new Device.Known(secondDevice));
     }
 
     @Test
@@ -325,16 +412,16 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         sendAs(device, post("/api/planner/md/{id}/publish", id),
                 upsertBody(id, "Published", TestDataFactory.VALID_CONTENT, version))
                 .andExpect(status().isOk());
-        long publishedVersion = stored(id).getSyncVersion();
+        long publishedVersion = stored(id).content().syncVersion();
 
         sendAs(device, post("/api/planner/md/{id}/unpublish", id),
                 upsertBody(id, "Smuggled Title", divergentContent(), publishedVersion))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(false));
 
-        Planner after = stored(id);
-        assertThat(after.getTitle()).isEqualTo("Published");
-        assertThat(after.getSyncVersion()).isEqualTo(publishedVersion);
+        StoredPlanner after = stored(id);
+        assertThat(after.content().title()).isEqualTo("Published");
+        assertThat(after.content().syncVersion()).isEqualTo(publishedVersion);
     }
 
     private JsonNode ownerCopy(UUID plannerId) throws Exception {
@@ -367,30 +454,30 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
     @Test
     void publishedTitleSave_WhenContentResentAsReceived_SkipsFilterRebuild() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        JsonNode received = ownerCopy(planner.getId());
-        assertThat(entityFilterRows(planner.getId())).isZero();
+        JsonNode received = ownerCopy(planner.id());
+        assertThat(entityFilterRows(planner.id())).isZero();
 
         saveBack(received, "Renamed", received.get("content").asString());
 
-        assertThat(entityFilterRows(planner.getId()))
+        assertThat(entityFilterRows(planner.id()))
                 .as("no rebuild ran, so the deliberately unbuilt index stays empty")
                 .isZero();
     }
 
     @Test
     void publishedContentSave_WhenIdentityAdded_FilterRowsAndFilteredListReflectItOnResponse() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        JsonNode received = ownerCopy(planner.getId());
-        PlannerEntityFilterId added = new PlannerEntityFilterId(ContentEntityType.IDENTITY, 10102, planner.getId());
+        JsonNode received = ownerCopy(planner.id());
+        PlannerEntityFilterId added = new PlannerEntityFilterId(ContentEntityType.IDENTITY, 10102, planner.id());
         assertThat(entityFilterRepository.existsById(added)).isFalse();
 
         ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asString());
@@ -403,51 +490,51 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10102"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].id").value(planner.getId().toString()));
+                .andExpect(jsonPath("$.content[0].id").value(planner.id().toString()));
     }
 
     @Test
     void publish_WhenStoredContentSelectsAnUnknownKeyword_Returns400UnknownKeywordAndStaysUnpublished() throws Exception {
-        Planner known = TestDataFactory.planner(owner).title("Known Keyword Draft")
+        StoredPlanner known = TestDataFactory.planner(owner).title("Known Keyword Draft")
                 .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(known.getId()).build());
-        Planner unknown = TestDataFactory.planner(owner).title("Unknown Keyword Draft")
+        statsRepository.save(PlannerStats.builder().plannerId(known.id()).build());
+        StoredPlanner unknown = TestDataFactory.planner(owner).title("Unknown Keyword Draft")
                 .selectedKeywords(Set.of("Sinking", "NotAKeyword")).save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(unknown.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(unknown.id()).build());
 
-        mockMvc.perform(post("/api/planner/md/{id}/publish", known.getId())
+        mockMvc.perform(post("/api/planner/md/{id}/publish", known.id())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(true));
-        mockMvc.perform(post("/api/planner/md/{id}/publish", unknown.getId())
+        mockMvc.perform(post("/api/planner/md/{id}/publish", unknown.id())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("UNKNOWN_KEYWORD"));
 
-        assertThat(stored(unknown.getId()).isPublished()).isFalse();
-        assertThat(catalogRepository.existsById(unknown.getId())).isFalse();
+        assertThat(stored(unknown.id()).publication().isPublished()).isFalse();
+        assertThat(catalogRepository.existsById(unknown.id())).isFalse();
     }
 
-    private Planner publishedWithUnknownKeyword(String title) {
-        Planner planner = TestDataFactory.planner(owner).title(title)
+    private StoredPlanner publishedWithUnknownKeyword(String title) {
+        StoredPlanner planner = TestDataFactory.planner(owner).title(title)
                 .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
-        return stored(planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
+        return stored(planner.id());
     }
 
     @Test
     void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Returns400UnknownKeyword() throws Exception {
-        Planner planner = publishedWithUnknownKeyword("Published Unknown Keyword");
+        StoredPlanner planner = publishedWithUnknownKeyword("Published Unknown Keyword");
         UpsertPlannerRequest titleEdit = UpsertRequests.resending(planner)
                 .title("Retitled")
                 .status(PlannerStatus.SAVED)
                 .build();
 
-        mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+        mockMvc.perform(put("/api/planner/md/{id}", planner.id())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
@@ -456,21 +543,21 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .andExpect(jsonPath("$.code").value("UNKNOWN_KEYWORD"))
                 .andExpect(jsonPath("$.detail").value("Unknown keywords: [NotAKeyword]"));
 
-        assertThat(stored(planner.getId()).getTitle()).isEqualTo("Published Unknown Keyword");
+        assertThat(stored(planner.id()).content().title()).isEqualTo("Published Unknown Keyword");
     }
 
     @Test
     void publishWithContent_WhenTheDraftSelectsAnUnknownKeyword_Returns400AndRollsBackTheSave() throws Exception {
-        Planner draft = TestDataFactory.planner(owner).title("Draft Before Publish")
+        StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Before Publish")
                 .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(draft.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(draft.id()).build());
         UpsertPlannerRequest publishBody = UpsertRequests.resending(draft)
                 .title("Draft Published With Unknown")
                 .status(PlannerStatus.SAVED)
-                .content(TestDataFactory.withSelectedKeywords(draft.getContentJson(), List.of("NotAKeyword")))
+                .content(TestDataFactory.withSelectedKeywords(draft.content().json(), List.of("NotAKeyword")))
                 .build();
 
-        mockMvc.perform(post("/api/planner/md/{id}/publish", draft.getId())
+        mockMvc.perform(post("/api/planner/md/{id}/publish", draft.id())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
@@ -478,8 +565,8 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("UNKNOWN_KEYWORD"));
 
-        Planner after = stored(draft.getId());
-        assertThat(after.isPublished()).isFalse();
-        assertThat(after.getTitle()).isEqualTo("Draft Before Publish");
+        StoredPlanner after = stored(draft.id());
+        assertThat(after.publication().isPublished()).isFalse();
+        assertThat(after.content().title()).isEqualTo("Draft Before Publish");
     }
 }

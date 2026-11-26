@@ -10,7 +10,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.VoteRequest;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -26,6 +26,10 @@ import org.danteplanner.backend.auth.token.ExpiredTokens;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerContentRows;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,11 +41,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -84,6 +88,15 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerContentRepository contentRepository;
+
+    @Autowired
+    private PlannerPublicationRepository publicationRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private PlannerViewRepository plannerViewRepository;
@@ -135,15 +148,15 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     private static final String UNKNOWN_GIFT_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"9899\"]");
 
-    private Planner createTestPlanner(User user) {
+    private StoredPlanner createTestPlanner(User user) {
         return TestDataFactory.planner(user)
                 .status(PlannerStatus.DRAFT)
                 .content(TestDataFactory.VALID_CONTENT)
                 .save(plannerRepository);
     }
 
-    private Planner createPublishedPlanner(User user, String title, String category, int upvotes) {
-        Planner planner = TestDataFactory.planner(user)
+    private StoredPlanner createPublishedPlanner(User user, String title, String category, int upvotes) {
+        StoredPlanner planner = TestDataFactory.planner(user)
                 .title(title)
                 .category(category)
                 .status(PlannerStatus.SAVED)
@@ -151,7 +164,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder()
-                .plannerId(planner.getId())
+                .plannerId(planner.id())
                 .upvotes(upvotes)
                 .build());
         TestDataFactory.addToCatalog(catalogService, planner);
@@ -391,12 +404,11 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPlanners_WhenSoftDeleted_ExcludesDeletedPlanners() throws Exception {
-            Planner planner1 = createTestPlanner(testUser);
-            Planner planner2 = createTestPlanner(testUser);
+            StoredPlanner planner1 = createTestPlanner(testUser);
+            StoredPlanner planner2 = createTestPlanner(testUser);
 
             // Soft delete one planner
-            planner2.softDelete(Instant.now());
-            plannerRepository.save(planner2);
+            PlannerContentRows.markDeleted(jdbcTemplate, planner2.id());
 
             mockMvc.perform(get("/api/planner/md")
                             .cookie(accessTokenCookie())
@@ -404,7 +416,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .param("size", "20"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(1)))
-                    .andExpect(jsonPath("$.content[0].id").value(planner1.getId().toString()));
+                    .andExpect(jsonPath("$.content[0].id").value(planner1.id().toString()));
         }
 
         @Test
@@ -436,13 +448,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPlanner_WhenOwnedByUser_ReturnsPlanner() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(get("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(get("/api/planner/md/{id}", planner.id())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(planner.getId().toString()))
-                    .andExpect(jsonPath("$.title").value(planner.getTitle()));
+                    .andExpect(jsonPath("$.id").value(planner.id().toString()))
+                    .andExpect(jsonPath("$.title").value(planner.content().title()));
         }
 
         @Test
@@ -457,9 +469,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPlanner_WhenOwnedByOtherUser_Returns404() throws Exception {
-            Planner otherUserPlanner = createTestPlanner(otherUser);
+            StoredPlanner otherUserPlanner = createTestPlanner(otherUser);
 
-            mockMvc.perform(get("/api/planner/md/{id}", otherUserPlanner.getId())
+            mockMvc.perform(get("/api/planner/md/{id}", otherUserPlanner.id())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -467,11 +479,10 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPlanner_WhenSoftDeleted_Returns404() throws Exception {
-            Planner planner = createTestPlanner(testUser);
-            planner.softDelete(Instant.now());
-            plannerRepository.save(planner);
+            StoredPlanner planner = createTestPlanner(testUser);
+            PlannerContentRows.markDeleted(jdbcTemplate, planner.id());
 
-            mockMvc.perform(get("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(get("/api/planner/md/{id}", planner.id())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -479,9 +490,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPlanner_WhenNoAuth_Returns401() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(get("/api/planner/md/{id}", planner.getId()))
+            mockMvc.perform(get("/api/planner/md/{id}", planner.id()))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -491,12 +502,12 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenSuccess_IncrementsSyncVersion() throws Exception {
-            Planner planner = createTestPlanner(testUser);
-            Long initialSyncVersion = planner.getSyncVersion();
+            StoredPlanner planner = createTestPlanner(testUser);
+            Long initialSyncVersion = planner.content().syncVersion();
 
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title("Updated Title").build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -507,13 +518,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenOnlyCategoryChangesOverARetiredId_Returns200() throws Exception {
-            Planner planner = TestDataFactory.planner(testUser)
+            StoredPlanner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.DRAFT)
                     .content(UNKNOWN_GIFT_CONTENT)
                     .save(plannerRepository);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("10F").build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -523,14 +534,14 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenCategoryAndContentChangeOverARetiredId_Returns400() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
             UpsertPlannerRequest request = UpsertRequests.resending(planner)
                     .title(null)
                     .category("10F")
                     .content(UNKNOWN_GIFT_CONTENT)
                     .build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -540,29 +551,29 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenVersionMismatch_Returns409() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = UpsertRequests.resending(planner)
                     .title("Updated Title")
                     .syncVersion(999L) // Wrong version
                     .build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"))
-                    .andExpect(jsonPath("$.serverVersion").value(planner.getSyncVersion()));
+                    .andExpect(jsonPath("$.serverVersion").value(planner.content().syncVersion()));
         }
 
         @Test
         void updatePlanner_WhenOwnedByOtherUser_Returns403() throws Exception {
-            Planner otherUserPlanner = createTestPlanner(otherUser);
+            StoredPlanner otherUserPlanner = createTestPlanner(otherUser);
 
             UpsertPlannerRequest request = UpsertRequests.resending(otherUserPlanner).title("Updated Title").build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -572,7 +583,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenContentTooLarge_Returns400() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
             String largeTitle = "x".repeat(52000);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).content(String.format(
@@ -580,7 +591,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 largeTitle
             )).build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -590,11 +601,11 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenNoAuth_Returns401() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title("Updated Title").build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -603,11 +614,11 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenContentVersionUpdated_PersistsNewVersion() throws Exception {
-            Planner planner = createTestPlanner(testUser); // contentVersion = 6
+            StoredPlanner planner = createTestPlanner(testUser); // contentVersion = 6
 
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).contentVersion(7).build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -617,22 +628,22 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void updatePlanner_WhenPublishedCategoryGrowsPastItsFloors_Returns400AndKeepsTheCategory() throws Exception {
-            Planner planner = createPublishedPlanner(testUser, "Five Floors", "5F", 0);
+            StoredPlanner planner = createPublishedPlanner(testUser, "Five Floors", "5F", 0);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("15F").build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
-            assertThat(plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory()).isEqualTo("5F");
+            assertThat(plannerRepository.findAggregate(planner.id()).orElseThrow().content().category()).isEqualTo("5F");
         }
 
         @Test
         void updatePlanner_WhenAPublishedPlannersStoredFloorIsNotAnObjectAndTheCategoryGrows_Returns400() throws Exception {
-            Planner planner = TestDataFactory.planner(testUser)
+            StoredPlanner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.SAVED)
                     .content(TestDataFactory.VALID_CONTENT.replace(
                             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
@@ -640,18 +651,18 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                                     + "{\"themePackId\":\"1006\",\"difficulty\":1,\"giftIds\":[]},5"))
                     .published(true)
                     .save(plannerRepository);
-            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+            statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
             TestDataFactory.addToCatalog(catalogService, planner);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("15F").build();
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
-            assertThat(plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory()).isEqualTo("5F");
+            assertThat(plannerRepository.findAggregate(planner.id()).orElseThrow().content().category()).isEqualTo("5F");
         }
     }
 
@@ -660,23 +671,21 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void deletePlanner_WhenSuccess_SoftDeletes() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(delete("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(session()))
                     .andExpect(status().isNoContent());
 
             // Verify soft delete
-            Planner deletedPlanner = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertThat(deletedPlanner.getContent().getDeletedAt()).isNotNull();
-            assertThat(deletedPlanner.isDeleted()).isTrue();
+            assertThat(contentRepository.findById(planner.id()).orElseThrow().getDeletedAt()).isNotNull();
         }
 
         @Test
         void deletePlanner_WhenOwnedByOtherUser_Returns404() throws Exception {
-            Planner otherUserPlanner = createTestPlanner(otherUser);
+            StoredPlanner otherUserPlanner = createTestPlanner(otherUser);
 
-            mockMvc.perform(delete("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
+            mockMvc.perform(delete("/api/planner/md/{id}", otherUserPlanner.id()).with(withCsrf())
                             .cookie(session()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -694,9 +703,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void deletePlanner_WhenNoAuth_Returns401() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
+            mockMvc.perform(delete("/api/planner/md/{id}", planner.id()).with(withCsrf())
                             .cookie(deviceIdCookie()))
                     .andExpect(status().isUnauthorized());
         }
@@ -796,15 +805,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void upsertPlanner_WhenDeletedPlannersExist_NotCountedInLimit() throws Exception {
             // Create 100 planners
-            List<Planner> planners = new ArrayList<>();
+            List<StoredPlanner> planners = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
                 planners.add(createTestPlanner(testUser));
             }
 
             // Soft delete one
-            Planner toDelete = planners.get(0);
-            toDelete.softDelete(Instant.now());
-            plannerRepository.save(toDelete);
+            PlannerContentRows.markDeleted(jdbcTemplate, planners.get(0).id());
 
             // Now should be able to create one more
             UpsertPlannerRequest request = UpsertRequests.valid();
@@ -832,7 +839,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     @Nested
     class GetPublishedPlannersTests {
 
-        private Planner createPublishedPlanner(User user, String title) {
+        private StoredPlanner createPublishedPlanner(User user, String title) {
             return PlannerControllerIT.this.createPublishedPlanner(user, title, "5F", 0);
         }
 
@@ -891,7 +898,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     @Nested
     class GetRecommendedPlannersTests {
 
-        private Planner createRecommendedPlanner(User user, String title, int upvotes) {
+        private StoredPlanner createRecommendedPlanner(User user, String title, int upvotes) {
             return createPublishedPlanner(user, title, "5F", upvotes);
         }
 
@@ -935,40 +942,40 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void publishValidatesBeforeMutating_WhenTitleBlank_Returns400AndStoresNothing() throws Exception {
-            Planner planner = TestDataFactory.planner(testUser)
+            StoredPlanner planner = TestDataFactory.planner(testUser)
                     .title("   ")
                     .status(PlannerStatus.DRAFT)
                     .content(TestDataFactory.VALID_CONTENT)
                     .save(plannerRepository);
 
-            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
-            Planner stored = plannerRepository.findById(planner.getId()).orElseThrow();
+            PlannerPublication stored = publicationRepository.findById(planner.id()).orElseThrow();
             assertThat(stored.isPublished()).isFalse();
             assertThat(stored.getFirstPublishedAt()).as("a refused publish leaves no first-publish stamp").isNull();
         }
 
         @Test
         void publicationIntents_WhenOwnerCallsEach_MovePlannerBothWays() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(true));
-            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isTrue();
+            assertThat(plannerRepository.findAggregate(planner.id()).orElseThrow().publication().isPublished()).isTrue();
 
-            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(false));
-            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isFalse();
+            assertThat(plannerRepository.findAggregate(planner.id()).orElseThrow().publication().isPublished()).isFalse();
         }
 
         @Test
@@ -988,7 +995,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated());
 
-            String stored = plannerRepository.findById(plannerId).orElseThrow().getContentJson();
+            String stored = plannerRepository.findAggregate(plannerId).orElseThrow().content().json();
             assertThat(content.getBytes(StandardCharsets.UTF_8).length).isLessThan(maxContentSizeBytes);
             assertThat(stored.getBytes(StandardCharsets.UTF_8).length).isGreaterThan(maxContentSizeBytes);
 
@@ -1020,7 +1027,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
-            assertThat(plannerRepository.findById(plannerId).orElseThrow().isPublished()).isFalse();
+            assertThat(plannerRepository.findAggregate(plannerId).orElseThrow().publication().isPublished()).isFalse();
         }
 
         @Test
@@ -1046,7 +1053,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
-            assertThat(plannerRepository.findById(plannerId).orElseThrow().isPublished()).isFalse();
+            assertThat(plannerRepository.findAggregate(plannerId).orElseThrow().publication().isPublished()).isFalse();
         }
 
         @Test
@@ -1072,9 +1079,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unpublishIntent_WhenNonOwner_Returns403() throws Exception {
-            Planner planner = createPublishedPlanner(testUser, "Someone Else's", "5F", 0);
+            StoredPlanner planner = createPublishedPlanner(testUser, "Someone Else's", "5F", 0);
 
-            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(AuthCookies.accessToken(otherUserAccessToken)))
                     .andExpect(status().isForbidden())
@@ -1083,21 +1090,21 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void publishIntent_WhenNonOwner_Returns403() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(AuthCookies.accessToken(otherUserAccessToken)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
-            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isFalse();
+            assertThat(plannerRepository.findAggregate(planner.id()).orElseThrow().publication().isPublished()).isFalse();
         }
 
         @Test
         void publishIntent_WhenNoAuth_Returns401() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf()))
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.id()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -1112,21 +1119,21 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void publishPath_WhenCalledWithPut_Returns405() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"published\":true}")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isMethodNotAllowed());
-            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isFalse();
+            assertThat(plannerRepository.findAggregate(planner.id()).orElseThrow().publication().isPublished()).isFalse();
         }
     }
 
     @Nested
     class CastVoteTests {
 
-        private Planner createPublishedPlanner() {
+        private StoredPlanner createPublishedPlanner() {
             // Created by other user so test user can vote
             return PlannerControllerIT.this.createPublishedPlanner(otherUser, "Votable Planner", "5F", 5);
         }
@@ -1134,16 +1141,16 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void castVote_WhenAuthenticated_Returns200() throws Exception {
             // Arrange
-            Planner planner = createPublishedPlanner();
+            StoredPlanner planner = createPublishedPlanner();
             VoteRequest request = new VoteRequest(VoteType.UP);
 
             // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
+                    .andExpect(jsonPath("$.plannerId").value(planner.id().toString()))
                     .andExpect(jsonPath("$.upvoteCount").value(6))
                     .andExpect(jsonPath("$.hasUpvoted").value(true));
         }
@@ -1152,12 +1159,12 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void castVote_WhenNullVoteType_Returns400() throws Exception {
             // Arrange
-            Planner planner = createPublishedPlanner();
+            StoredPlanner planner = createPublishedPlanner();
 
             VoteRequest removeRequest = new VoteRequest(null);
 
             // Act & Assert - votes are permanent, null voteType is rejected
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(removeRequest)))
@@ -1167,10 +1174,10 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void castVote_WhenUnauthenticated_Returns401() throws Exception {
-            Planner planner = createPublishedPlanner();
+            StoredPlanner planner = createPublishedPlanner();
             VoteRequest request = new VoteRequest(VoteType.UP);
 
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
@@ -1192,13 +1199,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void castVote_WhenUnpublishedPlanner_Returns404() throws Exception {
             // Arrange - Create unpublished planner
-            Planner planner = createTestPlanner(otherUser);
-            assertThat(planner.isPublished()).isFalse();
+            StoredPlanner planner = createTestPlanner(otherUser);
+            assertThat(planner.publication().isPublished()).isFalse();
 
             VoteRequest request = new VoteRequest(VoteType.UP);
 
             // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -1250,15 +1257,15 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     @Nested
     class GetPublishedPlannerDetailTests {
 
-        private Planner createPublishedPlannerWithViewCount(User user, int viewCount) {
-            Planner planner = TestDataFactory.planner(user)
+        private StoredPlanner createPublishedPlannerWithViewCount(User user, int viewCount) {
+            StoredPlanner planner = TestDataFactory.planner(user)
                     .title("View Test Planner")
                     .status(PlannerStatus.SAVED)
                     .content(TestDataFactory.VALID_CONTENT)
                     .published(true)
                     .save(plannerRepository);
             statsRepository.save(PlannerStats.builder()
-                    .plannerId(planner.getId())
+                    .plannerId(planner.id())
                     .viewCount(viewCount)
                     .build());
             return planner;
@@ -1266,13 +1273,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPublishedPlanner_WhenAnonymousAccess_Returns200() throws Exception {
-            Planner planner = createPublishedPlannerWithViewCount(testUser, 0);
+            StoredPlanner planner = createPublishedPlannerWithViewCount(testUser, 0);
 
-            mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
+            mockMvc.perform(get("/api/planner/md/published/{id}", planner.id())
                             .header("X-Forwarded-For", "10.0.0.1")
                             .header("User-Agent", "TestBrowser/1.0"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(planner.getId().toString()))
+                    .andExpect(jsonPath("$.id").value(planner.id().toString()))
                     .andExpect(jsonPath("$.title").value("View Test Planner"))
                     .andExpect(jsonPath("$.content").exists())
                     .andExpect(jsonPath("$.viewCount").isNumber());
@@ -1280,9 +1287,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPublishedPlanner_WhenFirstView_ReturnsPreRequestViewCount() throws Exception {
-            Planner planner = createPublishedPlannerWithViewCount(testUser, 5);
+            StoredPlanner planner = createPublishedPlannerWithViewCount(testUser, 5);
 
-            mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
+            mockMvc.perform(get("/api/planner/md/published/{id}", planner.id())
                             .header("X-Forwarded-For", "10.0.0.1")
                             .header("User-Agent", "TestBrowser/1.0"))
                     .andExpect(status().isOk())
@@ -1291,18 +1298,18 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPublishedPlanner_WhenDuplicateView_DoesNotIncrementViewCount() throws Exception {
-            Planner planner = createPublishedPlannerWithViewCount(testUser, 5);
+            StoredPlanner planner = createPublishedPlannerWithViewCount(testUser, 5);
 
             // 10.0.0.1 is RFC1918, so the viewer identity resolves to the device rather than the
             // address — which is the point: behind NAT every viewer shares one address, and only
             // the device id keeps them apart.
             UUID deviceId = UUID.randomUUID();
             String viewerHash = ViewerHashUtil.hashForAnonymousUser(
-                    "device:" + deviceId, "TestBrowser/1.0", planner.getId());
+                    "device:" + deviceId, "TestBrowser/1.0", planner.id());
             plannerViewRepository.save(
-                    new PlannerView(planner.getId(), viewerHash, LocalDate.now(ZoneOffset.UTC)));
+                    new PlannerView(planner.id(), viewerHash, LocalDate.now(ZoneOffset.UTC)));
 
-            mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
+            mockMvc.perform(get("/api/planner/md/published/{id}", planner.id())
                             .cookie(AuthCookies.deviceId(deviceId))
                             .header("X-Forwarded-For", "10.0.0.1")
                             .header("User-Agent", "TestBrowser/1.0"))
@@ -1312,9 +1319,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPublishedPlanner_WhenNotPublished_Returns404() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            StoredPlanner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+            mockMvc.perform(get("/api/planner/md/published/{id}", planner.id()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
         }

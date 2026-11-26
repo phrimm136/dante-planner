@@ -34,8 +34,9 @@ USAGE_TEXT = f"""usage: checks [--root <path>] [--print] [--full REASON] <lane> 
        checks hook < tool-json
 
 Runs the repo's repeated local checks (frontend, e2e, backend, the tooling test suites). Every
-run takes the shared test lock (<main checkout>/.claude/.test.lock, exclusive, blocking with a
-status line while another run holds it), writes the tool's whole output to a dated log, and
+run takes the shared test lock (<main checkout>/.claude/.test.lock, blocking with a status line
+while another run holds it): exclusive, except that `be test --exclude-tags containerized` takes
+one of two slots beside it and the lock shared, so two such runs go at once; writes the tool's whole output to a dated log, and
 prints one line: PASS <log> or FAIL <log>, followed by the tool's own summary (vitest "Test
 Files", the tsc error count, oxlint "Found ...", playwright's counts, gradle "BUILD ...", the
 tooling suite count). The exit code is the tool's. Read the log; never re-run a check to see its
@@ -55,7 +56,9 @@ changed:    the checks the change set reaches, before a commit. The change set i
             (vitest --changed), a static.lock change runs every vitest file, an e2e change runs
             e2e typecheck, a Java source or its lint configuration runs be lint, a backend source
             runs the test classes named after it, a backend build or resource file runs every
-            backend test, and a tooling change runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
+            backend test, and a tooling or scripts/ops change, or a file the tooling tests read
+            (fleet and envs terraform, chart, Argo CD root app, workflow, .claude/settings.json,
+            Grafana alert rules, any scripts/ shell script), runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
 --full:     a whole test run that PR Gate already runs (fe test or e2e run with no file, be test
             with no --tests, be check, be pit, fe gate) takes a stated reason.
 
@@ -101,10 +104,10 @@ CHECK_TABLE = (
               "gradle test; any --tests also runs the ArchUnit suite"),
     CheckSpec("be", "checkstyle", "", "checkstyleMain checkstyleTest --rerun-tasks"),
     CheckSpec("be", "lint", "", "every checkstyle, cpd and ast-grep task of gradle check, without tests or coverage"),
-    CheckSpec("be", "freeze-branches", "[--reason REASON]",
-              f"rewrite {BRANCH_STORE} from the sources; adding or raising a line needs the reason"),
+    CheckSpec("be", "freeze-branches", "",
+              f"rewrite {BRANCH_STORE} from the sources and print every count that moved"),
     CheckSpec("be", "pit", "", "pitestRatchet, the surviving-mutant ratchet"),
-    CheckSpec("tools", "test", "", f"every skill CLI and git-hook test suite ({TOOLING_SCRIPT}, "
+    CheckSpec("tools", "test", "", f"every skill CLI, git-hook and ops script test suite and the no-real-time check ({TOOLING_SCRIPT}, "
               f"what PR Gate job {TOOLING_JOB} runs)"),
 )
 
@@ -266,6 +269,7 @@ class RunPlan:
     command_argv: tuple
     extra_env: tuple = ()
     module_dir: Path = None
+    lock_share: str = "exclusive"
 
 
 class UsageFailure:
@@ -352,23 +356,15 @@ def be_test_plan(repo_paths, arg_words):
         task_words += ["--tests", ARCHUNIT_PATTERN]
     if exclude_tags:
         task_words.append(f"-PexcludeTags={exclude_tags}")
-    return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
+    lock_share = SLOT_SHARE if "containerized" in exclude_tags.split(",") else "exclusive"
+    return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words), lock_share=lock_share)
 
 
 def be_freeze_plan(repo_paths, arg_words):
-    prog_parser = UsageFailure("checks be freeze-branches")
-    reason_text = ""
-    word_index = 0
-    while word_index < len(arg_words):
-        if arg_words[word_index].split("=", 1)[0] != "--reason":
-            prog_parser.raise_failure(f"unknown argument {arg_words[word_index]}; the only option is --reason REASON")
-        reason_text, word_index = take_option(arg_words, word_index, "--reason", prog_parser)
-        if not reason_text.strip():
-            prog_parser.raise_failure("--reason needs a reason")
-    task_words = ["freezeShellBranches"]
-    if reason_text:
-        task_words.append(f"-PfreezeReason={reason_text}")
-    return RunPlan("be freeze-branches", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
+    if arg_words:
+        UsageFailure("checks be freeze-branches").raise_failure(
+            f"unknown argument {arg_words[0]}; freeze-branches takes no arguments")
+    return RunPlan("be freeze-branches", repo_paths.repo_root, gradle_argv(repo_paths, ["freezeShellBranches"]))
 
 
 def fe_fmt_plan(repo_paths, arg_words):
@@ -431,7 +427,26 @@ FRONTEND_WHOLE = ("frontend/package.json", "frontend/yarn.lock", "static.lock")
 BACKEND_SOURCES = ("backend/src/main/java/", "backend/src/test/java/")
 BACKEND_LINT_CONFIG = ("backend/config/checkstyle/", "backend/config/ast-grep/", "backend/sgconfig.yml",
                        "backend/build.gradle.kts")
-TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/")
+TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/", "scripts/ops/")
+TOOLING_INPUTS = ("terraform/modules/fleet/", "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-",
+                  ".github/workflows/deploy-fleet.yml", ".github/workflows/pr-gate.yml", "deploy/argocd/root-app-",
+                  ".claude/settings.json", "deploy/grafana/rules.py", "deploy/grafana/rules/")
+TOOLING_INPUT_PATTERNS = (re.compile(r"scripts/.+\.sh"), re.compile(r"terraform/[^/]+/envs/[^/]+\.tfvars"))
+STACK_FILE = re.compile(r"terraform/([^/]+)/([^/]+)")
+STACK_SUFFIXES = (".tf", ".tfvars.example")
+FLEET_SOURCE = re.compile(r'^\s*source\s*=\s*"\.\./modules/fleet"$', re.MULTILINE)
+
+
+def tooling_reads(repo_root, one_path):
+    if one_path.startswith(TOOLING_DIRS + TOOLING_INPUTS) or any(
+            input_pattern.fullmatch(one_path) for input_pattern in TOOLING_INPUT_PATTERNS):
+        return True
+    stack_match = STACK_FILE.fullmatch(one_path)
+    if not stack_match or not stack_match.group(2).endswith(STACK_SUFFIXES):
+        return False
+    main_path = repo_root / "terraform" / stack_match.group(1) / "main.tf"
+    return stack_match.group(2) == "main.tf" or (main_path.is_file()
+                                                 and bool(FLEET_SOURCE.search(main_path.read_text(encoding="utf-8"))))
 
 
 def whole_run(lane_name, check_name, arg_words):
@@ -509,7 +524,7 @@ def changed_plans(repo_paths, changed_paths, base_commit):
                              for pattern_word in ("--tests", test_pattern)]
             plan_rows.append((build_plan(repo_paths, "be", "test", pattern_words),
                               f"{len(test_patterns)} backend file(s) changed; their test classes run"))
-    tooling_path = first_path(lambda one_path: one_path.startswith(TOOLING_DIRS))
+    tooling_path = first_path(lambda one_path: tooling_reads(repo_paths.repo_root, one_path))
     if tooling_path:
         plan_rows.append((build_plan(repo_paths, "tools", "test", []), f"{tooling_path} changed"))
     return plan_rows
@@ -714,7 +729,7 @@ def summary_line(log_text):
 
 
 GRADLE_FAILED_TASK = re.compile(r"Execution failed for task ':([^']+)'")
-RAISED_BRANCH = re.compile(r" \d+ -> \d+$")
+MOVED_BRANCH = re.compile(r" \d+ -> \d+$")
 
 
 def gradle_failure_lines(log_text):
@@ -734,12 +749,12 @@ def gradle_failure_lines(log_text):
     return failure_lines
 
 
-def raised_branch_lines(log_text):
-    """The block `be freeze-branches` writes for the lines it raised: its reason, then one line per method."""
+def moved_branch_lines(log_text):
+    """The block `be freeze-branches` writes for the counts that moved: a header, then one line per method."""
     text_lines = log_text.splitlines()
     for line_index, text_line in enumerate(text_lines):
-        if text_line.startswith("raised, because "):
-            return [text_line, *itertools.takewhile(RAISED_BRANCH.search, text_lines[line_index + 1:])]
+        if text_line == "moved:":
+            return [text_line, *itertools.takewhile(MOVED_BRANCH.search, text_lines[line_index + 1:])]
     return []
 
 
@@ -808,16 +823,54 @@ def describe_holders(holder_rows):
                      for one_holder in holder_rows)
 
 
+SLOT_SHARE = "slot"
+SLOT_COUNT = 2
+
+
 class CheckLock:
-    def __init__(self, lock_path):
+    """Exclusive by default; a run without containers takes one of SLOT_COUNT slots and the lock shared.
+
+    The lock file is the one older copies of this CLI take exclusively, so they still wait for every slot holder."""
+
+    def __init__(self, lock_path, lock_share="exclusive"):
         self.lock_path = lock_path
+        self.lock_share = lock_share
         self.lock_file = None
+        self.slot_file = None
+
+    def slot_path(self, slot_index):
+        return self.lock_path.with_name(f"{self.lock_path.name}.slot{slot_index}")
+
+    def free_slot(self):
+        for slot_index in range(SLOT_COUNT):
+            slot_file = open(self.slot_path(slot_index), "a")
+            try:
+                fcntl.flock(slot_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return slot_file
+            except BlockingIOError:
+                slot_file.close()
+        return None
+
+    def take_slot(self, poll_seconds=1.0):
+        self.slot_file = self.free_slot()
+        if self.slot_file is not None:
+            return
+        print(f"checks: waiting for one of {SLOT_COUNT} test slots beside {self.lock_path}",
+              file=sys.stderr, flush=True)
+        wait_start = time.monotonic()
+        while self.slot_file is None:
+            time.sleep(poll_seconds)
+            self.slot_file = self.free_slot()
+        print(f"checks: took a test slot after {time.monotonic() - wait_start:.0f}s", file=sys.stderr, flush=True)
 
     def __enter__(self):
         self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        if self.lock_share == SLOT_SHARE:
+            self.take_slot()
+        lock_operation = fcntl.LOCK_SH if self.lock_share == SLOT_SHARE else fcntl.LOCK_EX
         self.lock_file = open(self.lock_path, "a")
         try:
-            fcntl.flock(self.lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(self.lock_file, lock_operation | fcntl.LOCK_NB)
             return self
         except BlockingIOError:
             pass
@@ -830,13 +883,16 @@ class CheckLock:
         print(f"checks: waiting for the test lock {self.lock_path}, held by {describe_holders(holder_rows)}",
               file=sys.stderr, flush=True)
         wait_start = time.monotonic()
-        fcntl.flock(self.lock_file, fcntl.LOCK_EX)
+        fcntl.flock(self.lock_file, lock_operation)
         print(f"checks: took the test lock after {time.monotonic() - wait_start:.0f}s", file=sys.stderr, flush=True)
         return self
 
     def __exit__(self, *exit_info):
         fcntl.flock(self.lock_file, fcntl.LOCK_UN)
         self.lock_file.close()
+        if self.slot_file is not None:
+            fcntl.flock(self.slot_file, fcntl.LOCK_UN)
+            self.slot_file.close()
 
 
 def require_modules(run_plan, repo_paths):
@@ -889,12 +945,12 @@ def run_single(repo_paths, run_plan, name_parts, print_only):
     require_modules(run_plan, repo_paths)
     repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
     print(f"checks: root {repo_paths.repo_root}", file=sys.stderr, flush=True)
-    with CheckLock(repo_paths.lock_path):
+    with CheckLock(repo_paths.lock_path, run_plan.lock_share):
         log_path = log_path_for(repo_paths.log_dir, name_parts, datetime.datetime.now())
         exit_code, verdict_text, summary_text = execute_plan(run_plan, log_path)
     print(f"{verdict_text} {log_path}  {summary_text}")
     log_text = log_path.read_text(encoding="utf-8", errors="replace")
-    for result_line in gradle_failure_lines(log_text) + raised_branch_lines(log_text):
+    for result_line in gradle_failure_lines(log_text) + moved_branch_lines(log_text):
         print(result_line)
     return exit_code
 

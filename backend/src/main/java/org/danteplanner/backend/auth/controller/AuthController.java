@@ -29,9 +29,6 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -143,20 +140,11 @@ public class AuthController {
 
     @RateLimitExempt
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || auth instanceof AnonymousAuthenticationToken) {
-            return ResponseEntity.noContent().build();
-        }
-
-        Object principal = auth.getPrincipal();
-        if (!(principal instanceof Long userId)) {
-            log.warn("Unexpected principal type: {}", typeName(principal));
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(authService.currentUser(userId));
+    public ResponseEntity<UserResponse> getCurrentUser(Viewer viewer) {
+        return switch (viewer) {
+            case Viewer.Guest guest -> ResponseEntity.noContent().build();
+            case Viewer.Member member -> ResponseEntity.ok(authService.currentUser(member.userId()));
+        };
     }
 
     @RateLimitExempt
@@ -180,10 +168,6 @@ public class AuthController {
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
-    }
-
-    private static String typeName(@Nullable Object principal) {
-        return principal == null ? "none" : principal.getClass().getName();
     }
 
     private sealed interface ProviderAnswer {

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.architecture;
 
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -10,14 +11,25 @@ import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
+import jakarta.persistence.EntityListeners;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import org.danteplanner.backend.shared.config.TaskSchedulerConfig;
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
+import org.danteplanner.fixture.wallclock.InheritedStampAuditedFixture;
 import org.danteplanner.fixture.wallclock.SpringAuditedFixture;
+import org.danteplanner.fixture.wallclock.StampedAuditedBase;
+import org.danteplanner.fixture.wallclock.UnstampedAuditedFixture;
 import org.danteplanner.fixture.wallclock.WallClockFixture;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +47,35 @@ class WallClockRuleTest {
                     .should().dependOnClassesThat().areAssignableTo(AuditingEntityListener.class)
                     .as("main code never names Spring's AuditingEntityListener, whose handler comes from a JVM-wide"
                             + " aspect; an audited entity names AuditedTimestampListener");
+
+    static final ArchRule AUDITED_ENTITIES_CARRY_A_STAMP =
+            classes()
+                    .that(nameTheAuditedTimestampListener())
+                    .should(carryAStampField())
+                    .as("a class naming AuditedTimestampListener in @EntityListeners has a @CreatedDate or"
+                            + " @LastModifiedDate field, its superclasses' included");
+
+    @Test
+    void production_WhenScanned_StampsEveryAuditedEntity() {
+        assertThatCode(() -> AUDITED_ENTITIES_CARRY_A_STAMP.check(ImportedClasses.production()))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void fixture_WhenAnAuditedClassHasNoStamp_FailsNamingIt() {
+        assertThatThrownBy(() -> AUDITED_ENTITIES_CARRY_A_STAMP.check(
+                new ClassFileImporter().importClasses(UnstampedAuditedFixture.class)))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining(UnstampedAuditedFixture.class.getName()
+                        + " names AuditedTimestampListener without a @CreatedDate or @LastModifiedDate field");
+    }
+
+    @Test
+    void fixture_WhenTheStampIsInherited_Passes() {
+        assertThatCode(() -> AUDITED_ENTITIES_CARRY_A_STAMP.check(new ClassFileImporter().importClasses(
+                InheritedStampAuditedFixture.class, StampedAuditedBase.class)))
+                .doesNotThrowAnyException();
+    }
 
     @Test
     void production_WhenScanned_NeverNamesSpringsAuditingListener() {
@@ -74,6 +115,25 @@ class WallClockRuleTest {
                 .hasMessageNotContaining(reader + "elapsedTicks()")
                 .hasMessageNotContaining(reader + "injectedNow()")
                 .hasMessageNotContaining(reader + "dateOfInstant()");
+    }
+
+    private static DescribedPredicate<JavaClass> nameTheAuditedTimestampListener() {
+        return DescribedPredicate.describe("name AuditedTimestampListener in @EntityListeners", javaClass ->
+                javaClass.tryGetAnnotationOfType(EntityListeners.class)
+                        .map(listeners -> Arrays.asList(listeners.value()).contains(AuditedTimestampListener.class))
+                        .orElse(false));
+    }
+
+    private static ArchCondition<JavaClass> carryAStampField() {
+        return new ArchCondition<>("carry a @CreatedDate or @LastModifiedDate field") {
+            @Override
+            public void check(JavaClass javaClass, ConditionEvents events) {
+                boolean stamped = javaClass.getAllFields().stream().anyMatch(field ->
+                        field.isAnnotatedWith(CreatedDate.class) || field.isAnnotatedWith(LastModifiedDate.class));
+                events.add(new SimpleConditionEvent(javaClass, stamped, javaClass.getName()
+                        + " names AuditedTimestampListener without a @CreatedDate or @LastModifiedDate field"));
+            }
+        };
     }
 
     private static DescribedPredicate<JavaAccess<?>> readsTheWallClock() {

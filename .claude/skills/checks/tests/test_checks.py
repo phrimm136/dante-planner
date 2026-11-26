@@ -1,10 +1,13 @@
 import datetime
+import fcntl
 import importlib.machinery
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import pytest
@@ -177,22 +180,18 @@ def test_a_passing_gradle_run_has_no_failure_lines():
     assert checks_cli.gradle_failure_lines(fixture_text("gradle-pass.log")) == []
 
 
-def test_freezing_the_branches_passes_its_reason_to_gradle():
+def test_freezing_the_branches_runs_the_task_and_takes_no_arguments():
     assert plan_for("be", "freeze-branches").command_argv[4:] == ("freezeShellBranches",)
-    assert plan_for("be", "freeze-branches", "--reason", "the port moved").command_argv[4:] == (
-        "freezeShellBranches", "-PfreezeReason=the port moved")
-    with pytest.raises(checks_cli.CheckError, match="--reason needs a reason"):
-        plan_for("be", "freeze-branches", "--reason", " ")
-    with pytest.raises(checks_cli.CheckError, match="unknown argument --force"):
-        plan_for("be", "freeze-branches", "--force")
+    with pytest.raises(checks_cli.CheckError, match="unknown argument --reason"):
+        plan_for("be", "freeze-branches", "--reason", "the port moved")
 
 
-def test_a_freeze_shows_the_raised_lines_and_their_reason():
-    log_text = "\n".join(["> Task :freezeShellBranches", "raised, because the port moved:",
-                          "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 1 -> 12", "", "BUILD SUCCESSFUL in 9s"])
-    assert checks_cli.raised_branch_lines(log_text) == [
-        "raised, because the port moved:", "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 1 -> 12"]
-    assert checks_cli.raised_branch_lines("> Task :freezeShellBranches\nBUILD SUCCESSFUL in 9s") == []
+def test_a_freeze_shows_every_count_that_moved():
+    log_text = "\n".join(["> Task :freezeShellBranches", "moved:",
+                          "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 12 -> 1", "", "BUILD SUCCESSFUL in 9s"])
+    assert checks_cli.moved_branch_lines(log_text) == [
+        "moved:", "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 12 -> 1"]
+    assert checks_cli.moved_branch_lines("> Task :freezeShellBranches\nBUILD SUCCESSFUL in 9s") == []
 
 
 def test_tools_test_runs_the_shared_tooling_script_from_the_root():
@@ -413,6 +412,47 @@ def test_summary_of_a_tooling_run_is_its_suite_count():
 def test_summary_of_a_silent_tool_names_the_command():
     assert checks_cli.summary_line("yarn run v1.22.22\n$ ast-grep scan\nDone in 0.29s.\n") == \
         "(no output from `ast-grep scan`)"
+
+
+def test_a_run_without_containers_takes_a_slot_and_the_lock_shared():
+    assert plan_for("be", "test", "--tests", "*X", "--exclude-tags", "containerized").lock_share == "slot"
+    assert plan_for("be", "test", "--tests", "*XIT").lock_share == "exclusive"
+
+
+def test_two_slot_runs_hold_the_lock_together_and_keep_an_exclusive_run_out(tmp_path):
+    lock_path = tmp_path / ".test.lock"
+    with checks_cli.CheckLock(lock_path, "slot"), checks_cli.CheckLock(lock_path, "slot") as second:
+        assert second.free_slot() is None
+        with open(lock_path, "a") as exclusive_probe:
+            with pytest.raises(BlockingIOError):
+                fcntl.flock(exclusive_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    with open(lock_path, "a") as exclusive_probe:
+        fcntl.flock(exclusive_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def test_a_waiting_slot_run_takes_whichever_slot_frees_first(tmp_path):
+    lock_path = tmp_path / ".test.lock"
+    holders = [checks_cli.CheckLock(lock_path, "slot") for _ in range(checks_cli.SLOT_COUNT)]
+    held = [holder.free_slot() for holder in holders]
+    waiter = checks_cli.CheckLock(lock_path, "slot")
+    freed_index = (os.getpid() + 1) % checks_cli.SLOT_COUNT
+    releaser = threading.Timer(0.2, lambda: held[freed_index].close())
+    releaser.start()
+    waiter.take_slot(poll_seconds=0.05)
+    releaser.join()
+    assert waiter.slot_file.name == str(waiter.slot_path(freed_index))
+    waiter.slot_file.close()
+    for index, slot_file in enumerate(held):
+        if index != freed_index:
+            slot_file.close()
+
+
+def test_an_exclusive_run_keeps_a_slot_run_out(tmp_path):
+    lock_path = tmp_path / ".test.lock"
+    with checks_cli.CheckLock(lock_path):
+        with open(lock_path, "a") as shared_probe:
+            with pytest.raises(BlockingIOError):
+                fcntl.flock(shared_probe, fcntl.LOCK_SH | fcntl.LOCK_NB)
 
 
 def test_lock_holders_read_proc_locks():
@@ -654,8 +694,43 @@ def test_a_tooling_change_runs_the_tooling_suites():
     assert [one_row[0] for one_row in changed_rows(".githooks/pre-push")] == ["tools test"]
 
 
+def test_an_ops_script_or_its_test_runs_the_tooling_suites():
+    for changed_path in ("scripts/ops/provision/k3s-snapshot-schedule-repair.sh",
+                         "scripts/ops/tests/test_snapshot_repair.py", ".github/scripts/no-real-time-in-tooling-tests.py"):
+        assert [one_row[0] for one_row in changed_rows(changed_path)] == ["tools test"], changed_path
+
+
+def fleet_tree_rows(tree_root, changed_path):
+    for stack_name, source_text in (("oregon", 'module "fleet" {\n  source = "../modules/fleet"\n}\n'),
+                                    ("rds", 'module "db" {\n  source = "../modules/rds"\n}\n')):
+        (tree_root / "terraform" / stack_name).mkdir(parents=True, exist_ok=True)
+        (tree_root / "terraform" / stack_name / "main.tf").write_text(source_text)
+    return [run_plan.step_label for run_plan, _ in checks_cli.changed_plans(
+        checks_cli.RepoPaths(tree_root, tree_root), {changed_path}, "abc123")]
+
+
+@pytest.mark.parametrize("changed_path", [
+    "terraform/modules/fleet/user-data/cp.sh.tftpl", "terraform/modules/fleet/variables.tf",
+    "terraform/oregon/variables.tf", "terraform/oregon/environment.tfvars.example", "terraform/rds/main.tf",
+    "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-seoul.yaml",
+    ".github/workflows/deploy-fleet.yml", "deploy/argocd/root-app-oregon.yaml", ".claude/settings.json",
+    "scripts/dev/seed.sh", "terraform/oregon/envs/prod.tfvars", "deploy/grafana/rules/cluster-rules.yaml",
+    "deploy/grafana/rules.py"])
+def test_an_input_the_ops_tests_read_runs_the_tooling_suites(tmp_path, changed_path):
+    assert fleet_tree_rows(tmp_path, changed_path) == ["tools test"]
+
+
+@pytest.mark.parametrize("changed_path", [
+    "terraform/rds/variables.tf", "terraform/modules/rds/main.tf", "terraform/oregon/README.md",
+    "terraform/oregon/.terraform.lock.hcl", "deploy/chart/templates/backend.yaml", "deploy/chart/values.yaml",
+    "deploy/argocd/project.yaml", "scripts/dev/seed.py", ".claude/settings.local.json",
+    "deploy/grafana/tests/test_rules.py"])
+def test_a_terraform_or_chart_file_no_ops_test_reads_reaches_nothing(tmp_path, changed_path):
+    assert fleet_tree_rows(tmp_path, changed_path) == []
+
+
 def test_a_path_no_check_reads_reaches_nothing():
-    assert changed_rows("docs/adr/509-x.md", "terraform/main.tf", "backend/README.md",
+    assert changed_rows("docs/adr/509-x.md", "terraform/modules/rds/main.tf", "backend/README.md",
                         "frontend/CLAUDE.md", ".claude/skills/checks/SKILL.md") == []
 
 

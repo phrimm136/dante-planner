@@ -87,10 +87,21 @@ class RespondDenialReaches429Test {
 
         mockMvc.perform(get("/api/fixture/inherited"))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"));
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
+                .andExpect(jsonPath("$.detail").value("Rate limit exceeded for user 7 on endpoint fixture"));
 
         assertThat(rateLimitStore.charges()).extracting(InMemoryProxyManager.Charge::key)
                 .containsExactly("7:fixture");
+    }
+
+    @Test
+    void exhaustedBucket_WhenClientKeyedHandlerRequested_NamesTheClient() throws Exception {
+        rateLimitStore.denyNext(TimeUnit.SECONDS.toNanos(1));
+
+        mockMvc.perform(get("/api/fixture/fail-closed"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
+                .andExpect(jsonPath("$.detail").value("Rate limit exceeded for client on endpoint auth"));
     }
 
     @Test
@@ -101,6 +112,6 @@ class RespondDenialReaches429Test {
 
     private static RateLimitProperties crudBucket() {
         RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig(10, 10, 60);
-        return RateLimitStores.limits(0, Map.of(RateLimitPolicy.CRUD, bucket));
+        return RateLimitStores.limits(0, Map.of(RateLimitPolicy.CRUD, bucket, RateLimitPolicy.AUTH, bucket));
     }
 }

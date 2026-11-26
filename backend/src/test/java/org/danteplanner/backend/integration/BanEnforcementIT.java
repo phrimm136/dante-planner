@@ -5,7 +5,7 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -110,8 +110,8 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void publish_WhenOwnerBanned_Returns403() throws Exception {
         // Arrange - create planner first (before ban)
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
+        UUID plannerId = planner.id();
 
         // Ban the user
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
@@ -124,14 +124,14 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.code", is("USER_BANNED")));
 
         // Verify planner was not published
-        Planner updated = plannerRepository.findById(plannerId).orElseThrow();
-        assertThat(updated.isPublished()).isFalse();
+        StoredPlanner updated = plannerRepository.findAggregate(plannerId).orElseThrow();
+        assertThat(updated.publication().isPublished()).isFalse();
     }
 
     @Test
     void createComment_WhenAuthorBanned_Returns403() throws Exception {
         // Arrange - create published planner
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
         // Ban the user
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Spam");
@@ -143,7 +143,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
                 """;
 
         // Act & Assert
-        mockMvc.perform(post("/api/planner/" + planner.getId() + "/comments").with(withCsrf())
+        mockMvc.perform(post("/api/planner/" + planner.id() + "/comments").with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
@@ -276,17 +276,17 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     void publish_WhenOwnerBannedAndTimedOut_IsRefusedByTheBanUntilItIsLifted() throws Exception {
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
         userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
 
-        mockMvc.perform(post("/api/planner/md/" + planner.getId() + "/publish").with(withCsrf()).cookie(userCookie()))
+        mockMvc.perform(post("/api/planner/md/" + planner.id() + "/publish").with(withCsrf()).cookie(userCookie()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("USER_BANNED")));
 
         userModerationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
 
-        mockMvc.perform(post("/api/planner/md/" + planner.getId() + "/publish").with(withCsrf()).cookie(userCookie()))
+        mockMvc.perform(post("/api/planner/md/" + planner.id() + "/publish").with(withCsrf()).cookie(userCookie()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("USER_TIMED_OUT")));
     }

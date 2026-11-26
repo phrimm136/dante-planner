@@ -48,8 +48,11 @@ public class RedisRoleConfig {
             ObjectProvider<ReadSourceProperties> readSourceProperties,
             RedisRoleHealth redisRoleHealth,
             MeterRegistry meterRegistry) {
-        boolean readsPrimaryFirst = readSourceProperties.stream().anyMatch(ReadSourceProperties::readsPrimaryFirst);
-        return new AuthReadSources(AuthReadSources.sourceOrder(readsPrimaryFirst,
+        ReadSourceProperties.ReadOrder readOrder = readSourceProperties.stream()
+                .map(ReadSourceProperties::readOrder)
+                .findFirst()
+                .orElse(ReadSourceProperties.ReadOrder.REPLICA_FIRST);
+        return new AuthReadSources(readOrder.stores(
                 new RoleGated<>(RedisRole.AUTH_LOCAL, authLocalStore, redisRoleHealth, meterRegistry),
                 new RoleGated<>(RedisRole.AUTH, authStore, redisRoleHealth, meterRegistry)));
     }

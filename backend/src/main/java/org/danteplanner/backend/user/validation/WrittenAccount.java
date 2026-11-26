@@ -3,6 +3,7 @@ package org.danteplanner.backend.user.validation;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.user.exception.AccountDeletedException;
 
 @Parsed
 public record WrittenAccount(Long userId) {
@@ -11,6 +12,13 @@ public record WrittenAccount(Long userId) {
         return switch (outcome) {
             case APPLIED -> new WrittenAccount(userId);
             case NOTHING -> throw new UserNotFoundException(userId);
+        };
+    }
+
+    public static WrittenAccount ofOwnAccount(Long userId, WriteOutcome outcome) {
+        return switch (outcome) {
+            case APPLIED -> new WrittenAccount(userId);
+            case NOTHING -> throw new AccountDeletedException(userId);
         };
     }
 }

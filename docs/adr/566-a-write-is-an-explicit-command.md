@@ -7,13 +7,14 @@ epic: none · pr: none · supersedes: 056 @persistence @convention
   REJECTED: `INSERT IGNORE` before such a lock — the loser holds a shared lock on the duplicate row and upgrades it: four first-time settings writers deadlocked in 19 of 20 rounds with `INSERT IGNORE` and `FOR UPDATE`, in none with `ON DUPLICATE KEY UPDATE`.
   REJECTED: Spring Data JDBC — its update also writes the whole row from what was read.
   REJECTED: jOOQ or JdbcClient for every write — jOOQ adds a code generator and a dependency, JdbcClient loses the startup check that a query's names resolve; neither is needed once nothing is written implicitly.
-  INVARIANT: every entity is `@Immutable` except the lines of `backend/config/mutable-entities-MODULE.txt`, which only shrink — `ImmutableEntityRuleTest`.
+  INVARIANT: every entity is `@Immutable`, with no list of exceptions — `ImmutableEntityRuleTest`.
   INVARIANT: no field of an immutable entity is written outside its own constructors and persist or load callbacks — `ImmutableEntityRuleTest`.
-  INVARIANT: no `@Modifying` query clears the persistence context except the lines of `backend/config/context-clearing-MODULE.txt`, which only shrink — `PersistenceContextClearingTest`.
+  INVARIANT: no `@Modifying` query clears the persistence context, with no list of exceptions — `PersistenceContextClearingTest`.
   INVARIANT: a JPQL `UPDATE` may name an immutable entity (`hibernate.query.immutable_entity_update_query_handling_mode=allow`) — `UserProfileImmutableIT`.
-  NON-GOAL: converting the listed entities — each leaves its list in the unit that converts it.
   NON-GOAL: a field written by reflection, as Spring Data auditing does — the rule reads bytecode field writes.
-- @persistence @lists — The lists are one file per module, because one shared list is edited by every unit that converts an entity and conflicts between units that run at the same time.
+
+## Superseded
+- @persistence @lists → 566 — The lists are one file per module, because one shared list is edited by every unit that converts an entity and conflicts between units that run at the same time.
   REJECTED: one list for every module — its adjacent lines are deleted by concurrent units, which then conflict on each merge.
 
 ## Takeaway

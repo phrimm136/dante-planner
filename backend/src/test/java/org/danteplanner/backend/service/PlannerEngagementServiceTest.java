@@ -1,9 +1,10 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
@@ -32,6 +33,9 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,9 +51,6 @@ import static org.mockito.Mockito.when;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
-import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -63,6 +64,8 @@ class PlannerEngagementServiceTest {
     private static final long PLANNER_OWNER_ID = 41L;
 
     private static final int RECOMMENDED_THRESHOLD = 10;
+
+    private static final Instant NOW = Instant.parse("2026-11-26T00:00:00Z");
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -100,7 +103,7 @@ class PlannerEngagementServiceTest {
                 accessGuard,
                 new PlannerReportService(reportRepository,
                         new PlannerModerationTargetAdapter(null, accessGuard), new ReportUniquenessValidator()),
-                new VoteUniquenessValidator(),
+                Clock.fixed(NOW, ZoneOffset.UTC),
                 RECOMMENDED_THRESHOLD
         );
 
@@ -121,22 +124,20 @@ class PlannerEngagementServiceTest {
     @Nested
     class CastVoteImmutabilityTests {
 
-        private Planner createPublishedPlanner() {
+        private StoredPlanner createPublishedPlanner() {
             return testPlannerBuilder().published(true).build();
         }
 
         @Test
         void castVote_WhenDuplicateVote_ThrowsException() {
             // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-            PlannerVoteId voteId =
-                new PlannerVoteId(testUser.getId(), plannerId);
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
-            when(plannerVoteRepository.existsById(voteId))
-                    .thenReturn(true);
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
+            when(plannerVoteRepository.insertIgnore(testUser.getId(), plannerId, "UP", NOW))
+                    .thenReturn(0);
 
             // Act & Assert
             assertRejected(() -> engagementService.castVote(testUser.getId(), plannerId, VoteType.UP))
@@ -145,24 +146,19 @@ class PlannerEngagementServiceTest {
                         assertThat(exception.getPlannerId()).isEqualTo(plannerId);
                         assertThat(exception.getUserId()).isEqualTo(testUser.getId());
                     });
-            verify(plannerVoteRepository, never()).insert(any());
             verify(statsRepository, never()).incrementUpvotes(any());
         }
 
         @Test
         void castVote_WhenFirstVote_CreatesVote() {
             // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-            PlannerVoteId voteId =
-                new PlannerVoteId(testUser.getId(), plannerId);
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
-            when(plannerVoteRepository.existsById(voteId))
-                    .thenReturn(false);
-            when(plannerVoteRepository.insert(any(PlannerVote.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
+            when(plannerVoteRepository.insertIgnore(testUser.getId(), plannerId, "UP", NOW))
+                    .thenReturn(1);
             AtomicInteger upvotes = new AtomicInteger(5);
             doAnswer(invocation -> upvotes.incrementAndGet()).when(statsRepository).incrementUpvotes(plannerId);
             when(statsRepository.upvotesOf(plannerId)).thenAnswer(invocation -> upvotes.get());
@@ -174,24 +170,17 @@ class PlannerEngagementServiceTest {
             // Assert
             assertThat(response.upvoteCount()).isEqualTo(6);
             assertThat(response.hasUpvoted()).isTrue();
-            ArgumentCaptor<PlannerVote> voteCaptor =
-                    ArgumentCaptor.forClass(PlannerVote.class);
-            verify(plannerVoteRepository).insert(voteCaptor.capture());
-            assertThat(voteCaptor.getValue().getUserId()).isEqualTo(testUser.getId());
-            assertThat(voteCaptor.getValue().getPlannerId()).isEqualTo(plannerId);
-            assertThat(voteCaptor.getValue().getVoteType()).isEqualTo(VoteType.UP);
+            verify(plannerVoteRepository).insertIgnore(testUser.getId(), plannerId, "UP", NOW);
         }
 
         @Test
         void castVote_WhenCrossingTheThreshold_RecordsTheRecommendedEvent() {
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
-            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
-            when(plannerVoteRepository.insert(any(PlannerVote.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
+            when(plannerVoteRepository.insertIgnore(testUser.getId(), plannerId, "UP", NOW)).thenReturn(1);
             when(statsRepository.upvotesOf(plannerId)).thenReturn(RECOMMENDED_THRESHOLD);
             when(statsRepository.trySetRecommendedNotified(plannerId, RECOMMENDED_THRESHOLD))
                     .thenReturn(1);
@@ -207,19 +196,17 @@ class PlannerEngagementServiceTest {
             verify(domainEventRepository).insert(recorded.capture());
             assertThat(recorded.getValue().getEventType()).isEqualTo(DomainEventType.PLANNER_RECOMMENDED);
             assertThat(recorded.getValue().getAggregateId()).isEqualTo(plannerId);
-            assertThat(recorded.getValue().getPayload()).isEqualTo("{\"ownerId\":" + planner.getUserId() + "}");
+            assertThat(recorded.getValue().getPayload()).isEqualTo("{\"ownerId\":" + planner.userId() + "}");
         }
 
         @Test
         void castVote_WhenAnotherVoteAlreadyLatched_RecordsNothing() {
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
-            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
-            when(plannerVoteRepository.insert(any(PlannerVote.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
+            when(plannerVoteRepository.insertIgnore(testUser.getId(), plannerId, "UP", NOW)).thenReturn(1);
             when(statsRepository.upvotesOf(plannerId)).thenReturn(RECOMMENDED_THRESHOLD);
             when(statsRepository.trySetRecommendedNotified(plannerId, RECOMMENDED_THRESHOLD))
                     .thenReturn(0);
@@ -231,14 +218,12 @@ class PlannerEngagementServiceTest {
 
         @Test
         void castVote_WhenBelowTheThreshold_RecordsNothing() {
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
-            when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
-            when(plannerVoteRepository.insert(any(PlannerVote.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
+            when(plannerVoteRepository.insertIgnore(testUser.getId(), plannerId, "UP", NOW)).thenReturn(1);
             when(statsRepository.upvotesOf(plannerId)).thenReturn(RECOMMENDED_THRESHOLD - 1);
 
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
@@ -251,7 +236,7 @@ class PlannerEngagementServiceTest {
     void reportPlanner_WhenCalled_CreatesTheReportForTheReporterAndPlanner() {
         UUID plannerId = UUID.randomUUID();
         when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
 
         engagementService.reportPlanner(testUser.getId(), plannerId);
 

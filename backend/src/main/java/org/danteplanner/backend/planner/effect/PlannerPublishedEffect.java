@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -42,11 +42,11 @@ public class PlannerPublishedEffect implements DomainEffectHandler {
             return;
         }
 
-        Planner planner = found.get().planner();
+        StoredPlanner planner = found.get().planner();
         long authorId = payloads.requireId(event, "authorId");
-        notifications.notifyPlannerPublished(authorId, planner.getId(), planner.getTitle());
+        notifications.notifyPlannerPublished(authorId, planner.id(), planner.content().title());
         FreshnessDeclarations.declare(new FreshnessScope.Global());
         pushes.broadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
-                PlannerPublishedPayload.fromEntity(planner, found.get().author()));
+                PlannerPublishedPayload.from(planner, found.get().author()));
     }
 }

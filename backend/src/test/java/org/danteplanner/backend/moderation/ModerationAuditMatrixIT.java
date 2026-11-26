@@ -112,7 +112,7 @@ class ModerationAuditMatrixIT extends SharedMySqlContainerSupport {
         User actor = TestDataFactory.createAdmin(userRepository, "audit-matrix-admin@example.com");
         User moderator = TestDataFactory.createModerator(userRepository, "audit-matrix-mod@example.com");
         User member = TestDataFactory.createTestUser(userRepository, "audit-matrix-member@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, member, true).getId();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, member, true).id();
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate, new PlannerComment(plannerId, member.getId(), null, 0), "text");
         return new Scene(actor, moderator, member, plannerId, comment.getId());
     }

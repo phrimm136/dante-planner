@@ -1,0 +1,27 @@
+package org.danteplanner.backend.planner.repository;
+
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+
+class PlannerAggregateInsertsImpl implements PlannerAggregateInserts {
+
+    private final PlannerContentRepository contentRepository;
+    private final PlannerPublicationRepository publicationRepository;
+    private final PlannerModerationRepository moderationRepository;
+
+    PlannerAggregateInsertsImpl(PlannerContentRepository contentRepository,
+            PlannerPublicationRepository publicationRepository, PlannerModerationRepository moderationRepository) {
+        this.contentRepository = contentRepository;
+        this.publicationRepository = publicationRepository;
+        this.moderationRepository = moderationRepository;
+    }
+
+    @Override
+    public void insertSatellites(PlannerContent content, PlannerPublication publication,
+            PlannerModeration moderation) {
+        contentRepository.insert(content);
+        publicationRepository.insert(publication);
+        moderationRepository.insert(moderation);
+    }
+}

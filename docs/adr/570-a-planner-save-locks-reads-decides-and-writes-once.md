@@ -1,0 +1,17 @@
+# 570 a-planner-save-locks-reads-decides-and-writes-once
+epic: none · pr: none · supersedes: 015 @aggregate
+
+## Decisions
+- @planner_content @locking @conditional-write — A planner save locks its `planner_content` row `FOR UPDATE`, reads the planner's facts, decides once, and writes one `UPDATE ... WHERE sync_version = <the version read under the lock> AND deleted_at IS NULL`; the client's `syncVersion` is compared in the decision (a stale save answers `SYNC_CONFLICT` with the server's version, a FORCED save writes over it), and zero rows under the lock means a writer skipped the lock: the service logs and counts it and answers 409 `CONCURRENT_WRITE` itself, the one domain exception a service builds outside a validator (ADR 061). Publish, unpublish, takedown and account deactivation change what the decision read without touching the content row, and the keyword backfill and the content migration change it without moving `sync_version`, so the lock is what keeps the read valid; the version in the WHERE is the tripwire for a writer that skips it.
+  REJECTED: no lock, with the version alone in the WHERE — a save that read the planner as private commits over a concurrent publish, so the catalog and filter rows stay on the old content.
+  REJECTED: the lock alone, with no version in the WHERE — a writer that forgets the lock rewrites a deleted row and answers success.
+  REJECTED: `INSERT ... ON DUPLICATE KEY UPDATE` as the save — the decision still reads first, the stale check becomes a per-column `IF`, and with the driver's found-rows default a stale save and a create both report one row, so neither can be told apart.
+  REJECTED: a pessimistic JPA lock on the immutable entity — Hibernate refuses a lock on an immutable entity already in the persistence context.
+  INVARIANT: two saves at one version answer one success and one `SYNC_CONFLICT` with the winner's version — `PlannerUpsertConflictIT`; a stale version or a deleted row matches no row and leaves it unchanged — `PlannerContentWriteIT`; a save racing a publish or a delete leaves the catalog and filter rows on the committed content — `PlannerStateRaceIT`.
+  NON-GOAL: removing `row_lock_version` — the column stays unmapped until no running pod of the previous release maps it, then a later migration drops it.
+- @aggregate @read-model — The planner is five immutable row entities written by explicit inserts in a fixed order and by conditional commands, and read as one `StoredPlanner` value whose columns become types where they are read; no association, cascade, version field or auditing listener remains, and a command carries the state it wrote by value instead of reloading the aggregate. The dirty-checked aggregate wrote every column at flush, after the response was built, so the save answered the previous save's `lastModifiedAt`, and cascade hid the order of the inserts.
+  REJECTED: the root-coordinated rich aggregate — its invariants now sit in the pure decision over the read value, and the flush-time write is what made the response disagree with the row.
+  INVARIANT: no entity is mutable — `ImmutableEntityRuleTest`; one instant per command, truncated to the column's microseconds, is the row's `last_modified_at` and the response's — `AuditedTimestampIT`.
+
+## Takeaway
+- takeaway: a lock protects the read a decision made, a conditional write protects the row; a write path needs to say which one it relies on, because the writers that never touch the row are the ones the row's version cannot see.

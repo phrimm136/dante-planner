@@ -174,7 +174,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
 
     private UUID publishedPlannerId() {
         User owner = TestDataFactory.createTestUser(userRepository, "matrix-owner@example.com");
-        return TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
+        return TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
     }
 
     private MockHttpServletRequestBuilder request(Endpoint endpoint, String path, String body, Cookie principal) {

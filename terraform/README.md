@@ -20,10 +20,10 @@ several real dependencies are not of that shape.
 | `iam-bootstrap` | The GitHub OIDC provider and the provisioning role, in an account that runs a fleet | `trusted_admin_principal_arns`, `aws_account_id` |
 | `log-archive` | The organization trail's destination bucket and its policy | `aws_account_id`, `management_account_id`, `organization_id` |
 | `registry` | Who may pull the backend image, and how many tagged images its repositories and their cross-region replicas keep; not the repositories themselves | `aws_account_id`, `organization_id` |
-| `secrets` | Secrets Manager **containers** and their cross-region replicas — never the values | `aws_account_id` |
+| `secrets` | Secrets Manager **containers** and their cross-region replicas — never the values | `aws_account_id` (passed by `ops tf plan`) |
 | `rds` | The MySQL primary, its parameter group, subnet group and security group | `engine_version` (in `envs/<env>.tfvars`), `aws_account_id` (passed by `ops tf plan`) |
-| `oregon` | The primary k3s fleet (`modules/fleet`), peered to the RDS VPC | `ingress_allowed_cidrs`, `rds_vpc_id`, `aws_account_id` |
-| `seoul` | The secondary fleet, the cross-region RDS read replica, cross-region peering | `rds_vpc_id`, `ingress_allowed_cidrs`, `aws_account_id` |
+| `oregon` | The primary k3s fleet (`modules/fleet`), peered to the RDS VPC | `ingress_allowed_cidrs` (SSM `/danteplanner/<env>/oregon/ingress_allowed_cidrs`), `aws_account_id` (passed by `ops tf plan`); `rds_vpc_id` from the `rds` state |
+| `seoul` | The secondary fleet, the cross-region RDS read replica, cross-region peering | `ingress_allowed_cidrs` (SSM `/danteplanner/<env>/seoul/ingress_allowed_cidrs`), `aws_account_id` (passed by `ops tf plan`); `rds_vpc_id` from the `rds` state |
 | `cloudflare` | Tunnels, load balancer, pools, health monitor | `cloudflare_api_token`, `account_id`, `zone_id` |
 
 ## State
@@ -116,15 +116,38 @@ required and they live in different stacks.
 
 The RDS VPC comes from one of two places. With `create_vpc = true` the `rds` stack creates the VPC
 and its subnets (`rds/network.tf`), which both tracked settings files choose. With `create_vpc = false`
-the stack takes `vpc_id` and `db_subnet_ids` of a VPC that no stack manages. Both fleets take
-`rds_vpc_id` as an input in either case, so `rds` is applied before them.
+the stack takes `vpc_id` and `db_subnet_ids` of a VPC that no stack manages. Both fleets read
+`rds_vpc_id` from the `rds` stack's state (its `rds_vpc_id` output) in either case, so `rds` is
+applied before them; `rds` reads the fleets' state only once it exists, so the second `rds` apply
+wires the peering return path.
 
-A stack with an `envs/` directory (today `rds`) keeps its settings tracked in `envs/<env>.tfvars`,
+A stack with an `envs/` directory (today `rds`, `oregon`, `seoul` and `secrets`) keeps its settings tracked in `envs/<env>.tfvars`,
 one file per environment it is applied in, holding no account id, ARN, hostname or other
 account-bound value. `ops tf plan <stack>` passes the file of the env it plans under and, when the
 stack declares `aws_account_id`, the selected profile's `sso_account_id`. For such a stack it refuses
 `-var-file`, and `-var` for a variable the settings file assigns or for `aws_account_id`, so each
 variable has one source; a `-var` for any other variable, a per-run value, passes.
+
+The operator value `ingress_allowed_cidrs` of `oregon` and `seoul` lives in SSM Parameter Store in
+us-west-2 of each env's account, at `/danteplanner/<env>/<stack>/ingress_allowed_cidrs`, and each
+stack's `inputs.tf` reads it. `scripts/ops/provision/seed-tf-inputs.sh --env <env>` writes it from the
+operator's gitignored `<stack>/<env>.tfvars`. Staging's `gitops_target_revision` is not tracked: the
+staging rehearsal takes it as a dispatch input, defaulting to the ref it runs from.
+
+Moving to this layout takes these user-run steps, once, in this order:
+
+```bash
+AWS_PROFILE=prod    scripts/ops/provision/seed-tf-inputs.sh --env prod --apply
+AWS_PROFILE=staging scripts/ops/provision/seed-tf-inputs.sh --env staging --apply
+.claude/skills/ops/bin/ops tf plan rds       # expect only the new rds_vpc_id output
+.claude/skills/ops/bin/ops tf apply <plan file printed above>
+AWS_PROFILE=staging aws ssm delete-parameters --region us-west-2 \
+  --names /danteplanner/staging/tfvars/secrets /danteplanner/staging/tfvars/oregon /danteplanner/staging/tfvars/seoul
+```
+
+Run each seed without `--apply` first to see what it writes. Until `rds` publishes its `rds_vpc_id`
+output, an `oregon` or `seoul` plan fails on the missing attribute. The deleted parameters held the
+old staging var-files of `secrets`, `oregon` and `seoul`, which nothing reads any more.
 
 Every other `*.tfvars` is gitignored. Each other stack ships a tracked `environment.tfvars.example`
 or `account.tfvars.example`; the auto-loaded name `terraform.tfvars` is not used anywhere.
@@ -187,7 +210,7 @@ and also refuses a directory holding an auto-loaded `terraform.tfvars`.
 of which call it:**
 
 ```bash
-.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf plan oregon
 ```
 
 It is transparent, handing off every argument, stdin and the exit status, so it substitutes for

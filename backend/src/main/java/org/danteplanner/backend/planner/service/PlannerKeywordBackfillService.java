@@ -8,8 +8,12 @@ import tools.jackson.databind.node.MissingNode;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.CatalogCopy;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordBackfillRow;
+import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordColumn;
+import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.PublishState;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,15 +59,6 @@ public class PlannerKeywordBackfillService {
         }
     }
 
-    private sealed interface KeywordColumn {
-
-        record Empty() implements KeywordColumn {
-        }
-
-        record Json(String text) implements KeywordColumn {
-        }
-    }
-
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public BackfillPage backfillPage(BackfillCursor cursor, int limit) {
         List<KeywordBackfillRow> rows = switch (cursor) {
@@ -74,37 +69,57 @@ public class PlannerKeywordBackfillService {
         for (KeywordBackfillRow candidate : rows) {
             corrected += switch (stateOf(candidate)) {
                 case RowState.Current current -> 0;
-                case RowState.Stale stale -> correctUnderLock(candidate.plannerId());
+                case RowState.Stale stale -> correctUnderLock(candidate);
             };
         }
         return new BackfillPage(BackfillCursor.following(cursor, rows), rows.size(), corrected);
     }
 
-    private int correctUnderLock(UUID plannerId) {
-        plannerRepository.lockContent(plannerId);
-        return repository.keywordRowOf(plannerId).map(this::correct).orElse(0);
+    private int correctUnderLock(KeywordBackfillRow candidate) {
+        plannerRepository.lockContent(candidate.plannerId());
+        return repository.keywordRowOf(candidate.plannerId())
+                .map(row -> correct(row, candidate.syncVersion()))
+                .orElse(0);
     }
 
-    private int correct(KeywordBackfillRow row) {
+    private int correct(KeywordBackfillRow row, long pageVersion) {
         return switch (stateOf(row)) {
             case RowState.Current current -> 0;
-            case RowState.Stale(List<Correction> corrections) -> {
-                corrections.forEach(correction -> apply(row.plannerId(), correction));
-                yield 1;
-            }
+            case RowState.Stale(List<Correction> corrections) -> applied(row.plannerId(), pageVersion, corrections);
         };
     }
 
-    private void apply(UUID plannerId, Correction correction) {
-        switch (correction) {
-            case Correction.Content(KeywordColumn.Json json) ->
-                    repository.refreshContentKeywords(plannerId, json.text());
-            case Correction.Content(KeywordColumn.Empty empty) -> repository.clearContentKeywords(plannerId);
-            case Correction.FilterRows filterRows -> plannerCatalogService.syncFilterRows(plannerId);
-            case Correction.Catalog(KeywordColumn.Json json) ->
-                    repository.refreshCatalogKeywords(plannerId, json.text());
-            case Correction.Catalog(KeywordColumn.Empty empty) -> repository.clearCatalogKeywords(plannerId);
+    private int applied(UUID plannerId, long pageVersion, List<Correction> corrections) {
+        for (Correction correction : corrections) {
+            switch (apply(plannerId, pageVersion, correction)) {
+                case APPLIED -> { }
+                case NOTHING -> {
+                    return 0;
+                }
+            }
         }
+        return 1;
+    }
+
+    private WriteOutcome apply(UUID plannerId, long pageVersion, Correction correction) {
+        return switch (correction) {
+            case Correction.Content(KeywordColumn.Json json) ->
+                    WriteOutcome.of(repository.refreshContentKeywords(plannerId, pageVersion, json.text()));
+            case Correction.Content(KeywordColumn.Empty empty) ->
+                    WriteOutcome.of(repository.clearContentKeywords(plannerId, pageVersion));
+            case Correction.FilterRows filterRows -> {
+                plannerCatalogService.syncFilterRows(plannerId);
+                yield WriteOutcome.APPLIED;
+            }
+            case Correction.Catalog(KeywordColumn.Json json) -> {
+                repository.refreshCatalogKeywords(plannerId, json.text());
+                yield WriteOutcome.APPLIED;
+            }
+            case Correction.Catalog(KeywordColumn.Empty empty) -> {
+                repository.clearCatalogKeywords(plannerId);
+                yield WriteOutcome.APPLIED;
+            }
+        };
     }
 
     private sealed interface Correction {
@@ -127,41 +142,64 @@ public class PlannerKeywordBackfillService {
         record Stale(List<Correction> corrections) implements RowState {
         }
 
-        static RowState of(KeywordBackfillRow row, KeywordColumn derived, KeywordColumn column,
-                KeywordColumn catalog) {
+        static RowState of(PublishState publication, KeywordColumn derived, KeywordColumn column,
+                CatalogCopy catalog) {
             List<Correction> corrections = new ArrayList<>();
             if (!derived.equals(column)) {
                 corrections.add(new Correction.Content(derived));
-                if (row.published()) {
-                    corrections.add(new Correction.FilterRows());
+                switch (publication) {
+                    case PUBLISHED -> corrections.add(new Correction.FilterRows());
+                    case UNPUBLISHED -> { }
                 }
             }
-            if (row.catalogued() && !derived.equals(catalog)) {
-                corrections.add(new Correction.Catalog(derived));
+            switch (catalog) {
+                case CatalogCopy.Uncatalogued uncatalogued -> { }
+                case CatalogCopy.Catalogued(KeywordColumn stored) -> {
+                    if (!derived.equals(stored)) {
+                        corrections.add(new Correction.Catalog(derived));
+                    }
+                }
             }
             return corrections.isEmpty() ? new Current() : new Stale(corrections);
         }
     }
 
     private RowState stateOf(KeywordBackfillRow row) {
-        return RowState.of(row, derivedColumn(row.contentKeywords()), canonical(row.columnKeywords()),
-                canonical(row.catalogKeywords()));
+        return RowState.of(row.publication(), derivedColumn(row.contentKeywords()), canonical(row.columnKeywords()),
+                canonical(row.catalog()));
     }
 
-    private KeywordColumn derivedColumn(String selectionJson) {
-        JsonNode selection;
-        try {
-            selection = selectionJson == null ? MissingNode.getInstance() : objectMapper.readTree(selectionJson);
-        } catch (JacksonException e) {
-            throw new IllegalStateException("MySQL returned an unreadable JSON selection: " + selectionJson, e);
-        }
+    private KeywordColumn derivedColumn(KeywordColumn contentSelection) {
+        JsonNode selection = switch (contentSelection) {
+            case KeywordColumn.Empty empty -> MissingNode.getInstance();
+            case KeywordColumn.Json(String text) -> selectionOf(text);
+        };
         return serialized(List.copyOf(PlannerKeywords.fromSelection(selection).asSet()));
     }
 
-    private KeywordColumn canonical(String stored) {
-        if (stored == null) {
-            return new KeywordColumn.Empty();
+    private JsonNode selectionOf(String selectionJson) {
+        try {
+            return objectMapper.readTree(selectionJson);
+        } catch (JacksonException e) {
+            throw new IllegalStateException("MySQL returned an unreadable JSON selection: " + selectionJson, e);
         }
+    }
+
+    private CatalogCopy canonical(CatalogCopy catalog) {
+        return switch (catalog) {
+            case CatalogCopy.Uncatalogued uncatalogued -> uncatalogued;
+            case CatalogCopy.Catalogued(KeywordColumn stored) -> new CatalogCopy.Catalogued(canonical(stored));
+        };
+    }
+
+    private KeywordColumn canonical(KeywordColumn column) {
+        return switch (column) {
+            case KeywordColumn.Empty empty -> empty;
+            case KeywordColumn.Json(String stored) -> reserialized(stored);
+        };
+    }
+
+    private KeywordColumn reserialized(String stored) {
         try {
             List<String> keywords = objectMapper.readValue(stored, STRING_LIST);
             return keywords == null || keywords.contains(null)

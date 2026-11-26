@@ -1,5 +1,6 @@
 package org.danteplanner.backend.support;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -17,7 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.planner.effect.PlannerRecommendedEffect;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -55,9 +56,9 @@ class RecordingNotificationsTest {
     @BeforeEach
     void setUp() {
         owner = users.add(TestDataFactory.unsavedUser(OWNER_ID));
-        Planner planner = TestDataFactory.planner(owner).id(PLANNER_ID).title(TITLE).build();
+        StoredPlanner planner = TestDataFactory.planner(owner).id(PLANNER_ID).title(TITLE).build();
         when(plannerRepository.findPublishedAggregate(PLANNER_ID))
-                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner), Visibility.SHOWN)));
     }
 
     @Test

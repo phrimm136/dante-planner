@@ -130,7 +130,7 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, member.userId(), request.enabled());
+        ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, member.userId(), request.setting());
         return ResponseEntity.ok(response);
     }
 }

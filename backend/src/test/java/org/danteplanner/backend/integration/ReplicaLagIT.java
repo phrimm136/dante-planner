@@ -19,7 +19,7 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.PoolLedger;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -88,8 +88,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-withdraw-" + withdrawal + "@example.com");
         User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-withdraw-mod-" + withdrawal + "@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
         try {
@@ -110,8 +110,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void publishedRead_WhenRepublishedOnPausedReplica_ServesThePlanner() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
         try {
@@ -136,28 +136,28 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @ValueSource(strings = {"GET", "POST"})
     void batchPull_WhenAPlannerIsDeletedOnPausedReplica_OmitsItWhileKeepingTheLiveOne(String method) throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-deleted-" + method + "@example.com");
-        Planner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        Planner doomed = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner doomed = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         replicationControl.awaitCaughtUp();
 
         try {
             replicationControl.stopReplica();
 
-            deletePlanner(owner, doomed.getId());
+            deletePlanner(owner, doomed.id());
 
             Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
                     Timestamp.class,
-                    doomed.getId().toString());
+                    doomed.id().toString());
             assertThat(replicaDeletedAt)
                     .as("the paused replica must still hold the row un-soft-deleted, so the omission comes from the read path")
                     .isNull();
 
-            List<String> served = batchPull(method, owner, List.of(doomed.getId(), live.getId()));
+            List<String> served = batchPull(method, owner, List.of(doomed.id(), live.id()));
 
             assertThat(served)
                     .as("the deleted planner must be omitted and the live one served")
-                    .containsExactly(live.getId().toString());
+                    .containsExactly(live.id().toString());
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -227,7 +227,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void publish_WhenTheFilterRebuildRunsOnTheGtidPrimary_ReplicatesTheSameFilterRows() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-filter-rows@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
 
         send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
         send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
@@ -308,8 +308,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void publishedRead_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-deactivate@example.com");
-        Planner first = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        Planner second = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner first = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner second = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         replicationControl.awaitCaughtUp();
 
         try {
@@ -322,9 +322,9 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             assertThat(replicaOwnerDeletedAt)
                     .as("the paused replica must still hold the owner active, so a 404 comes from the read path, not replication")
                     .isNull();
-            for (Planner planner : List.of(first, second)) {
-                assertThat(replicaStillPublished(planner.getId())).isTrue();
-                assertNotFoundLikeACaughtUpReplica(getPublished(planner.getId()), planner.getId());
+            for (StoredPlanner planner : List.of(first, second)) {
+                assertThat(replicaStillPublished(planner.id())).isTrue();
+                assertNotFoundLikeACaughtUpReplica(getPublished(planner.id()), planner.id());
             }
         } finally {
             replicationControl.startReplica();
@@ -336,8 +336,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     void splitReads_WhenOwnerDeactivatedOnPausedReplica_Return404AndRecordNoView() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-split-owner@example.com");
         User viewer = TestDataFactory.createTestUser(userRepository, "replica-lag-split-viewer@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
         try {
@@ -379,8 +379,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void commentThread_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-lag-owner@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
         try {
@@ -406,12 +406,12 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void commentThread_WhenOwnerDeactivatedOnCaughtUpReplica_Returns404() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-caught-up-owner@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
         deleteAccount(owner);
         replicationControl.awaitCaughtUp();
 
-        assertNotFoundLikeACaughtUpReplica(getComments(planner.getId()), planner.getId());
+        assertNotFoundLikeACaughtUpReplica(getComments(planner.id()), planner.id());
     }
 
     private HttpResponse<String> getComments(UUID plannerId) throws Exception {

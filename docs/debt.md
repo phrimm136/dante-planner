@@ -622,8 +622,8 @@ guards the parse but likewise skips the schema gate.
   sts:AssumeRoleWithWebIdentity". Declaring `environment: production` would satisfy the
   trust but attaches that environment's required reviewer, which an unattended cron cannot
   clear — an ungated environment plus a matching `sub` condition on the role is the shape
-  that works. (2) Inputs: `TFVARS_OREGON`, `TFVARS_SEOUL`, `TFVARS_SECRETS` and
-  `TFVARS_CLOUDFLARE` do not exist at repository scope or in any environment, and the workflow's own note
+  that works. (2) Inputs: oregon, seoul and secrets plan from their tracked `envs/` files and
+  SSM, but `TFVARS_CLOUDFLARE` does not exist at repository scope or in any environment, and the workflow's own note
   explains the consequence — "a partial set is worse than none: variables that gate a
   resource default to empty, so a plan missing one reports the resource's destruction as
   drift". (3) Account: the workflow writes `backend.hcl` as
@@ -1014,12 +1014,12 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   opt out of both before its Cache Rule is enabled.
   re-check: `rg -qF 'return request.getDispatcherType() == DispatcherType.ASYNC;' backend/src/main/java/org/danteplanner/backend/shared/security/CsrfDoubleSubmitFilter.java`
 - **The forwarded-for fallback trusts the leftmost hop.** `ClientIpResolver.firstHop` takes
-  the client-written entry once the direct peer is a trusted proxy;
+  the client-written entry once the direct peer is a trusted proxy (`IpClaim.forwarded`);
   `ClientIpResolverTest.resolve_WhenHeaderCarriesAChainOfHops_ReturnsTheLeftmost` pins that
   as the spec. Latent while `CF-Connecting-IP` is always present on the tunnel-only path. Replace
   with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
   an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
-  re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
+  re-check: `rg -q 'new Claimed\(firstHop\(header\)\)' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
 
 ## 2026-09-18 consistency without an LLM (scheduled ratchet)
 
@@ -1285,20 +1285,20 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   with its own `@DynamicPropertySource` exceeds the context budget of 15 in
   `TestIsolationConventionTest`.
   re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java 'setTaskExecutor'`
-- `MarkerStore` keeps its own `Source` record and `sourceOrder` and asks `RedisRoleHealth.isAvailable`
-  itself, where the auth reads go through `RoleGated` (same roles, same primary-first rule); it is
+- `MarkerStore` keeps its own `Source` record and asks `RedisRoleHealth.isAvailable`
+  itself (its order now comes from the shared `ReadOrder`), where the auth reads go through `RoleGated` (same roles, same primary-first rule); it is
   the one frozen entry of the role-health rule in `RedisRoleGateRule`. Left apart because another
   open change rewrites the marker read path. Worth doing when that change has landed: build its
   sources as `RoleGated` and delete its own record, ordering and availability check. Its read falls
   through to the next source on a command error and `AuthReadSources.read` does not, so it cannot
   simply read through `AuthReadSources`.
-  re-check: `rg -q 'static List<Source> sourceOrder' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
+  re-check: `rg -q 'public record Source\(RedisRole role' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
 
-- `NotificationRepository.hardDeleteOldNotifications` deletes on `deleted_at < :cutoff` and no index
-  leads with `deleted_at`, so the nightly purge likely scans and locks the whole `notifications` table
+- `NotificationRepository.deleteReadBefore` deletes on `read_at < :cutoff` and no index leads with
+  `read_at`, so the nightly purge likely scans and locks the whole `notifications` table
   (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
   holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
-  re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(deleted_at'`
+  re-check: `rg -q 'n.readAt < :cutoff' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(read_at'`
 - `SentinelUserVerifier.java:15` says verification is skipped in tests because "TestDataInitializer
   handles it"; that class never loaded and the test overhaul deleted it. Fix the comment when the
   sentinel-user code is next touched.
@@ -1841,18 +1841,13 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   manager for the manifests in the same change. An image that moves to an upstream chart leaves
   this entry. Worth doing with the next component that stays hand-written.
   re-check: `rg -q 'image: redis:7-alpine' deploy/chart/templates/redis-auth.yaml`
-- **The Redis and alloy containers have no readiness probe.** Both Redis instances and alloy
-  declare none, so a Redis replaying its AOF file counts as Ready and its Service sends it traffic.
-  Worth doing with the auth Redis entry above.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/redis-auth.yaml 'readinessProbe'`
-- **Nothing finds a metric that production never emits.** An alert rule's cases feed it series
-  that the case itself writes, and the remote-write keep-list only filters what exists, so a
-  rule over a metric with no series in Mimir passes every gate and never fires. Five alerts were
-  dead this way, the last one because a ClusterRole lacked one rule. The fix is a read-only `ops`
-  command that takes the metric names from `deploy/grafana/rules` and reports each one with no
-  series in either region, run after any change to the rules, the keep-list or an exporter.
-  Worth doing at the next change to the `ops` CLI.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent .claude/skills/ops/SKILL.md -i 'no series'`
+- **The alloy log shipper has no liveness probe.** `alloy-logs.yaml` sets no probe, and
+  `kubernetes.baseline.json` keeps CKV_K8S_8 and CKV_K8S_9 for `Deployment.danteplanner.alloy`.
+  No Service sends it traffic, so a readiness probe changes nothing; a hung alloy stops shipping
+  logs and nothing restarts it. Its HTTP server is off (`enableHttpServerPort: false`, listening
+  on 127.0.0.1), so a probe needs that server on the pod address, which the NetworkPolicy unit
+  should scope. Worth doing with the NetworkPolicy entry above.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/alloy-logs.yaml -i 'probe'`
 
 ## 2026-11-19 tests that need a hand edit after a data refresh
 
@@ -1875,7 +1870,3 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   can run so (`controller.type: daemonset`, `alloy.mounts.varlog`). Worth deciding when a fault
   during a shutdown has to be explained and its log lines are missing.
   re-check: `rg -q 'loki.source.kubernetes' deploy/chart/templates/alloy-logs.yaml`
-- `UserRepository.changeEpithet` does not require `deleted_at IS NULL`, so an account scheduled for
-  deletion can still change its epithet with a live token. Worth deciding when account deletion is next
-  changed.
-  re-check: `rg -qF 'u.usernameEpithet = :epithet, u.updatedAt = :now WHERE u.id = :id"' backend/src/main/java/org/danteplanner/backend/user/repository/UserRepository.java`

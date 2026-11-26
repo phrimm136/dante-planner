@@ -17,7 +17,7 @@ STALENESS_TITLES = ("staleness-meta-oregon", "staleness-meta-seoul")
 DEFAULT_FILES = [RULES_DIR / "cluster-rules.yaml", RULES_DIR / "app-rules.yaml"]
 
 KIND_FIELDS = {
-    "prometheus": ({"name", "kind", "for", "expr", "cases"}, {"summary", "params"}),
+    "prometheus": ({"name", "kind", "for", "expr", "cases"}, {"summary", "params", "absent_until_event"}),
     "loki": ({"name", "kind", "for", "expr", "cases"}, {"summary"}),
     "cloudwatch": ({"name", "kind", "for", "metric", "db_instance", "region", "threshold"}, set()),
 }
@@ -26,10 +26,121 @@ PLACEHOLDER = re.compile(r"(?<!\{)\{([A-Za-z_][A-Za-z0-9_]*)\}(?!\})")
 SUMMARY_DESCRIPTION = "{{ $values.B }} in 5m"
 TIME_RANGE = {"from": 600, "to": 0}
 EXPR_DATASOURCE = {"type": "__expr__", "uid": "__expr__"}
+GROUPING_WORDS = {"by", "without", "on", "ignoring", "group_left", "group_right"}
+OPERATOR_WORDS = {"and", "or", "unless", "bool", "offset", "inf", "nan", "atan2"}
+AGGREGATION_WORDS = ("by", "without")
+QUOTE_CHARS = "\"'`"
+NAME_PATTERN = re.compile(r"[A-Za-z_:][A-Za-z0-9_:]*")
+NUMBER_PATTERN = re.compile(r"(?:0[xX][0-9a-fA-F]+|\d*\.?\d+(?:[eE][+-]?\d+)?)[A-Za-z0-9]*")
+TEMPLATE_VARIABLE = re.compile(r"\$(?:\{[^}]*\}|[A-Za-z_][A-Za-z0-9_]*)")
+MATCHER_PATTERN = re.compile(r'\s*([A-Za-z_][A-Za-z0-9_]*)\s*(=~|!=|!~|=)\s*"((?:[^"\\]|\\.)*)"\s*(?:,|$)')
 
 
 class RuleError(Exception):
     pass
+
+
+class ExprError(Exception):
+    pass
+
+
+@dataclass(frozen=True)
+class SeriesSelector:
+    metric_name: str
+    label_matchers: tuple
+
+
+def quote_end(expr_text, quote_index):
+    quote_char = expr_text[quote_index]
+    scan_index = quote_index + 1
+    while scan_index < len(expr_text):
+        if expr_text[scan_index] == "\\" and quote_char != "`":
+            scan_index += 2
+            continue
+        if expr_text[scan_index] == quote_char:
+            return scan_index + 1
+        scan_index += 1
+    raise ExprError(f"the string at offset {quote_index} never closes")
+
+
+def closing_index(expr_text, open_index, open_char, close_char):
+    nest_depth = 0
+    scan_index = open_index
+    while scan_index < len(expr_text):
+        scan_char = expr_text[scan_index]
+        if scan_char in QUOTE_CHARS:
+            scan_index = quote_end(expr_text, scan_index)
+            continue
+        if scan_char == open_char:
+            nest_depth += 1
+        elif scan_char == close_char:
+            nest_depth -= 1
+            if not nest_depth:
+                return scan_index
+        scan_index += 1
+    raise ExprError(f"'{open_char}' at offset {open_index} never closes")
+
+
+def label_matchers(matcher_text):
+    found_matchers = []
+    matched_end = 0
+    for matcher_match in MATCHER_PATTERN.finditer(matcher_text):
+        if matcher_match.start() != matched_end:
+            break
+        matched_end = matcher_match.end()
+        label_name, match_op, quoted_value = matcher_match.groups()
+        if label_name == "__name__":
+            raise ExprError("a selector names its metric through __name__")
+        found_matchers.append((label_name, match_op, re.sub(r"\\(.)", r"\1", quoted_value)))
+    if matcher_text[matched_end:].strip():
+        raise ExprError(f"the label matchers {{{matcher_text}}} do not parse")
+    return tuple(found_matchers)
+
+
+def word_selector(expr_text, name_match, found_selectors):
+    word_text = name_match.group(0)
+    folded_word = word_text.lower()
+    rest_text = expr_text[name_match.end():]
+    following_index = len(expr_text) - len(rest_text.lstrip())
+    following_char = expr_text[following_index:following_index + 1]
+    if folded_word in GROUPING_WORDS:
+        return closing_index(expr_text, following_index, "(", ")") + 1 if following_char == "(" else name_match.end()
+    following_word = NAME_PATTERN.match(expr_text, following_index)
+    if folded_word in OPERATOR_WORDS or following_char == "(" or (
+            following_word and following_word.group(0).lower() in AGGREGATION_WORDS):
+        return name_match.end()
+    if following_char == "{":
+        close_index = closing_index(expr_text, following_index, "{", "}")
+        found_selectors.append(SeriesSelector(word_text, label_matchers(expr_text[following_index + 1:close_index])))
+        return close_index + 1
+    found_selectors.append(SeriesSelector(word_text, ()))
+    return name_match.end()
+
+
+def expression_selectors(expr_text):
+    found_selectors = []
+    scan_index = 0
+    while scan_index < len(expr_text):
+        scan_char = expr_text[scan_index]
+        if scan_char in QUOTE_CHARS:
+            scan_index = quote_end(expr_text, scan_index)
+        elif scan_char == "[":
+            scan_index = closing_index(expr_text, scan_index, "[", "]") + 1
+        elif scan_char == "{":
+            raise ExprError(f"a selector without a metric name at offset {scan_index}")
+        elif scan_char == "$" and TEMPLATE_VARIABLE.match(expr_text, scan_index):
+            scan_index = TEMPLATE_VARIABLE.match(expr_text, scan_index).end()
+        elif scan_char.isdigit() or (scan_char == "." and expr_text[scan_index + 1:scan_index + 2].isdigit()):
+            scan_index = NUMBER_PATTERN.match(expr_text, scan_index).end()
+        elif NAME_PATTERN.match(expr_text, scan_index):
+            scan_index = word_selector(expr_text, NAME_PATTERN.match(expr_text, scan_index), found_selectors)
+        else:
+            scan_index += 1
+    return tuple(found_selectors)
+
+
+def metric_names(expr_text):
+    return {one_selector.metric_name for one_selector in expression_selectors(expr_text)}
 
 
 @dataclass
@@ -131,6 +242,22 @@ def check_params(rule_entry):
             rule_entry.fail_rule(f"expr uses {{{placeholder_name}}}, which params does not declare")
 
 
+def check_absent_metrics(rule_entry):
+    absent_names = rule_entry.rule_fields.get("absent_until_event")
+    if absent_names is None:
+        return
+    if not isinstance(absent_names, list) or not absent_names or not all(
+            isinstance(absent_name, str) and absent_name for absent_name in absent_names):
+        rule_entry.fail_rule("absent_until_event must be a list of one or more metric names")
+    try:
+        read_names = metric_names(rule_entry.test_expr())
+    except ExprError as expr_problem:
+        rule_entry.fail_rule(f"absent_until_event needs a readable expr: {expr_problem}")
+    unread_names = sorted(set(absent_names) - read_names)
+    if unread_names:
+        rule_entry.fail_rule(f"absent_until_event names {', '.join(unread_names)}, which expr does not read")
+
+
 def check_rule(rule_entry):
     rule_kind = rule_entry.rule_kind
     if rule_kind not in KIND_FIELDS:
@@ -158,6 +285,7 @@ def check_rule(rule_entry):
         check_string(rule_entry, "summary", rule_entry.rule_fields["summary"])
     if rule_kind == "prometheus":
         check_params(rule_entry)
+        check_absent_metrics(rule_entry)
     elif PLACEHOLDER.search(rule_entry.rule_fields["expr"]):
         rule_entry.fail_rule(f"expr uses {{{PLACEHOLDER.search(rule_entry.rule_fields['expr']).group(1)}}}, but a {rule_kind} rule takes no params")
     rule_cases = rule_entry.rule_fields["cases"]
@@ -320,12 +448,6 @@ def emit_loki_cases(loaded_rules):
                 print(json.dumps(case_line, ensure_ascii=False))
 
 
-def emit_exprs(loaded_rules):
-    for rule_entry in loaded_rules:
-        if rule_entry.rule_kind == "prometheus":
-            print(rule_entry.test_expr())
-
-
 def audit_problems(loaded_rules, live_rules, managed_folder):
     declared_titles = {rule_entry.rule_name for rule_entry in loaded_rules} | set(STALENESS_TITLES)
     live_by_title = {}
@@ -369,7 +491,6 @@ def main():
     promtool_parser = command_parsers.add_parser("promtool", help="write the wrapped rule file and promtool tests")
     promtool_parser.add_argument("out_dir")
     command_parsers.add_parser("loki-cases", help="one JSON line per Loki case")
-    command_parsers.add_parser("exprs", help="every Prometheus expression, params at their test values")
     audit_parser = command_parsers.add_parser("audit", help="read the live rule listing on stdin, fail on a duplicate or undeclared rule")
     audit_parser.add_argument("folder_uid")
     parsed_args = arg_parser.parse_args()
@@ -381,10 +502,8 @@ def main():
             emit_promtool(loaded_rules, parsed_args.out_dir)
         elif parsed_args.command == "loki-cases":
             emit_loki_cases(loaded_rules)
-        elif parsed_args.command == "audit":
-            audit_live_rules(loaded_rules, parsed_args.folder_uid)
         else:
-            emit_exprs(loaded_rules)
+            audit_live_rules(loaded_rules, parsed_args.folder_uid)
     except RuleError as rule_problem:
         print(f"rules.py: {rule_problem}", file=sys.stderr)
         return 1

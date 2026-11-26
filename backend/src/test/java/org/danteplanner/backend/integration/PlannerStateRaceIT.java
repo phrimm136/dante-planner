@@ -1,5 +1,19 @@
 package org.danteplanner.backend.integration;
 
+import java.util.stream.Collectors;
+import java.util.Set;
+import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
+import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
+import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +38,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -32,6 +45,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -50,12 +64,16 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
     private static final int ROUNDS = 20;
     private static final int FIRST_TOGGLES = 4;
     private static final int SUBSCRIBES = 8;
+    private static final UUID DEVICE = UUID.fromString("0b5d1f2e-0000-4000-8000-00000000beef");
 
     @Autowired private UserRepository userRepository;
     @Autowired private PlannerRepository plannerRepository;
     @Autowired private PlannerStatsRepository statsRepository;
     @Autowired private PlannerCatalogRepository catalogRepository;
+    @Autowired private PlannerPublicationRepository publicationRepository;
+    @Autowired private PlannerModerationRepository moderationRepository;
     @Autowired private PlannerPublishingService publishingService;
+    @Autowired private PlannerCommandService commandService;
     @Autowired private PlannerSubscriptionService subscriptionService;
     @Autowired private PlannerModerationService moderationService;
     @Autowired private TransactionTemplate transactionTemplate;
@@ -75,7 +93,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
         UUID id = draft();
 
         assertThat(publishingService.publish(owner.getId(), id).published()).isTrue();
-        Instant firstStamp = stored(id).getFirstPublishedAt();
+        Instant firstStamp = publication(id).getFirstPublishedAt();
         assertThat(publishingService.publish(owner.getId(), id).published()).isTrue();
         assertAgrees(id, true);
 
@@ -85,7 +103,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
 
         assertThat(publishingService.publish(owner.getId(), id).published()).isTrue();
         assertAgrees(id, true);
-        assertThat(stored(id).getFirstPublishedAt()).isNotNull().isEqualTo(firstStamp);
+        assertThat(publication(id).getFirstPublishedAt()).isNotNull().isEqualTo(firstStamp);
         assertThat(publishedEvents(id)).isEqualTo(1);
     }
 
@@ -101,7 +119,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
             if ((race.first() != null && !refused) || race.second() != null) {
                 defects.add(round + ": " + race);
             }
-            if (published(id) || catalogued(id) || stored(id).getTakenDownAt() == null) {
+            if (published(id) || catalogued(id) || moderation(id).getTakenDownAt() == null) {
                 defects.add(round + ": not withdrawn");
             }
             if (publishedEvents(id) != (refused ? 0 : 1)) {
@@ -148,12 +166,12 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
         for (int round = 0; round < ROUNDS; round++) {
             UUID id = draft();
             Race hiding = race(() -> publishingService.publish(owner.getId(), id), () -> hide(id));
-            if (hiding.failed() || !published(id) || !catalogued(id) || !stored(id).isHiddenFromRecommended()) {
+            if (hiding.failed() || !published(id) || !catalogued(id) || !moderation(id).isHiddenFromRecommended()) {
                 defects.add(round + ": " + hiding + " after hide");
             }
 
             Race unhiding = race(() -> publishingService.unpublish(owner.getId(), id), () -> unhide(id));
-            if (unhiding.failed() || published(id) || catalogued(id) || stored(id).isHiddenFromRecommended()) {
+            if (unhiding.failed() || published(id) || catalogued(id) || moderation(id).isHiddenFromRecommended()) {
                 defects.add(round + ": " + unhiding + " after unhide");
             }
         }
@@ -181,11 +199,11 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
             ModeratedPlanner taken = moderationService.deletePlanner(moderator.getId(), id, "first");
             assertThat(taken.published()).isFalse();
             assertAgrees(id, false);
-            Instant stamp = stored(id).getTakenDownAt();
+            Instant stamp = moderation(id).getTakenDownAt();
             assertThat(stamp).isNotNull();
 
             assertThat(moderationService.deletePlanner(moderator.getId(), id, "again").published()).isFalse();
-            assertThat(stored(id).getTakenDownAt()).isEqualTo(stamp);
+            assertThat(moderation(id).getTakenDownAt()).isEqualTo(stamp);
         }
     }
 
@@ -199,8 +217,8 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
             hide(id);
         });
 
-        assertThat(stored(id).getTakenDownAt()).isNotNull();
-        assertThat(stored(id).isHiddenFromRecommended()).isTrue();
+        assertThat(moderation(id).getTakenDownAt()).isNotNull();
+        assertThat(moderation(id).isHiddenFromRecommended()).isTrue();
     }
 
     @Test
@@ -210,11 +228,11 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
         transactionTemplate.executeWithoutResult(status -> {
             assertThat(published(id)).isFalse();
             elsewhere(() -> publishingService.publish(owner.getId(), id));
-            publishingService.toggleOwnerNotifications(owner.getId(), id, false);
+            publishingService.toggleOwnerNotifications(owner.getId(), id, NotificationSetting.OFF);
         });
 
-        assertThat(stored(id).isOwnerNotificationsEnabled()).isFalse();
-        assertThat(stored(id).getFirstPublishedAt()).isNotNull();
+        assertThat(publication(id).isOwnerNotificationsEnabled()).isFalse();
+        assertThat(publication(id).getFirstPublishedAt()).isNotNull();
         assertAgrees(id, true);
     }
 
@@ -321,6 +339,80 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
         assertThat(subscriptions(owner, id)).containsExactly(false);
     }
 
+    @Test
+    void save_WhenPublishedAtOnce_LeavesTheCatalogAndFilterRowsOnTheCommittedContent() {
+        List<String> defects = new ArrayList<>();
+        for (int round = 0; round < ROUNDS; round++) {
+            UUID id = draft();
+            UpsertPlannerRequest edit = keywordEdit(id, "Raced " + round);
+            Race race = race(() -> commandService.upsertPlanner(owner.getId(), DEVICE, id, edit, WriteMode.CHECKED),
+                    () -> publishingService.publish(owner.getId(), id));
+
+            StoredPlanner after = plannerRepository.findAggregate(id).orElseThrow();
+            if (race.failed() || !published(id) || !after.content().title().equals("Raced " + round)
+                    || !searchRowsFollow(id, after)) {
+                defects.add(round + ": " + race + " " + catalogRepository.findById(id).map(PlannerCatalog::getTitle)
+                        + " " + keywordFilterRows(id));
+            }
+        }
+        assertThat(defects).isEmpty();
+    }
+
+    @Test
+    void save_WhenDeletedAtOnce_AnswersFirstOrAbsentAndLeavesNoSearchRows() {
+        List<String> defects = new ArrayList<>();
+        for (int round = 0; round < ROUNDS; round++) {
+            UUID id = publishedPlanner();
+            UpsertPlannerRequest edit = keywordEdit(id, "Raced " + round);
+            Race race = race(() -> commandService.upsertPlanner(owner.getId(), DEVICE, id, edit, WriteMode.CHECKED),
+                    () -> commandService.deletePlanner(owner.getId(), id));
+
+            boolean saveAnswered = race.first() == null || race.first() instanceof PlannerNotFoundException;
+            if (!saveAnswered || race.second() != null || !tombstoned(id) || catalogued(id)
+                    || !keywordFilterRows(id).isEmpty() || entityFilterRows(id) != 0) {
+                defects.add(round + ": " + race + " tombstoned " + tombstoned(id) + " catalogued " + catalogued(id));
+            }
+        }
+        assertThat(defects).isEmpty();
+    }
+
+    private UpsertPlannerRequest keywordEdit(UUID id, String title) {
+        StoredPlanner stored = plannerRepository.findAggregate(id).orElseThrow();
+        return UpsertRequests.resending(stored)
+                .title(title)
+                .content(TestDataFactory.withSelectedKeywords(stored.content().json(), Set.of("Burst")))
+                .syncVersion(stored.content().syncVersion())
+                .build();
+    }
+
+    private boolean searchRowsFollow(UUID id, StoredPlanner committed) {
+        Set<String> keywords = committed.content().keywords().stream()
+                .map(PlannerKeywords::filterKeyword)
+                .collect(Collectors.toSet());
+        return catalogRepository.findById(id)
+                .filter(row -> row.getTitle().equals(committed.content().title()))
+                .filter(row -> row.keywordsOrEmpty().equals(committed.content().keywords()))
+                .isPresent()
+                && keywordFilterRows(id).equals(keywords);
+    }
+
+    private Set<String> keywordFilterRows(UUID id) {
+        return Set.copyOf(jdbc.queryForList(
+                "SELECT keyword FROM planner_keyword_filter WHERE planner_id = UUID_TO_BIN(?)",
+                String.class, id.toString()));
+    }
+
+    private int entityFilterRows(UUID id) {
+        return jdbc.queryForObject("SELECT COUNT(*) FROM planner_entity_filter WHERE planner_id = UUID_TO_BIN(?)",
+                Integer.class, id.toString());
+    }
+
+    private boolean tombstoned(UUID id) {
+        return jdbc.queryForObject(
+                "SELECT deleted_at IS NOT NULL FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
+                Boolean.class, id.toString());
+    }
+
     private record Race(Throwable first, Throwable second) {
 
         boolean failed() {
@@ -385,7 +477,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
     }
 
     private UUID draft() {
-        UUID id = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
+        UUID id = TestDataFactory.createTestPlanner(plannerRepository, owner, false).id();
         statsRepository.save(PlannerStats.builder().plannerId(id).build());
         return id;
     }
@@ -396,12 +488,16 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
         return id;
     }
 
-    private Planner stored(UUID id) {
-        return plannerRepository.findAggregate(id).orElseThrow();
+    private PlannerPublication publication(UUID id) {
+        return publicationRepository.findById(id).orElseThrow();
+    }
+
+    private PlannerModeration moderation(UUID id) {
+        return moderationRepository.findById(id).orElseThrow();
     }
 
     private boolean published(UUID id) {
-        return stored(id).isPublished();
+        return publication(id).isPublished();
     }
 
     private boolean catalogued(UUID id) {

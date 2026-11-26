@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -18,6 +19,12 @@ public interface PlannerCatalogRepository
     @Modifying
     @Query(value = RecommendedSql.REFRESH_RECOMMENDED, nativeQuery = true)
     int refreshRecommended(@Param("plannerId") UUID plannerId, @Param("threshold") int threshold);
+
+    @Modifying
+    @Query("UPDATE PlannerCatalog c SET c.title = :title, c.category = :category, c.selectedKeywords = :keywords "
+            + "WHERE c.plannerId = :plannerId")
+    void copyScalars(@Param("plannerId") UUID plannerId, @Param("title") String title,
+            @Param("category") String category, @Param("keywords") Set<String> keywords);
 
     @Modifying(flushAutomatically = true)
     @Query("DELETE FROM PlannerCatalog c WHERE c.plannerId = :plannerId")

@@ -3,7 +3,7 @@ package org.danteplanner.backend.integration;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
@@ -17,7 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
@@ -80,9 +81,12 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerVoteRepository voteRepository;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private User owner;
     private String token;
-    private Planner published;
+    private StoredPlanner published;
 
     @BeforeEach
     void setUp() {
@@ -125,15 +129,16 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     private void engageAsOwner() {
-        voteRepository.insert(new PlannerVote(owner.getId(), published.getId(), VoteType.UP));
+        transactionTemplate.executeWithoutResult(status -> voteRepository.insertIgnore(
+                owner.getId(), published.id(), VoteType.UP.name(), Instant.now()));
     }
 
     @Test
     void responseContractStable_WhenOwnerDetail_FieldSetUnchanged() throws Exception {
-        published.getContent().setDeviceId(UUID.randomUUID());
-        plannerRepository.save(published);
+        published = TestDataFactory.planner(owner).published(true).deviceId(UUID.randomUUID())
+                .save(plannerRepository);
 
-        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
+        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.id()), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -146,7 +151,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @Test
     void responseContractStable_WhenOwnerDetailHasNoDevice_OmitsDeviceId() throws Exception {
-        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
+        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.id()), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -170,7 +175,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     void listCardFields_WhenListed_TrimmedCardShape() throws Exception {
         PlannerStats stats =
                 PlannerStats.builder()
-                        .plannerId(published.getId())
+                        .plannerId(published.id())
                         .build();
         statsRepository.save(stats);
         TestDataFactory.addToCatalog(catalogService, published);
@@ -179,7 +184,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        JsonNode card = cardFor(json, published.getId());
+        JsonNode card = cardFor(json, published.id());
         assertThat(fieldNames(card)).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "selectedKeywords",
                 "authorUsernameEpithet", "authorUsernameSuffix", "upvotes",
@@ -194,7 +199,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     // list-card-fields
     @Test
     void listCardFields_WhenListedAsViewer_CarriesUserContext() throws Exception {
-        statsRepository.save(PlannerStats.builder().plannerId(published.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(published.id()).build());
         TestDataFactory.addToCatalog(catalogService, published);
         engageAsOwner();
 
@@ -202,7 +207,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        JsonNode card = cardFor(json, published.getId());
+        JsonNode card = cardFor(json, published.id());
         assertThat(fieldNames(card)).contains("hasUpvoted", "isBookmarked");
         assertThat(flag(card, "hasUpvoted"))
                 .as("the viewer's vote row is reflected on the card")
@@ -213,10 +218,10 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Test
     void unpublishedChangesVisibleToOwner_WhenStatusDirty_StatusAndPublishedCarried() throws Exception {
         // A published planner whose edit state went dirty (draft) after publish
-        published.getContent().setStatus(PlannerStatus.DRAFT);
-        plannerRepository.save(published);
+        published = TestDataFactory.planner(owner).published(true).status(PlannerStatus.DRAFT)
+                .save(plannerRepository);
 
-        performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
+        performAuthed(mockMvc, get("/api/planner/md/{id}", published.id()), token)
                 .andExpect(status().isOk())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
                         .jsonPath("$.published").value(true))
@@ -226,7 +231,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @Test
     void responseContractStable_WhenPublishedDetail_FieldSetUnchanged() throws Exception {
-        String json = mockMvc.perform(get("/api/planner/md/published/{id}", published.getId()))
+        String json = mockMvc.perform(get("/api/planner/md/published/{id}", published.id()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -251,7 +256,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         engageAsOwner();
 
         String json = performAuthed(
-                mockMvc, get("/api/planner/md/published/{id}", published.getId()), token)
+                mockMvc, get("/api/planner/md/published/{id}", published.id()), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -302,20 +307,20 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         performAuthed(mockMvc, post("/api/planner/md/batch").with(withCsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new PlannerBatchRequest(List.of(published.getId())))),
+                                new PlannerBatchRequest(List.of(published.id())))),
                 token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(published.getId().toString()))
+                .andExpect(jsonPath("$[0].id").value(published.id().toString()))
                 .andExpect(jsonPath("$[0].upvotes").doesNotExist());
     }
 
     @Test
     void noUpvotes_WhenBatchPulledByGet_KeyAbsent() throws Exception {
-        Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 
         performAuthed(mockMvc, get("/api/planner/md/batch")
-                        .param("ids", published.getId() + "," + draft.getId()),
+                        .param("ids", published.id() + "," + draft.id()),
                 token)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))

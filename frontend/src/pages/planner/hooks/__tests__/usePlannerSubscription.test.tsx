@@ -1,50 +1,46 @@
-/**
- * usePlannerSubscription.test.ts
- *
- * Tests for planner subscription mutation hook.
- * Uses Vitest + React Testing Library for testing.
- */
-
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { usePlannerSubscription } from '../usePlannerSubscription'
 import { publishedPlannerQueryKeys } from '../usePublishedPlannerQuery'
+import type { PublishedPlannerQueryState } from '../usePublishedPlannerQuery'
 
-// Mock the API client
 vi.mock('@/lib/api', () => ({
   ApiClient: {
     post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   },
 }))
 
-// Import after mocking
 import { ApiClient } from '@/lib/api'
 
-// Mock response data
-const mockSubscriptionResponse = {
-  plannerId: '123e4567-e89b-12d3-a456-426614174000',
-  subscribed: true,
+const PLANNER_ID = '123e4567-e89b-12d3-a456-426614174000'
+const SUBSCRIPTION_PATH = `/api/planner/md/${PLANNER_ID}/subscription`
+
+const subscribedResponse = { plannerId: PLANNER_ID, subscribed: true }
+const unsubscribedResponse = { plannerId: PLANNER_ID, subscribed: false }
+
+function detailState(isSubscribed: boolean): PublishedPlannerQueryState {
+  return {
+    apiData: { id: PLANNER_ID, isSubscribed },
+    planner: {},
+  } as unknown as PublishedPlannerQueryState
 }
 
-const mockUnsubscribeResponse = {
-  plannerId: '123e4567-e89b-12d3-a456-426614174000',
-  subscribed: false,
+function cachedIsSubscribed(queryClient: QueryClient): boolean | undefined {
+  const state = queryClient.getQueryData<PublishedPlannerQueryState>(
+    publishedPlannerQueryKeys.detail(PLANNER_ID),
+  )
+  return state && 'apiData' in state ? state.apiData.isSubscribed : undefined
 }
 
-/**
- * Create a wrapper component with QueryClientProvider
- */
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: {
-        retry: false,
-      },
-      mutations: {
-        retry: false,
-      },
+      queries: { retry: false },
+      mutations: { retry: false },
     },
   })
 
@@ -65,110 +61,121 @@ describe('usePlannerSubscription', () => {
     vi.resetAllMocks()
   })
 
-  describe('mutation function', () => {
-    it('calls correct API endpoint with planner ID', async () => {
-      vi.mocked(ApiClient.post).mockResolvedValue(mockSubscriptionResponse)
+  describe('intent routing', () => {
+    it('subscribes with one PUT to the subscription route', async () => {
+      vi.mocked(ApiClient.put).mockResolvedValue(subscribedResponse)
       const { wrapper } = createWrapper()
-
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
       await act(async () => {
-        await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
+        await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
       })
 
-      expect(ApiClient.post).toHaveBeenCalledWith(
-        '/api/planner/md/123e4567-e89b-12d3-a456-426614174000/subscribe',
-      )
+      expect(ApiClient.put).toHaveBeenCalledTimes(1)
+      expect(ApiClient.put).toHaveBeenCalledWith(SUBSCRIPTION_PATH)
+      expect(ApiClient.delete).not.toHaveBeenCalled()
+      expect(ApiClient.post).not.toHaveBeenCalled()
     })
 
-    it('handles subscribe response correctly', async () => {
-      vi.mocked(ApiClient.post).mockResolvedValue(mockSubscriptionResponse)
+    it('leaves with one DELETE to the subscription route', async () => {
+      vi.mocked(ApiClient.delete).mockResolvedValue(unsubscribedResponse)
       const { wrapper } = createWrapper()
+      const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
+      await act(async () => {
+        await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'unsubscribe' })
+      })
+
+      expect(ApiClient.delete).toHaveBeenCalledTimes(1)
+      expect(ApiClient.delete).toHaveBeenCalledWith(SUBSCRIPTION_PATH)
+      expect(ApiClient.put).not.toHaveBeenCalled()
+      expect(ApiClient.post).not.toHaveBeenCalled()
+    })
+
+    it('returns the validated response', async () => {
+      vi.mocked(ApiClient.put).mockResolvedValue(subscribedResponse)
+      const { wrapper } = createWrapper()
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
       let response
       await act(async () => {
-        response = await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
+        response = await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
       })
 
-      expect(response).toEqual({
-        plannerId: '123e4567-e89b-12d3-a456-426614174000',
-        subscribed: true,
-      })
-    })
-
-    it('handles unsubscribe response correctly', async () => {
-      vi.mocked(ApiClient.post).mockResolvedValue(mockUnsubscribeResponse)
-      const { wrapper } = createWrapper()
-
-      const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
-
-      let response
-      await act(async () => {
-        response = await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
-      })
-
-      expect(response).toEqual({
-        plannerId: '123e4567-e89b-12d3-a456-426614174000',
-        subscribed: false,
-      })
+      expect(response).toEqual(subscribedResponse)
     })
   })
 
-  describe('cache invalidation', () => {
-    it('invalidates planner detail query on success', async () => {
-      vi.mocked(ApiClient.post).mockResolvedValue(mockSubscriptionResponse)
+  describe('cache update', () => {
+    it('writes the subscribed state the server answered into the detail', async () => {
+      vi.mocked(ApiClient.put).mockResolvedValue(subscribedResponse)
       const { wrapper, queryClient } = createWrapper()
-
-      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-
+      queryClient.setQueryData(publishedPlannerQueryKeys.detail(PLANNER_ID), detailState(false))
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
       await act(async () => {
-        await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
+        await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
       })
 
-      await waitFor(() => {
-        expect(invalidateSpy).toHaveBeenCalledWith({
-          queryKey: publishedPlannerQueryKeys.detail('123e4567-e89b-12d3-a456-426614174000'),
-        })
+      expect(cachedIsSubscribed(queryClient)).toBe(true)
+    })
+
+    it('follows the response, not the intent', async () => {
+      vi.mocked(ApiClient.delete).mockResolvedValue(subscribedResponse)
+      const { wrapper, queryClient } = createWrapper()
+      queryClient.setQueryData(publishedPlannerQueryKeys.detail(PLANNER_ID), detailState(true))
+      const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
+
+      await act(async () => {
+        await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'unsubscribe' })
+      })
+
+      expect(cachedIsSubscribed(queryClient)).toBe(true)
+    })
+
+    it('leaves a removed detail as it is', async () => {
+      vi.mocked(ApiClient.put).mockResolvedValue(subscribedResponse)
+      const { wrapper, queryClient } = createWrapper()
+      queryClient.setQueryData(publishedPlannerQueryKeys.detail(PLANNER_ID), { removed: true })
+      const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
+
+      await act(async () => {
+        await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
+      })
+
+      expect(queryClient.getQueryData(publishedPlannerQueryKeys.detail(PLANNER_ID))).toEqual({
+        removed: true,
       })
     })
 
-    it('does not invalidate on error', async () => {
-      vi.mocked(ApiClient.post).mockRejectedValue(new Error('Network error'))
+    it('leaves the detail unchanged on error', async () => {
+      vi.mocked(ApiClient.put).mockRejectedValue(new Error('Network error'))
       const { wrapper, queryClient } = createWrapper()
-
-      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-
+      queryClient.setQueryData(publishedPlannerQueryKeys.detail(PLANNER_ID), detailState(false))
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
       await act(async () => {
-        try {
-          await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
-        } catch {
-          // Expected to fail
-        }
+        await result.current
+          .mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
+          .catch(() => undefined)
       })
 
-      expect(invalidateSpy).not.toHaveBeenCalled()
+      expect(cachedIsSubscribed(queryClient)).toBe(false)
     })
   })
 
   describe('response validation', () => {
     it('throws on invalid response', async () => {
-      vi.mocked(ApiClient.post).mockResolvedValue({
+      vi.mocked(ApiClient.put).mockResolvedValue({
         plannerId: 'not-a-uuid',
         subscribed: 'not-a-boolean',
       })
       const { wrapper } = createWrapper()
-
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
       await expect(
         act(async () => {
-          await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
+          await result.current.mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
         }),
       ).rejects.toThrow(/^\[planner subscription\] Validation failed: /)
     })
@@ -180,7 +187,7 @@ describe('usePlannerSubscription', () => {
       const pendingPromise = new Promise((resolve) => {
         resolvePromise = resolve
       })
-      vi.mocked(ApiClient.post).mockReturnValue(pendingPromise as Promise<unknown>)
+      vi.mocked(ApiClient.put).mockReturnValue(pendingPromise as Promise<unknown>)
 
       const { wrapper } = createWrapper()
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
@@ -188,7 +195,7 @@ describe('usePlannerSubscription', () => {
       expect(result.current.isPending).toBe(false)
 
       act(() => {
-        result.current.mutate('123e4567-e89b-12d3-a456-426614174000')
+        result.current.mutate({ plannerId: PLANNER_ID, intent: 'subscribe' })
       })
 
       await waitFor(() => {
@@ -196,7 +203,7 @@ describe('usePlannerSubscription', () => {
       })
 
       act(() => {
-        resolvePromise!(mockSubscriptionResponse)
+        resolvePromise!(subscribedResponse)
       })
 
       await waitFor(() => {
@@ -205,17 +212,14 @@ describe('usePlannerSubscription', () => {
     })
 
     it('sets isError on failure', async () => {
-      vi.mocked(ApiClient.post).mockRejectedValue(new Error('Subscription failed'))
+      vi.mocked(ApiClient.put).mockRejectedValue(new Error('Subscription failed'))
       const { wrapper } = createWrapper()
-
       const { result } = renderHook(() => usePlannerSubscription(), { wrapper })
 
       await act(async () => {
-        try {
-          await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
-        } catch {
-          // Expected
-        }
+        await result.current
+          .mutateAsync({ plannerId: PLANNER_ID, intent: 'subscribe' })
+          .catch(() => undefined)
       })
 
       await waitFor(() => {

@@ -3,7 +3,7 @@ package org.danteplanner.backend.planner.sync;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
-import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -27,7 +27,7 @@ public record PlannerChange(Set<Field> fields) {
         STORED
     }
 
-    public static PlannerChange between(PlannerContent stored, CarriedWrite carried, ObjectMapper mapper) {
+    public static PlannerChange between(StoredContent stored, CarriedWrite carried, ObjectMapper mapper) {
         Set<Field> fields = EnumSet.allOf(Field.class);
         fields.removeIf(field -> !moved(field, stored, carried, mapper));
         return new PlannerChange(Collections.unmodifiableSet(fields));
@@ -46,17 +46,17 @@ public record PlannerChange(Set<Field> fields) {
         return categoryOnly() ? ContentSource.STORED : ContentSource.CARRIED;
     }
 
-    private static boolean moved(Field field, PlannerContent stored, CarriedWrite carried, ObjectMapper mapper) {
+    private static boolean moved(Field field, StoredContent stored, CarriedWrite carried, ObjectMapper mapper) {
         return switch (field) {
-            case TITLE -> !Objects.equals(carried.title(), stored.getTitle());
-            case STATUS -> !Objects.equals(carried.status(), stored.getStatus());
-            case CATEGORY -> !Objects.equals(carried.category(), stored.getCategory());
-            case CONTENT -> contentChanged(carried.content(), stored.getContent(), mapper);
+            case TITLE -> !Objects.equals(carried.title(), stored.title());
+            case STATUS -> !Objects.equals(carried.status(), stored.status());
+            case CATEGORY -> !Objects.equals(carried.category(), stored.category());
+            case CONTENT -> contentChanged(carried.content(), stored.json(), mapper);
             case GAME_CONTENT_VERSION ->
-                    !Objects.equals(carried.gameContentVersion(), stored.getGameContentVersion());
+                    !Objects.equals(carried.gameContentVersion(), stored.gameContentVersion());
             case CONTENT_SCHEMA_VERSION ->
-                    !Objects.equals(carried.contentSchemaVersion(), stored.getContentSchemaVersion());
-            case DEVICE_ID -> !Objects.equals(carried.deviceId(), stored.getDeviceId());
+                    !Objects.equals(carried.contentSchemaVersion(), stored.schemaVersion());
+            case DEVICE_ID -> !carried.device().equals(stored.device());
         };
     }
 

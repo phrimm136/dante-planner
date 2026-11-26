@@ -127,7 +127,7 @@ public class ReadSourcesConfig {
         return new ReadSourceSelector(readSourceProperties.readSources().stream()
                 .map(source -> new ReadSourceSelector.Source(
                         source.name(),
-                        source.isPrimary(),
+                        authorityOf(source.endpoint()),
                         source.isPrimary() && isReadFirst(source)
                                 ? primaryPool
                                 : beanFactory.getBean(poolBeanName(source.name()), DataSource.class),
@@ -164,6 +164,13 @@ public class ReadSourcesConfig {
                 "to", event.getStateTransition().getToState().name().toLowerCase(Locale.ROOT))
                 .increment());
         return breaker;
+    }
+
+    private static ReadSourceSelector.Authority authorityOf(ReadSourceProperties.Source.Endpoint endpoint) {
+        return switch (endpoint) {
+            case ReadSourceProperties.Source.Endpoint.Primary primary -> ReadSourceSelector.Authority.PRIMARY;
+            case ReadSourceProperties.Source.Endpoint.Replica replica -> ReadSourceSelector.Authority.REPLICA;
+        };
     }
 
     private ReadSourceProperties.Source source(String sourceName) {

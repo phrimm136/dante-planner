@@ -7,11 +7,14 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.shared.sse.SseEnvelope;
+import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.LockWaits;
 import org.danteplanner.backend.support.SseTopicRecorder;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -33,12 +36,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Dispatching the same event twice derives its effect once.
@@ -53,8 +63,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestConfig.class)
 class DomainEventDispatchIT extends SharedMySqlContainerSupport {
 
+    private static final int ROUNDS = 10;
+
     @Autowired
     private DomainEventDispatcher dispatcher;
+
+    @Autowired
+    private DomainEventRepository events;
+
+    @Autowired
+    private Clock clock;
 
     @Autowired
     @Qualifier("sseLocalRedisConnectionFactory")
@@ -86,7 +104,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
 
     private User owner;
     private User commenter;
-    private Planner planner;
+    private StoredPlanner planner;
     private SseTopicRecorder recorder;
 
     @BeforeEach
@@ -105,7 +123,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
     @Test
     void dispatch_WhenTheSameEventIsDispatchedTwice_DerivesTheEffectOnce() {
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment dispatched twice");
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "A comment dispatched twice");
         long eventId = recordEvent(comment.getId());
 
         dispatcher.dispatchDomainEvent(eventId);
@@ -119,13 +137,66 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
 
         recorder.fence();
         assertThat(recorder.userEvents(owner.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
-        assertThat(recorder.commentEvents(planner.getId(), SseEventType.COMMENT_ADDED))
+        assertThat(recorder.commentEvents(planner.id(), SseEventType.COMMENT_ADDED))
                 .filteredOn(envelope -> commenter.getId().equals(envelope.excludeUserId()))
                 .hasSize(1);
         assertThat(attempts(eventId))
                 .as("both attempts are counted — the count is what the poison cap reads — while "
                         + "only the first derived anything")
                 .isEqualTo(2);
+    }
+
+    @Test
+    void dispatch_WhenTwoWorkersDispatchTheSameEventAtOnce_AppliesTheEffectOnce() throws Exception {
+        List<StoredPlanner> raced = new ArrayList<>();
+        try (ExecutorService workers = Executors.newFixedThreadPool(2)) {
+            for (int round = 0; round < ROUNDS; round++) {
+                planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+                raced.add(planner);
+                long eventId = recordEvent(insertComment(commenter, "A comment raced for", null).getId());
+                CyclicBarrier start = new CyclicBarrier(2);
+                Runnable worker = () -> {
+                    Hang.await(start, "the other worker");
+                    dispatcher.dispatchDomainEvent(eventId);
+                };
+                Future<?> first = workers.submit(worker);
+                Future<?> second = workers.submit(worker);
+                Hang.get(first, "the first dispatch");
+                Hang.get(second, "the second dispatch");
+                assertThat(attempts(eventId)).isEqualTo(2);
+            }
+        }
+
+        assertThat(notificationsFor(owner)).hasSize(ROUNDS);
+        recorder.fence();
+        assertThat(recorder.userEvents(owner.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(ROUNDS);
+        assertThat(raced).allSatisfy(each ->
+                assertThat(recorder.commentEvents(each.id(), SseEventType.COMMENT_ADDED)).hasSize(1));
+    }
+
+    @Test
+    void claim_WhenAnotherClaimHoldsTheRow_WaitsAndMatchesNothing() throws Exception {
+        long eventId = recordEvent(insertComment(commenter, "A comment claimed twice", null).getId());
+        try (ExecutorService workers = Executors.newSingleThreadExecutor()) {
+            Future<Integer> second = transaction().execute(status -> {
+                assertThat(events.claim(eventId, clock.instant())).isEqualTo(1);
+                Future<Integer> waiting = workers.submit(() -> claimed(eventId));
+                LockWaits.await(jdbcTemplate, 1, waiting::isDone, "the second claim to wait");
+                assertThat(waiting).isNotDone();
+                return waiting;
+            });
+
+            assertThat(Hang.get(second, "the second claim")).isZero();
+        }
+    }
+
+    @Test
+    void dispatch_WhenNoSuchEventExists_DispatchesNothing() {
+        long absentId = -1;
+
+        assertThatCode(() -> dispatcher.dispatchDomainEvent(absentId)).doesNotThrowAnyException();
+
+        assertThat(events.existsById(absentId)).isFalse();
     }
 
     @Test
@@ -140,7 +211,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         assertThat(recorder.userEvents(owner.getId(), SseEventType.NOTIFY_COMMENT)).singleElement()
                 .extracting(SseEnvelope.Wire::payload, as(InstanceOfAssertFactories.MAP))
                 .containsEntry("commentSnippet", "Text of the content row");
-        assertThat(recorder.commentEvents(planner.getId(), SseEventType.COMMENT_ADDED)).singleElement()
+        assertThat(recorder.commentEvents(planner.id(), SseEventType.COMMENT_ADDED)).singleElement()
                 .extracting(SseEnvelope.Wire::payload, as(InstanceOfAssertFactories.MAP))
                 .containsEntry("content", "Text of the content row");
         assertThat(jdbcTemplate.queryForObject("SELECT content FROM planner_comments WHERE id = ?",
@@ -209,9 +280,13 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         assertThat(recorder.userEvents(parentAuthor.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
     }
 
+    private int claimed(long eventId) {
+        return transaction().execute(status -> events.claim(eventId, clock.instant()));
+    }
+
     private PlannerComment insertComment(User author, String content, Long parentCommentId) {
         return StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), author.getId(), parentCommentId,
+                new PlannerComment(planner.id(), author.getId(), parentCommentId,
                         parentCommentId == null ? 0 : 1), content);
     }
 
@@ -225,10 +300,10 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
                     INSERT INTO domain_events (event_type, aggregate_id, payload, created_at)
                     VALUES (?, UUID_TO_BIN(?), JSON_OBJECT(?, ?), NOW(6))
                     """,
-                    eventType, planner.getId().toString(), idKey, id);
+                    eventType, planner.id().toString(), idKey, id);
             return jdbcTemplate.queryForObject(
                     "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) AND event_type = ?",
-                    Long.class, planner.getId().toString(), eventType);
+                    Long.class, planner.id().toString(), eventType);
         });
     }
 
@@ -245,7 +320,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
 
     private List<Notification> notificationsFor(User recipient) {
         return notificationRepository
-                .findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(recipient.getId(), PageRequest.of(0, 10))
+                .findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(recipient.getId(), PageRequest.of(0, 10))
                 .getContent();
     }
 }

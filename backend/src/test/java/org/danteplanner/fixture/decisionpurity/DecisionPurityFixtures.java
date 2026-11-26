@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import org.danteplanner.backend.shared.failure.CommandOutcome;
@@ -44,6 +45,24 @@ final class DecisionPurityFixtures {
 
     interface Port {
         boolean isOpen();
+    }
+
+    interface Store {
+        void save();
+    }
+
+    static final class Saver {
+
+        private final Store store;
+
+        Saver(Store store) {
+            this.store = store;
+        }
+
+        Choice decide() {
+            store.save();
+            return new Choice.Left();
+        }
     }
 
     static final class PortReader {
@@ -221,6 +240,21 @@ final class DecisionPurityFixtures {
 
         static Choice decide(long millis) {
             return List.of(Duration.ofMillis(millis)).isEmpty() ? new Choice.Left() : new Choice.Right();
+        }
+    }
+
+    static final class Signer {
+
+        static Choice decide(Authentication authentication) {
+            return authentication.getPrincipal() instanceof Long ? new Choice.Left() : new Choice.Right();
+        }
+    }
+
+    static final class Unsigner {
+
+        static Choice decide(Authentication authentication) {
+            authentication.setAuthenticated(false);
+            return new Choice.Right();
         }
     }
 

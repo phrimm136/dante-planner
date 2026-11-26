@@ -7,7 +7,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
-import org.danteplanner.backend.user.api.Restriction;
+import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
@@ -252,7 +252,7 @@ public class UserService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-        WrittenAccount written = WrittenAccount.of(userId,
+        WrittenAccount written = WrittenAccount.ofOwnAccount(userId,
                 WriteOutcome.of(userRepository.changeEpithet(userId, epithet.getValue(), clock.instant())));
         FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()), new FreshnessScope.Global());
 

@@ -2,9 +2,9 @@ package org.danteplanner.backend.planner.sync;
 
 import lombok.Builder;
 
+import org.danteplanner.backend.planner.entity.Device;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 
-import java.util.UUID;
 
 @Builder
 public record CarriedWrite(
@@ -14,6 +14,6 @@ public record CarriedWrite(
     String content,
     Integer gameContentVersion,
     Integer contentSchemaVersion,
-    UUID deviceId
+    Device.Known device
 ) {
 }

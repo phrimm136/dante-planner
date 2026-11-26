@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.StoredComments;
@@ -48,7 +48,7 @@ class CommentDecompositionMigrationIT extends ExclusiveDatabaseSupport {
 
     private JdbcTemplate jdbc;
     private User author;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -106,7 +106,7 @@ class CommentDecompositionMigrationIT extends ExclusiveDatabaseSupport {
         Long shown = oldShapeRow("shown", null, null, true, 0);
         StoredComments.split(jdbc, shown);
 
-        mockMvc.perform(get("/api/planner/{id}/comments", planner.getId()))
+        mockMvc.perform(get("/api/planner/{id}/comments", planner.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].content").value("shown"));
@@ -133,7 +133,7 @@ class CommentDecompositionMigrationIT extends ExclusiveDatabaseSupport {
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, upvote_count, "
                 + "created_at, edited_at, deleted_at, author_notifications_enabled) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, 0, ?, NOW(), ?, ?, ?)",
-                publicId, planner.getId().toString(), author.getId(), content, upvotes, editedAt, deletedAt, notified);
+                publicId, planner.id().toString(), author.getId(), content, upvotes, editedAt, deletedAt, notified);
         return jdbc.queryForObject("SELECT id FROM planner_comments WHERE public_id = UUID_TO_BIN(?)",
                 Long.class, publicId);
     }

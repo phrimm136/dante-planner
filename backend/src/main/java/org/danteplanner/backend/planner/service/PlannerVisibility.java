@@ -10,10 +10,6 @@ public final class PlannerVisibility {
     private PlannerVisibility() {
     }
 
-    public static boolean visible(PlannerVisibilityFacts facts) {
-        return facts.published() && !facts.authorDeleted();
-    }
-
     public static Set<FreshnessScope> scopes(UUID plannerId, long ownerId) {
         return Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(ownerId));
     }

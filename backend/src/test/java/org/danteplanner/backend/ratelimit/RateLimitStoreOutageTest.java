@@ -360,7 +360,7 @@ class RateLimitStoreOutageTest {
         CookieUtils cookieUtils = new CookieUtils(false, "", "Lax");
         FrontendProperties frontendProperties = new FrontendProperties(FRONTEND_URL);
         SecurityProperties securityProperties = new SecurityProperties();
-        securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP);
+        securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP + "/32");
         securityProperties.parseTrustedProxyIps();
         DeviceIdResolver deviceIdResolver = new DeviceIdResolver(cookieUtils);
 

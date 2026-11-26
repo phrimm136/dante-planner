@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run Terraform behind the repo's guard.
 # Usage: terraform-run.sh <terraform args...>
-#   scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars
+#   scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars
 #
 # The guard refuses a command whose credentials belong to a different account than the state
 # bucket it would write, and one whose directory holds an auto-loaded terraform.tfvars. Both

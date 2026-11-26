@@ -27,7 +27,13 @@ class FixtureConstructionRuleTest {
                         + ".user() constructs org.danteplanner.backend.user.entity.User;"
                         + " use TestDataFactory or UpsertRequests")
                 .hasMessageContaining(PlannerConstructorFixture.class.getName()
-                        + ".planner() constructs org.danteplanner.backend.planner.entity.Planner;"
+                        + ".planner() constructs org.danteplanner.backend.planner.repository.StoredPlanner;"
+                        + " use TestDataFactory or UpsertRequests")
+                .hasMessageContaining(PlannerConstructorFixture.class.getName()
+                        + ".core() constructs org.danteplanner.backend.planner.entity.Planner;"
+                        + " use TestDataFactory or UpsertRequests")
+                .hasMessageContaining(PlannerConstructorFixture.class.getName()
+                        + ".content() constructs org.danteplanner.backend.planner.entity.PlannerContent;"
                         + " use TestDataFactory or UpsertRequests")
                 .hasMessageContaining(UpsertRequestFixture.class.getName()
                         + ".request() constructs org.danteplanner.backend.planner.dto.UpsertPlannerRequest;"
@@ -41,7 +47,7 @@ class FixtureConstructionRuleTest {
         assertThatThrownBy(() -> FixtureConstructionRule.FIXTURES_ONLY_IN_SUPPORT.check(referenced))
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining(ConstructorReferenceFixture.class.getName()
-                        + ".planner() constructs org.danteplanner.backend.planner.entity.Planner;"
+                        + ".planner() constructs org.danteplanner.backend.planner.repository.StoredPlanner;"
                         + " use TestDataFactory or UpsertRequests")
                 .hasMessageContaining(ConstructorReferenceFixture.class.getName()
                         + ".user() constructs org.danteplanner.backend.user.entity.User;"

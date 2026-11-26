@@ -1,5 +1,56 @@
 id: no-branch-in-outcome-command
 snapshots:
+  "class A {\n  FooOutcome run(List<String> items) {\n    for (String item : items) {\n      if (item.isEmpty()) {\n        continue;\n      }\n      save(item);\n    }\n    return FooOutcome.DONE;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (item.isEmpty()) {
+                continue;
+              }
+      style: primary
+      start: 87
+      end: 134
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(List<String> items) {
+            for (String item : items) {
+              if (item.isEmpty()) {
+                continue;
+              }
+              save(item);
+            }
+            return FooOutcome.DONE;
+          }
+      style: secondary
+      start: 12
+      end: 190
+  "class A {\n  FooOutcome run(boolean x) {\n    if (x) {\n      log();\n      return FooOutcome.LEFT;\n    }\n    return FooOutcome.RIGHT;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (x) {
+              log();
+              return FooOutcome.LEFT;
+            }
+      style: primary
+      start: 44
+      end: 101
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(boolean x) {
+            if (x) {
+              log();
+              return FooOutcome.LEFT;
+            }
+            return FooOutcome.RIGHT;
+          }
+      style: secondary
+      start: 12
+      end: 134
   "class A {\n  FooOutcome run(boolean x) {\n    if (x) {\n      return FooOutcome.LEFT;\n    }\n    return FooOutcome.RIGHT;\n  }\n}\n":
     labels:
     - source: |-
@@ -23,6 +74,32 @@ snapshots:
       style: secondary
       start: 12
       end: 121
+  "class A {\n  FooOutcome run(boolean x) {\n    if (x) {\n      return FooOutcome.LEFT;\n    } else {\n      return FooOutcome.RIGHT;\n    }\n  }\n}\n":
+    labels:
+    - source: |-
+        if (x) {
+              return FooOutcome.LEFT;
+            } else {
+              return FooOutcome.RIGHT;
+            }
+      style: primary
+      start: 44
+      end: 132
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(boolean x) {
+            if (x) {
+              return FooOutcome.LEFT;
+            } else {
+              return FooOutcome.RIGHT;
+            }
+          }
+      style: secondary
+      start: 12
+      end: 136
   "class A {\n  FooOutcome run(boolean x) {\n    return x ? FooOutcome.LEFT : FooOutcome.RIGHT;\n  }\n}\n":
     labels:
     - source: "x ? FooOutcome.LEFT : FooOutcome.RIGHT"
@@ -40,6 +117,54 @@ snapshots:
       style: secondary
       start: 12
       end: 94
+  "class A {\n  FooOutcome run(boolean x, boolean y) {\n    if (x || y) {\n      return FooOutcome.SKIPPED;\n    }\n    return FooOutcome.DONE;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (x || y) {
+              return FooOutcome.SKIPPED;
+            }
+      style: primary
+      start: 55
+      end: 107
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(boolean x, boolean y) {
+            if (x || y) {
+              return FooOutcome.SKIPPED;
+            }
+            return FooOutcome.DONE;
+          }
+      style: secondary
+      start: 12
+      end: 139
+  "class A {\n  FooOutcome run(boolean y) {\n    if (y) {\n      log();\n      throw new IllegalStateException();\n    }\n    return FooOutcome.DONE;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (y) {
+              log();
+              throw new IllegalStateException();
+            }
+      style: primary
+      start: 44
+      end: 112
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(boolean y) {
+            if (y) {
+              log();
+              throw new IllegalStateException();
+            }
+            return FooOutcome.DONE;
+          }
+      style: secondary
+      start: 12
+      end: 144
   "class A {\n  Holder.BarOutcome run(boolean x) {\n    Runnable r = () -> {\n      if (x) {\n        log();\n      }\n    };\n    return Holder.BarOutcome.DONE;\n  }\n}\n":
     labels:
     - source: |-
@@ -65,3 +190,26 @@ snapshots:
       style: secondary
       start: 12
       end: 155
+  "class A {\n  void run(boolean x) {\n    if (x) {\n      return;\n    }\n    save();\n  }\n  FooOutcome other(boolean x) {\n    if (x) {\n      return save();\n    }\n    return FooOutcome.DONE;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (x) {
+              return save();
+            }
+      style: primary
+      start: 119
+      end: 154
+    - source: FooOutcome
+      style: secondary
+      start: 85
+      end: 95
+    - source: |-
+        FooOutcome other(boolean x) {
+            if (x) {
+              return save();
+            }
+            return FooOutcome.DONE;
+          }
+      style: secondary
+      start: 85
+      end: 186

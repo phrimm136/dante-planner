@@ -68,7 +68,7 @@ public class FreshnessConfig {
         MarkerStore.Source local = new MarkerStore.Source(RedisRole.AUTH_LOCAL, authLocalStore);
         MarkerStore.Source auth = new MarkerStore.Source(RedisRole.AUTH, authStore);
         return new MarkerStore(authRedisConnectionFactory, redisClientResources,
-                MarkerStore.sourceOrder(readSourceProperties.readsPrimaryFirst(), local, auth),
+                readSourceProperties.readOrder().stores(local, auth),
                 redisRoleHealth, settings, meterRegistry);
     }
 

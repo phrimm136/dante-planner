@@ -16,15 +16,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +45,9 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceLayerTest {
 
+    private static final Instant NOW = Instant.parse("2026-11-26T00:00:00Z");
+    private static final Clock CLOCK = Clock.fixed(NOW, ZoneOffset.UTC);
+
     @Mock
     private NotificationRepository notificationRepository;
 
@@ -55,9 +60,9 @@ class NotificationServiceLayerTest {
 
     @BeforeEach
     void setUp() {
-        inboxService = new NotificationInboxService(notificationRepository, Clock.systemUTC());
+        inboxService = new NotificationInboxService(notificationRepository, CLOCK);
         dispatchService = new NotificationDispatchService(notificationRepository);
-        retentionService = new NotificationRetentionService(notificationRepository, Clock.systemUTC());
+        retentionService = new NotificationRetentionService(notificationRepository, CLOCK);
     }
 
     private void whenInsertIgnoreYields(int rows) {
@@ -76,8 +81,8 @@ class NotificationServiceLayerTest {
         Notification stored = new Notification(userId, contentId, type,
                 new Notification.Content.PlannerScoped(testPlannerId, plannerTitle));
         UUID publicId = UUID.randomUUID();
-        stored.setPublicId(publicId);
-        stored.setCreatedAt(Instant.now());
+        ReflectionTestUtils.setField(stored, "publicId", publicId);
+        ReflectionTestUtils.setField(stored, "createdAt", Instant.now());
         lenient().when(notificationRepository.findByUserIdAndContentIdAndNotificationType(
                 userId, contentId, type)).thenReturn(Optional.of(stored));
         return publicId;
@@ -250,7 +255,7 @@ class NotificationServiceLayerTest {
 
             Page<Notification> page = new PageImpl<>(List.of(n1, n2));
 
-            when(notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(eq(testUserId), any(Pageable.class)))
+            when(notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(eq(testUserId), any(Pageable.class)))
                     .thenReturn(page);
 
             // Act
@@ -268,7 +273,7 @@ class NotificationServiceLayerTest {
             // Arrange
             Page<Notification> emptyPage = new PageImpl<>(List.of());
 
-            when(notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(eq(testUserId), any(Pageable.class)))
+            when(notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(eq(testUserId), any(Pageable.class)))
                     .thenReturn(emptyPage);
 
             // Act
@@ -281,7 +286,7 @@ class NotificationServiceLayerTest {
 
         @Test
         void getInbox_WhenRead_ScopesTheRecipientAndGlobal() {
-            when(notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(eq(7L), any(Pageable.class)))
+            when(notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(eq(7L), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(List.of()));
 
             assertThat(inboxService.getInbox(7L, 0, 20).scopes())
@@ -295,7 +300,7 @@ class NotificationServiceLayerTest {
         @Test
         void getUnreadCount_WhenUnreadExist_ReturnsCount() {
             // Arrange
-            when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUserId))
+            when(notificationRepository.countByUserIdAndReadAtIsNull(testUserId))
                     .thenReturn(5L);
 
             // Act
@@ -308,7 +313,7 @@ class NotificationServiceLayerTest {
         @Test
         void getUnreadCount_WhenNoUnread_ReturnsZero() {
             // Arrange
-            when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUserId))
+            when(notificationRepository.countByUserIdAndReadAtIsNull(testUserId))
                     .thenReturn(0L);
 
             // Act
@@ -320,7 +325,7 @@ class NotificationServiceLayerTest {
 
         @Test
         void getUnreadCount_WhenRead_ScopesTheRecipientAndGlobal() {
-            when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(7L)).thenReturn(0L);
+            when(notificationRepository.countByUserIdAndReadAtIsNull(7L)).thenReturn(0L);
 
             assertThat(inboxService.getUnreadCount(7L).scopes())
                     .containsExactlyInAnyOrder(new FreshnessScope.User(7L), new FreshnessScope.Global());
@@ -331,52 +336,36 @@ class NotificationServiceLayerTest {
     class MarkAsReadTests {
 
         @Test
-        void markAsRead_WhenSuccess_SetsReadFlag() {
-            // Arrange
+        void markAsRead_WhenTheOwnRowExists_MarksBeforeReadingAndAnswersTheStoredReadAt() {
             UUID publicId = UUID.randomUUID();
-            Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
-            notification.setPublicId(publicId);
-            assertThat(notification.isRead()).isFalse();
-
-            when(notificationRepository.findByPublicId(publicId))
+            Instant firstReadAt = NOW.minusSeconds(60);
+            Notification notification = new Notification(
+                    testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
+            ReflectionTestUtils.setField(notification, "publicId", publicId);
+            ReflectionTestUtils.setField(notification, "readAt", firstReadAt);
+            when(notificationRepository.findByPublicIdAndUserId(publicId, testUserId))
                     .thenReturn(Optional.of(notification));
 
-            // Act
             NotificationResponse response = inboxService.markAsRead(publicId, testUserId);
 
-            // Assert
-            assertThat(notification.isRead()).isTrue();
-            assertThat(notification.getReadAt()).isNotNull();
+            assertThat(response.id()).isEqualTo(publicId);
             assertThat(response.read()).isTrue();
+            assertThat(response.readAt()).isEqualTo(firstReadAt);
+            InOrder order = inOrder(notificationRepository);
+            order.verify(notificationRepository).markAsRead(publicId, testUserId, NOW);
+            order.verify(notificationRepository).findByPublicIdAndUserId(publicId, testUserId);
         }
 
         @Test
-        void markAsRead_WhenNotFound_ThrowsException() {
-            // Arrange
+        void markAsRead_WhenNoOwnRow_ThrowsException() {
             UUID publicId = UUID.randomUUID();
-            when(notificationRepository.findByPublicId(publicId))
+            when(notificationRepository.findByPublicIdAndUserId(publicId, testUserId))
                     .thenReturn(Optional.empty());
 
-            // Act & Assert
             assertRejected(() -> inboxService.markAsRead(publicId, testUserId))
                     .withCode("NOT_FOUND")
-                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
-        }
-
-        @Test
-        void markAsRead_WhenWrongUser_ThrowsException() {
-            // Arrange
-            UUID publicId = UUID.randomUUID();
-            Notification notification = new Notification(100L, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
-            notification.setPublicId(publicId);
-
-            when(notificationRepository.findByPublicId(publicId))
-                    .thenReturn(Optional.of(notification));
-
-            // Act & Assert
-            assertRejected(() -> inboxService.markAsRead(publicId, 999L))
-                    .withCode("NOT_FOUND")
-                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .isEqualTo("Notification not found with id: " + publicId));
         }
     }
 
@@ -384,81 +373,11 @@ class NotificationServiceLayerTest {
     class MarkAllAsReadTests {
 
         @Test
-        void markAllAsRead_WhenUnreadExist_ReturnsUpdatedCount() {
-            // Arrange
-            when(notificationRepository.markAllAsRead(eq(testUserId), any(Instant.class)))
-                    .thenReturn(3);
+        void markAllAsRead_WhenUnreadExist_MarksTheirIdsAndAnswersTheMatchedCount() {
+            when(notificationRepository.unreadIdsOf(testUserId)).thenReturn(List.of(3L, 5L, 8L));
+            when(notificationRepository.markAllAsRead(List.of(3L, 5L, 8L), NOW)).thenReturn(2);
 
-            // Act
-            int count = inboxService.markAllAsRead(testUserId);
-
-            // Assert
-            assertThat(count).isEqualTo(3);
-        }
-
-        @Test
-        void markAllAsRead_WhenNoUnread_ReturnsZero() {
-            // Arrange
-            when(notificationRepository.markAllAsRead(eq(testUserId), any(Instant.class)))
-                    .thenReturn(0);
-
-            // Act
-            int count = inboxService.markAllAsRead(testUserId);
-
-            // Assert
-            assertThat(count).isEqualTo(0);
-        }
-    }
-
-    @Nested
-    class DeleteNotificationTests {
-
-        @Test
-        void deleteNotification_WhenSuccess_SoftDeletes() {
-            // Arrange
-            UUID publicId = UUID.randomUUID();
-            Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
-            notification.setPublicId(publicId);
-            assertThat(notification.isDeleted()).isFalse();
-
-            when(notificationRepository.findByPublicId(publicId))
-                    .thenReturn(Optional.of(notification));
-
-            // Act
-            inboxService.deleteNotification(publicId, testUserId);
-
-            // Assert
-            assertThat(notification.isDeleted()).isTrue();
-            assertThat(notification.getDeletedAt()).isNotNull();
-        }
-
-        @Test
-        void deleteNotification_WhenNotFound_ThrowsException() {
-            // Arrange
-            UUID publicId = UUID.randomUUID();
-            when(notificationRepository.findByPublicId(publicId))
-                    .thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertRejected(() -> inboxService.deleteNotification(publicId, testUserId))
-                    .withCode("NOT_FOUND")
-                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
-        }
-
-        @Test
-        void deleteNotification_WhenWrongUser_ThrowsException() {
-            // Arrange
-            UUID publicId = UUID.randomUUID();
-            Notification notification = new Notification(100L, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
-            notification.setPublicId(publicId);
-
-            when(notificationRepository.findByPublicId(publicId))
-                    .thenReturn(Optional.of(notification));
-
-            // Act & Assert
-            assertRejected(() -> inboxService.deleteNotification(publicId, 999L))
-                    .withCode("NOT_FOUND")
-                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
+            assertThat(inboxService.markAllAsRead(testUserId)).isEqualTo(2);
         }
     }
 
@@ -466,45 +385,11 @@ class NotificationServiceLayerTest {
     class CleanupOldNotificationsTests {
 
         @Test
-        void cleanupOldNotifications_WhenRun_SoftAndHardDeletes() {
-            // Arrange
-            when(notificationRepository.softDeleteOldReadNotifications(any(Instant.class), any(Instant.class)))
-                    .thenReturn(10);
-            when(notificationRepository.hardDeleteOldNotifications(any(Instant.class)))
-                    .thenReturn(5);
-
-            // Act
+        void cleanupOldNotifications_WhenRun_DeletesWhatWasReadOver365DaysAgo() {
             retentionService.purgeExpired();
 
-            // Assert
-            verify(notificationRepository).softDeleteOldReadNotifications(any(Instant.class), any(Instant.class));
-            verify(notificationRepository).hardDeleteOldNotifications(any(Instant.class));
-        }
-
-        @Test
-        void cleanupOldNotifications_WhenRun_UsesCorrectCutoffDates() {
-            // Arrange
-            ArgumentCaptor<Instant> softDeleteCutoffCaptor = ArgumentCaptor.forClass(Instant.class);
-            ArgumentCaptor<Instant> hardDeleteCutoffCaptor = ArgumentCaptor.forClass(Instant.class);
-
-            when(notificationRepository.softDeleteOldReadNotifications(softDeleteCutoffCaptor.capture(), any(Instant.class)))
-                    .thenReturn(0);
-            when(notificationRepository.hardDeleteOldNotifications(hardDeleteCutoffCaptor.capture()))
-                    .thenReturn(0);
-
-            // Act
-            retentionService.purgeExpired();
-
-            // Assert - verify cutoff dates are approximately correct
-            Instant now = Instant.now();
-            Instant softDeleteCutoff = softDeleteCutoffCaptor.getValue();
-            Instant hardDeleteCutoff = hardDeleteCutoffCaptor.getValue();
-
-            long softDeleteDays = ChronoUnit.DAYS.between(softDeleteCutoff, now);
-            long hardDeleteDays = ChronoUnit.DAYS.between(hardDeleteCutoff, now);
-
-            assertThat(softDeleteDays).as("Soft delete cutoff should be ~90 days").isBetween(89L, 91L);
-            assertThat(hardDeleteDays).as("Hard delete cutoff should be ~365 days").isBetween(364L, 366L);
+            verify(notificationRepository).deleteReadBefore(NOW.minus(365, ChronoUnit.DAYS));
+            verifyNoMoreInteractions(notificationRepository);
         }
     }
 }

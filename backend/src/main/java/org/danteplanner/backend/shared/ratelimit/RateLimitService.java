@@ -2,7 +2,6 @@ package org.danteplanner.backend.shared.ratelimit;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
@@ -20,54 +19,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RateLimitService {
 
-    private static final String NO_USER = "null";
     private static final long MIN_RETRY_AFTER_SECONDS = 1;
     private static final long NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1);
 
     private final ProxyManager<byte[]> proxyManager;
     private final RateLimitProperties properties;
 
-    public void check(RateLimitPolicy policy, Long userId) {
-        check(policy, userId, requireOwnEndpoint(policy));
-    }
-
-    public void check(RateLimitPolicy policy, Long userId, String endpoint) {
-        consumeOrThrow(policy, userId.toString(), endpoint, userId.toString());
-    }
-
-    public void check(RateLimitPolicy policy, String identifier) {
-        consumeOrThrow(policy, identifier, requireOwnEndpoint(policy), NO_USER);
-    }
-
-    public void check(RateLimitPolicy policy, UUID deviceId) {
-        consumeOrThrow(policy, deviceId.toString(), requireOwnEndpoint(policy), NO_USER);
-    }
-
-    private static String requireOwnEndpoint(RateLimitPolicy policy) {
-        return switch (policy.endpoint()) {
-            case RateLimitPolicy.Endpoint.Fixed fixed -> fixed.name();
-            case RateLimitPolicy.Endpoint.CallerNamed callerNamed ->
-                    throw new IllegalArgumentException(policy + " keys its buckets by a caller-named endpoint");
-        };
-    }
-
-    private enum Charge {
-        ADMITTED,
-        REFUSED;
-
-        static Charge of(boolean consumed) {
-            return consumed ? ADMITTED : REFUSED;
-        }
-    }
-
-    private void consumeOrThrow(RateLimitPolicy policy, String subject, String endpoint,
-            String refusedUser) {
-        ConsumptionProbe probe = consume(subject + ":" + endpoint, policy.bucket(properties));
-        switch (Charge.of(probe.isConsumed())) {
-            case ADMITTED -> { }
-            case REFUSED -> throw new RateLimitExceededException(
-                    refusedUser, endpoint, retryAfterSeconds(probe.getNanosToWaitForRefill()));
-        }
+    public ConsumptionProbe charge(RateLimitPolicy policy, ChargeKey key) {
+        return consume(key.spelled(), policy.bucket(properties));
     }
 
     static long retryAfterSeconds(long nanosToWaitForRefill) {

@@ -1,5 +1,7 @@
 package org.danteplanner.backend.moderation;
 
+import org.danteplanner.backend.planner.entity.Listing;
+import org.danteplanner.backend.planner.entity.Takedown;
 import javax.sql.DataSource;
 
 import tools.jackson.databind.JsonNode;
@@ -12,7 +14,7 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -92,7 +94,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
     private User owner;
     private User moderator;
     private User admin;
-    private Planner planner;
+    private StoredPlanner planner;
     private Cookie moderatorCookie;
     private Cookie adminCookie;
 
@@ -117,108 +119,108 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                         actor.getId(), actor.getRole(), Instant.now().plus(1, ChronoUnit.HOURS), Instant.now()));
     }
 
-    private Planner reloaded() {
-        return plannerRepository.findById(planner.getId()).orElseThrow();
+    private StoredPlanner reloaded() {
+        return plannerRepository.findAggregate(planner.id()).orElseThrow();
     }
 
     @Test
     void takedownPlanner_WhenActorBanned_Returns403AndPlannerStaysPublished() throws Exception {
         ban(moderator);
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(reloaded().isTakenDown()).isFalse();
-        assertThat(reloaded().isPublished()).isTrue();
+        assertThat(reloaded().takedown()).isEqualTo(new Takedown.Clear());
+        assertThat(reloaded().publication().isPublished()).isTrue();
     }
 
     @Test
     void takedownPlanner_WhenActorTimedOut_Returns403AndPlannerStaysPublished() throws Exception {
         timeOut(moderator);
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_TIMED_OUT"));
 
-        assertThat(reloaded().isTakenDown()).isFalse();
-        assertThat(reloaded().isPublished()).isTrue();
+        assertThat(reloaded().takedown()).isEqualTo(new Takedown.Clear());
+        assertThat(reloaded().publication().isPublished()).isTrue();
     }
 
     @Test
     void takedownPlanner_WhenAdminActorBanned_Returns403AndPlannerStaysPublished() throws Exception {
         ban(admin);
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(adminCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(reloaded().isTakenDown()).isFalse();
+        assertThat(reloaded().takedown()).isEqualTo(new Takedown.Clear());
     }
 
     @Test
     void takedownPlanner_WhenActorUnrestricted_Returns200AndTakesDown() throws Exception {
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isOk());
 
-        assertThat(reloaded().isTakenDown()).isTrue();
+        assertThat(reloaded().takedown()).isInstanceOf(Takedown.TakenDown.class);
     }
 
     @Test
     void unpublishPlanner_WhenActorBanned_Returns403AndPlannerStaysPublished() throws Exception {
         ban(moderator);
 
-        mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", planner.getId()).with(withCsrf())
+        mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(reloaded().isPublished()).isTrue();
+        assertThat(reloaded().publication().isPublished()).isTrue();
     }
 
     @Test
     void hideFromRecommended_WhenActorBanned_Returns403AndPlannerStaysListed() throws Exception {
         ban(moderator);
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(reloaded().isHiddenFromRecommended()).isFalse();
+        assertThat(reloaded().listing()).isEqualTo(new Listing.Listed());
     }
 
     @Test
     void unhideFromRecommended_WhenActorBanned_Returns403AndPlannerStaysHidden() throws Exception {
-        plannerTarget.hideFromRecommended(planner.getId(), admin.getId(), "Hidden before the ban");
+        plannerTarget.hideFromRecommended(planner.id(), admin.getId(), "Hidden before the ban");
         ban(moderator);
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(reloaded().isHiddenFromRecommended()).isTrue();
+        assertThat(reloaded().listing()).isInstanceOf(Listing.Hidden.class);
     }
 
     @Test
     void deleteComment_WhenActorBanned_Returns403AndCommentSurvives() throws Exception {
         PlannerComment comment = StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                planner.getId(), owner.getId(), null, 0), "A comment to be moderated");
+                planner.id(), owner.getId(), null, 0), "A comment to be moderated");
         ban(moderator);
 
         mockMvc.perform(post("/api/moderation/comments/{publicId}/delete", comment.getPublicId()).with(withCsrf())
@@ -265,15 +267,15 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 userRepository.changeRole(
                         moderator.getId(), UserRole.MODERATOR, UserRole.NORMAL, Instant.now()));
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
-        assertThat(reloaded().isTakenDown()).isFalse();
-        assertThat(reloaded().isPublished()).isTrue();
+        assertThat(reloaded().takedown()).isEqualTo(new Takedown.Clear());
+        assertThat(reloaded().publication().isPublished()).isTrue();
     }
 
     @Test
@@ -319,14 +321,14 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 userRepository.softDelete(
                         moderator.getId(), Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS)));
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(moderatorCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
-        assertThat(reloaded().isTakenDown()).isFalse();
+        assertThat(reloaded().takedown()).isEqualTo(new Takedown.Clear());
     }
 
     @Test
@@ -334,21 +336,21 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
         Cookie orphanCookie = AuthCookies.accessToken(
                 jwtTokenService.generateAccessToken(Long.MAX_VALUE, UserRole.MODERATOR));
 
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.id()).with(withCsrf())
                         .cookie(orphanCookie)
                         .contentType(APPLICATION_JSON)
                         .content(REASON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
-        assertThat(reloaded().isTakenDown()).isFalse();
+        assertThat(reloaded().takedown()).isEqualTo(new Takedown.Clear());
     }
 
     @Test
     void takedownPlanner_WhenActorBanned_RendersTheBanRefusalOfAnOrdinaryRoute() throws Exception {
         ban(moderator);
 
-        JsonNode privileged = problemBody(post("/api/moderation/planner/{id}/takedown", planner.getId())
+        JsonNode privileged = problemBody(post("/api/moderation/planner/{id}/takedown", planner.id())
                 .with(withCsrf())
                 .cookie(moderatorCookie)
                 .contentType(APPLICATION_JSON)

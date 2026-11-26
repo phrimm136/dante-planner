@@ -9,10 +9,10 @@ import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.entity.AccountLife;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
-import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.validation.RoleChangeValidator;
+import org.danteplanner.backend.user.validation.RoleChangeValidator.DeletableAccount;
 import org.danteplanner.backend.user.validation.WrittenAccount;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
@@ -69,14 +69,12 @@ public class UserAccountLifecycleService {
             case AccountLife.Live live -> { }
         }
 
-        if (user.getRole() == UserRole.ADMIN) {
-            roleChangeValidator.requireAnotherActiveAdministrator();
-        }
+        DeletableAccount deletable = roleChangeValidator.requireDeletable(user);
 
         Instant now = clock.instant();
         Instant scheduledDeleteAt = now.plus(Duration.ofDays(gracePeriodDays));
-        WrittenAccount written = WrittenAccount.of(userId,
-                WriteOutcome.of(userRepository.softDelete(userId, now, scheduledDeleteAt)));
+        WrittenAccount written = WrittenAccount.of(deletable.getUserId(),
+                WriteOutcome.of(userRepository.softDelete(deletable.getUserId(), now, scheduledDeleteAt)));
         FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
 
         participants.forEach(participant -> participant.accountDeactivated(userId));

@@ -3,10 +3,12 @@ package org.danteplanner.backend.planner.dto;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.Device;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.Publication;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,34 +31,31 @@ public record PlannerResponse(
     boolean published
 ) {
 
-    public static PlannerResponse fromEntity(Planner planner) {
-        return fromEntity(planner, planner.isPublished());
+    public static PlannerResponse from(StoredPlanner planner) {
+        return from(planner, planner.publication());
     }
 
-    public static PlannerResponse fromEntity(Planner planner, Publication publication) {
-        return fromEntity(planner, publication.isPublished());
-    }
-
-    private static PlannerResponse fromEntity(Planner planner, boolean published) {
+    public static PlannerResponse from(StoredPlanner planner, Publication publication) {
+        StoredContent content = planner.content();
         return PlannerResponse.builder()
-                .id(planner.getId())
-                .title(planner.getTitle())
-                .category(planner.getCategory())
-                .status(planner.getStatus())
-                .content(planner.getContentJson())
-                .schemaVersion(planner.getSchemaVersion())
-                .contentVersion(planner.getContentVersion())
-                .plannerType(planner.getPlannerType())
-                .syncVersion(planner.getSyncVersion())
-                .deviceId(textOf(planner.getDeviceId()))
-                .createdAt(planner.getCreatedAt())
-                .lastModifiedAt(planner.getLastModifiedAt())
-                .savedAt(planner.getLastModifiedAt())
-                .published(published)
+                .id(planner.id())
+                .title(content.title())
+                .category(content.category())
+                .status(content.status())
+                .content(content.json())
+                .schemaVersion(content.schemaVersion())
+                .contentVersion(content.gameContentVersion())
+                .plannerType(planner.plannerType())
+                .syncVersion(content.syncVersion())
+                .deviceId(switch (content.device()) {
+                    case Device.Known(UUID deviceId) -> deviceId.toString();
+                    case Device.Unknown unknown -> null;
+                })
+                .createdAt(planner.createdAt())
+                .lastModifiedAt(content.lastModifiedAt())
+                .savedAt(content.lastModifiedAt())
+                .published(publication.isPublished())
                 .build();
     }
 
-    private static @Nullable String textOf(@Nullable UUID id) {
-        return id != null ? id.toString() : null;
-    }
 }

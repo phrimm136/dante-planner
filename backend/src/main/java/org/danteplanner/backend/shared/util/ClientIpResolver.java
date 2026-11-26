@@ -5,11 +5,12 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.shared.config.SecurityProperties;
-import org.danteplanner.backend.shared.config.SecurityProperties.CidrRange;
 
 /**
  * An {@code X-Forwarded-For} or {@code CF-Connecting-IP} header is honoured only when the direct
@@ -34,11 +35,11 @@ public final class ClientIpResolver {
     );
 
     /** RFC 1918 space plus loopback: not routable, so never a caller's own address. */
-    private static final List<CidrRange> PRIVATE_IPV4_RANGES = List.of(
-            CidrRange.parse("10.0.0.0/8"),
-            CidrRange.parse("172.16.0.0/12"),
-            CidrRange.parse("192.168.0.0/16"),
-            CidrRange.parse("127.0.0.0/8"));
+    private static final List<IpAddressMatcher> PRIVATE_IPV4_RANGES = List.of(
+            new IpAddressMatcher("10.0.0.0/8"),
+            new IpAddressMatcher("172.16.0.0/12"),
+            new IpAddressMatcher("192.168.0.0/16"),
+            new IpAddressMatcher("127.0.0.0/8"));
 
     private static final List<String> PRIVATE_IPV6_ADDRESSES = List.of("::1", "::");
 
@@ -46,17 +47,8 @@ public final class ClientIpResolver {
     }
 
     public static String resolve(HttpServletRequest request, SecurityProperties securityProperties) {
-        String directIp = request.getRemoteAddr();
-        return clientIp(directIp, securityProperties.isTrustedProxy(directIp), RequestHeaders.forwardedFor(request));
-    }
-
-    private static String clientIp(String directIp, boolean peerIsTrustedProxy, @Nullable String forwarded) {
-        if (!peerIsTrustedProxy || forwarded == null || forwarded.isBlank()) {
-            return directIp;
-        }
-
-        String claimedIp = firstHop(forwarded);
-        return isValidIp(claimedIp) ? claimedIp : directIp;
+        Peer peer = Peer.of(securityProperties.trustedProxies().contains(request.getRemoteAddr()));
+        return forwardedOrDirect(request, peer);
     }
 
     public static String resolveClientIdentifier(
@@ -64,11 +56,10 @@ public final class ClientIpResolver {
             SecurityProperties securityProperties,
             Supplier<UUID> deviceId
     ) {
-        String ip = switch (ClientIpEvidence.of(
-                RequestHeaders.cfConnectingIp(request), securityProperties.isTrustedProxy(request.getRemoteAddr()))) {
-            case ClientIpEvidence.Trusted trusted -> trusted.ip();
-            case ClientIpEvidence.NotEvidence notEvidence -> resolve(request, securityProperties);
-        };
+        Peer peer = Peer.of(securityProperties.trustedProxies().contains(request.getRemoteAddr()));
+        IpClaim edge = IpClaim.edge(RequestHeaders.cfConnectingIp(request));
+        String forwardedOrDirect = forwardedOrDirect(request, peer);
+        String ip = ipOf(peer, edge, forwardedOrDirect);
 
         if (isPrivateIp(ip)) {
             UUID resolvedDeviceId = deviceId.get();
@@ -94,27 +85,50 @@ public final class ClientIpResolver {
         if (!IPV4_PATTERN.matcher(ip).matches()) {
             return false;
         }
-        return PRIVATE_IPV4_RANGES.stream().anyMatch(range -> range.contains(ip));
+        return PRIVATE_IPV4_RANGES.stream().anyMatch(range -> range.matches(ip));
     }
 
-    private sealed interface ClientIpEvidence {
+    private static String forwardedOrDirect(HttpServletRequest request, Peer peer) {
+        IpClaim forwarded = IpClaim.forwarded(RequestHeaders.forwardedFor(request));
+        return ipOf(peer, forwarded, request.getRemoteAddr());
+    }
 
-        record Trusted(String ip) implements ClientIpEvidence {
+    /**
+     * A claimed address counts only when the peer is a trusted proxy: the edge forwards
+     * {@code CF-Connecting-IP} verbatim and a proxy appends to {@code X-Forwarded-For}.
+     * {@code isValidIp} checks shape, never provenance.
+     */
+    private static String ipOf(Peer peer, IpClaim claim, String fallback) {
+        return switch (claim) {
+            case IpClaim.Claimed claimed when peer == Peer.TRUSTED_PROXY && isValidIp(claimed.ip()) -> claimed.ip();
+            case IpClaim.Claimed claimed -> fallback;
+            case IpClaim.Absent absent -> fallback;
+        };
+    }
+
+    private enum Peer {
+        TRUSTED_PROXY,
+        DIRECT;
+
+        static Peer of(boolean trustedProxy) {
+            return trustedProxy ? TRUSTED_PROXY : DIRECT;
+        }
+    }
+
+    private sealed interface IpClaim {
+
+        record Claimed(String ip) implements IpClaim {
         }
 
-        record NotEvidence() implements ClientIpEvidence {
+        record Absent() implements IpClaim {
         }
 
-        /**
-         * The edge forwards {@code CF-Connecting-IP} verbatim, so it is evidence only when the peer is
-         * the edge. {@code isValidIp} checks shape, never provenance.
-         */
-        static ClientIpEvidence of(@Nullable String header, boolean peerIsTrustedProxy) {
-            if (header == null || header.isBlank()) {
-                return new NotEvidence();
-            }
-            String claimedIp = header.trim();
-            return peerIsTrustedProxy && isValidIp(claimedIp) ? new Trusted(claimedIp) : new NotEvidence();
+        static IpClaim edge(@Nullable String header) {
+            return header == null || header.isBlank() ? new Absent() : new Claimed(header.trim());
+        }
+
+        static IpClaim forwarded(@Nullable String header) {
+            return header == null || header.isBlank() ? new Absent() : new Claimed(firstHop(header));
         }
     }
 

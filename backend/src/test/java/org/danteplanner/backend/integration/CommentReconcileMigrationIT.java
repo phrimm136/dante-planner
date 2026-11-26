@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentCommandService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.StoredComments;
@@ -59,7 +59,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     private JdbcTemplate jdbc;
     private User author;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -100,7 +100,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
         assertThat(newShape()).isEqualTo(jdbc.queryForList("SELECT id AS comment_id, content, edited_at, deleted_at, "
                 + "author_notifications_enabled, upvote_count FROM planner_comments ORDER BY id")).hasSize(2);
-        mockMvc.perform(get("/api/planner/{id}/comments", planner.getId()))
+        mockMvc.perform(get("/api/planner/{id}/comments", planner.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].content").value("parent"))
@@ -170,11 +170,11 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Test
     void migration_WhenCommentCountsDrifted_RecountsThemAndWritesNoCorrectRow() {
-        Planner high = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        Planner empty = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        Planner correct = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        Planner correctlyZero = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        Planner withoutStats = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner high = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner empty = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner correct = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner correctlyZero = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner withoutStats = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         splitRow(author.getId(), "low");
         commentOn(high);
         Long deleted = commentOn(high);
@@ -188,7 +188,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
         storeCount(empty, 3);
         storeCount(correct, 1);
         storeCount(correctlyZero, 0);
-        jdbc.update("DELETE FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)", withoutStats.getId().toString());
+        jdbc.update("DELETE FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)", withoutStats.id().toString());
 
         assertThat(applyMigration()).isEqualTo(3);
 
@@ -200,13 +200,13 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Test
     void migration_WhenACommentArrivesBetweenTheReadAndTheCorrection_SkipsThatPlannerAndCorrectsTheOthers() {
-        Planner other = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner other = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         splitRow(author.getId(), "text");
         commentOn(other);
         storeCount(planner, 5);
         storeCount(other, 5);
 
-        run(COUNTS_CALL, () -> commandService.createComment(planner.getId(), author.getId(),
+        run(COUNTS_CALL, () -> commandService.createComment(planner.id(), author.getId(),
                 UUID.randomUUID(), new CreateCommentRequest("arrived", null)));
 
         assertThat(storedCounts(planner)).containsExactly(6);
@@ -258,7 +258,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
     void migration_WhenASessionHoldsRowsItHasNoReasonToChange_FinishesWithoutWaiting() {
         Long held = splitRow(author.getId(), "live");
         Long erased = splitRow(SENTINEL_USER_ID, "erased");
-        Planner drifted = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner drifted = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         storeCount(planner, 2);
         storeCount(drifted, 4);
 
@@ -277,7 +277,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Test
     void migration_WhenALaterRowIsHeld_HasCommittedTheEarlierOnesAndTheNextRunFinishes() {
-        Planner other = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner other = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         storeCount(planner, 5);
         storeCount(other, 5);
         List<UUID> inMigrationOrder = jdbc.queryForList("SELECT BIN_TO_UUID(planner_id) FROM planner_stats "
@@ -358,7 +358,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
         newShapeRow("from this server");
 
         assertThat(oldText(id)).isEqualTo("from the previous server");
-        mockMvc.perform(get("/api/planner/{id}/comments", planner.getId()))
+        mockMvc.perform(get("/api/planner/{id}/comments", planner.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].content").value(containsInAnyOrder(
                         "from the previous server", "from this server")));
@@ -370,7 +370,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
         return id;
     }
 
-    private Long commentOn(Planner target) {
+    private Long commentOn(StoredPlanner target) {
         Long id = insertRow(target, author.getId(), "text", null);
         StoredComments.split(jdbc, id);
         return id;
@@ -380,11 +380,11 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
         return insertRow(planner, userId, content, parentId);
     }
 
-    private Long insertRow(Planner target, Long userId, @Nullable String content, @Nullable Long parentId) {
+    private Long insertRow(StoredPlanner target, Long userId, @Nullable String content, @Nullable Long parentId) {
         String publicId = UUID.randomUUID().toString();
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, parent_comment_id, content, depth, "
                 + "created_at) VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, ?, ?, ?, NOW())",
-                publicId, target.getId().toString(), userId, parentId, content, parentId == null ? 0 : 1);
+                publicId, target.id().toString(), userId, parentId, content, parentId == null ? 0 : 1);
         return idOf(UUID.fromString(publicId));
     }
 
@@ -419,14 +419,14 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
                 + "WHERE comment_id = ? AND deleted_at IS NOT NULL", id);
     }
 
-    private void storeCount(Planner target, int count) {
+    private void storeCount(StoredPlanner target, int count) {
         jdbc.update("INSERT INTO planner_stats (planner_id, comment_count) VALUES (UUID_TO_BIN(?), ?) "
-                + "ON DUPLICATE KEY UPDATE comment_count = VALUES(comment_count)", target.getId().toString(), count);
+                + "ON DUPLICATE KEY UPDATE comment_count = VALUES(comment_count)", target.id().toString(), count);
     }
 
-    private List<Integer> storedCounts(Planner target) {
+    private List<Integer> storedCounts(StoredPlanner target) {
         return jdbc.queryForList("SELECT comment_count FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)",
-                Integer.class, target.getId().toString());
+                Integer.class, target.id().toString());
     }
 
     private int countsByPlanner(UUID plannerId) {

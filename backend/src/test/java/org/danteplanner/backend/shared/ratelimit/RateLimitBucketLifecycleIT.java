@@ -34,12 +34,11 @@ import com.redis.testcontainers.RedisContainer;
 import org.assertj.core.api.SoftAssertions;
 
 import io.github.bucket4j.BucketConfiguration;
+import io.github.bucket4j.ConsumptionProbe;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @Tag("containerized")
@@ -96,16 +95,15 @@ class RateLimitBucketLifecycleIT {
         return stored.getBandwidths()[0].getCapacity();
     }
 
+    private ConsumptionProbe charge(long userId) {
+        return rateLimitService.charge(RateLimitPolicy.CRUD, ChargeKey.User.parse(RateLimitPolicy.CRUD, userId, ENDPOINT));
+    }
+
     private int successfulCharges(long userId, int attempts) {
         int passed = 0;
         for (int i = 0; i < attempts; i++) {
-            Throwable refused = catchThrowable(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT));
-            if (refused == null) {
+            if (charge(userId).isConsumed()) {
                 passed++;
-            } else {
-                assertRejected(() -> {
-                    throw refused;
-                }).withCode("RATE_LIMIT_EXCEEDED");
             }
         }
         return passed;
@@ -115,7 +113,7 @@ class RateLimitBucketLifecycleIT {
     void check_WhenLimitLoweredOnALiveBucket_EnforcesTheLoweredLimit() {
         long userId = 101L;
         limit(10);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
 
         configVersion = 2;
         limit(3);
@@ -132,11 +130,11 @@ class RateLimitBucketLifecycleIT {
     void check_WhenLimitRaisedOnALiveBucket_StoresTheRaisedLimit() {
         long userId = 102L;
         limit(3);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
 
         configVersion = 2;
         limit(10);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
 
         assertThat(storedCapacity(userId)).as("stored capacity after raising 3 -> 10").isEqualTo(10);
     }
@@ -146,12 +144,12 @@ class RateLimitBucketLifecycleIT {
         long userId = 105L;
         long startNanos = System.nanoTime();
         limit(3);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
+        charge(userId);
 
         configVersion = 2;
         limit(10);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
         long available = availableTokens(userId);
         long accruable = refillAccruableSince(startNanos, 10);
 
@@ -196,10 +194,10 @@ class RateLimitBucketLifecycleIT {
     void check_WhenLimitChangedWithoutAVersionBump_KeepsTheStoredLimit() {
         long userId = 103L;
         limit(3);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
 
         limit(10);
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
+        charge(userId);
 
         assertThat(storedCapacity(userId)).as("stored capacity after 3 -> 10 at the same version").isEqualTo(3);
     }

@@ -11,7 +11,7 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.api.Restriction;
+import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
 import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;

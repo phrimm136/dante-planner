@@ -1,5 +1,8 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.shared.dto.NotificationSetting;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.danteplanner.backend.support.PlannerContentRows;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
@@ -11,7 +14,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -91,6 +94,11 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerRepository plannerRepository;
 
+
+    @Autowired
+
+    private JdbcTemplate jdbcTemplate;
+
     @Autowired
     private PlannerStatsRepository plannerStatsRepository;
 
@@ -123,7 +131,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     private User owner;
     private User viewer;
-    private Planner published;
+    private StoredPlanner published;
 
     @BeforeEach
     void setUp() {
@@ -157,7 +165,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void viewCount_WhenSameUserPostsTwiceInOneDay_BuffersOneViewUnderOneExpiringSeenKey() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         LocalDate before = LocalDate.now(ZoneOffset.UTC);
 
         for (int i = 0; i < 2; i++) {
@@ -181,7 +189,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void viewCount_WhenNoUserAgentIsSent_RecordsTheHashOfAnEmptyAgent() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         LocalDate before = LocalDate.now(ZoneOffset.UTC);
 
         mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
@@ -200,7 +208,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flush_WhenBufferHoldsAView_AppliesItAndClearsTheBuffer() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         int before = viewCountOf(plannerId);
 
         mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
@@ -214,7 +222,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flush_WhenLeftoverBatchIsAlreadyRecorded_DeletesItWithoutReapplying() {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         UUID batchId = UUID.randomUUID();
         String batchKey = BATCH_KEY_PREFIX + batchId;
         transactionTemplate.executeWithoutResult(status -> viewFlushBatchRepository.insertBatch(batchId));
@@ -230,7 +238,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flush_WhenLeftoverBatchIsNotRecorded_AppliesRecordsAndDeletesIt() {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         UUID batchId = UUID.randomUUID();
         String batchKey = BATCH_KEY_PREFIX + batchId;
         redisTemplate.opsForHash().put(batchKey, plannerId.toString(), "5");
@@ -246,7 +254,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void stats_WhenPublished_ReturnsTheCountsWithNoStore() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         transactionTemplate.executeWithoutResult(status -> {
             plannerStatsRepository.incrementViewCountBy(plannerId, 4);
             plannerStatsRepository.incrementUpvotes(plannerId);
@@ -268,7 +276,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flags_WhenNonOwnerUpvotedAndSubscribed_ReturnsTrueTrueFalseWithNoStore() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         plannerVoteRepository.save(new PlannerVote(viewer.getId(), plannerId, VoteType.UP));
         subscriptionService.createSubscription(viewer.getId(), plannerId);
 
@@ -288,7 +296,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flags_WhenOwnerUpvotedAndSubscribed_CarriesTheOwnerNotificationSetting() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         plannerVoteRepository.save(new PlannerVote(owner.getId(), plannerId, VoteType.UP));
         subscriptionService.createSubscription(owner.getId(), plannerId);
 
@@ -296,12 +304,12 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasUpvoted").value(true))
                 .andExpect(jsonPath("$.isSubscribed").value(true))
-                .andExpect(jsonPath("$.ownerNotificationsEnabled").value(published.isOwnerNotificationsEnabled()));
+                .andExpect(jsonPath("$.ownerNotificationsEnabled").value(published.ownerNotifications() == NotificationSetting.ON));
     }
 
     @Test
     void flags_WhenAnonymous_ReturnsAllFalse() throws Exception {
-        mockMvc.perform(get("/api/planner/md/published/{id}/flags", published.getId()))
+        mockMvc.perform(get("/api/planner/md/published/{id}/flags", published.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasUpvoted").value(false))
                 .andExpect(jsonPath("$.isSubscribed").value(false))
@@ -310,7 +318,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void splitEndpoints_WhenPlannerUnpublished_AnswerTheDetailReadNotFound() throws Exception {
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).id();
         String detail = "Planner not found with id: " + plannerId;
 
         mockMvc.perform(get("/api/planner/md/published/{id}", plannerId))
@@ -338,7 +346,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void viewCount_WhenAnonymous_Returns204AndBuffersTheView() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
 
         mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
                         .cookie(AuthCookies.freshDeviceId()))
@@ -349,7 +357,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flush_WhenBatchKeyIsNotRegistered_LeavesItUnreplayed() {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         UUID batchId = UUID.randomUUID();
         String batchKey = BATCH_KEY_PREFIX + batchId;
         redisTemplate.opsForHash().put(batchKey, plannerId.toString(), "5");
@@ -370,7 +378,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void flush_WhenARegisteredBatchCannotBeApplied_CountsItAndStillFlushesTheBuffer() throws Exception {
-        UUID plannerId = published.getId();
+        UUID plannerId = published.id();
         String poison = "not-a-batch-id-" + UUID.randomUUID();
         redisTemplate.opsForSet().add(BATCHES_KEY, poison);
         try {
@@ -392,22 +400,21 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void splitEndpoints_WhenContentSoftDeleted_AnswerTheDetailReadNotFound() throws Exception {
-        published.softDelete(Instant.now());
-        plannerRepository.save(published);
+        PlannerContentRows.markDeleted(jdbcTemplate, published.id());
 
-        assertHiddenFromEveryReadPath(published.getId());
+        assertHiddenFromEveryReadPath(published.id());
     }
 
     @Test
     void splitEndpoints_WhenTakenDownByModerator_AnswerTheDetailReadNotFound() throws Exception {
         User moderator = TestDataFactory.createModerator(userRepository, "split-read-moderator@example.com");
-        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", published.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/moderation/planner/{id}/takedown", published.id()).with(withCsrf())
                         .cookie(authOf(moderator))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"reason\":\"Content violates community guidelines\"}"))
                 .andExpect(status().isOk());
 
-        assertHiddenFromEveryReadPath(published.getId());
+        assertHiddenFromEveryReadPath(published.id());
     }
 
     @Test
@@ -416,7 +423,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
                 userRepository.softDelete(
                         owner.getId(), Instant.now(), Instant.now().plusSeconds(86_400L * 30)));
 
-        assertHiddenFromEveryReadPath(published.getId());
+        assertHiddenFromEveryReadPath(published.id());
     }
 
     private void assertHiddenFromEveryReadPath(UUID plannerId) throws Exception {
@@ -454,13 +461,13 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
         UUID deviceId = UUID.randomUUID();
         Cookie device = AuthCookies.deviceId(deviceId);
         String viewRecordKey = "device:" + deviceId + ":view-record";
-        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.id()).with(withCsrf())
                         .cookie(device))
                 .andExpect(status().isNoContent());
         assertThat(availableTokens(viewRecordKey, VIEW_RECORD_CAPACITY)).isEqualTo(VIEW_RECORD_CAPACITY - 1);
         bucket(viewRecordKey, VIEW_RECORD_CAPACITY).tryConsumeAsMuchAsPossible();
 
-        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.getId()).with(withCsrf())
+        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.id()).with(withCsrf())
                         .cookie(device))
                 .andExpect(status().isTooManyRequests());
 

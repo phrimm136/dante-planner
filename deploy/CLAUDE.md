@@ -6,7 +6,8 @@
   retired single-EC2 host and has no effect on the k3s fleet.
 - Third-party components come from their upstream Helm charts, one ArgoCD Application per
   component under `chart/templates/` (chart version in `targetRevision`, values in
-  `helm.valuesObject`, raised by Renovate), identical in both regions. The rest is the project's
+  `helm.valuesObject`, raised by Renovate, except External Secrets:
+  `README.md`, Chart versions), identical in both regions. The rest is the project's
   own chart, `chart/`; what differs per region is written in `values-<region>.yaml`, which
   `values.schema.json` ties to the region's role.
 - The backend image tag in `values-<region>.yaml` is bumped by `.github/workflows/deploy-fleet.yml`

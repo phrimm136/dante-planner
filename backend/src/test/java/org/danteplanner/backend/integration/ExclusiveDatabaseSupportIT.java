@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -33,11 +33,11 @@ class ExclusiveDatabaseSupportIT extends ExclusiveDatabaseSupport {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
         User author = TestDataFactory.createTestUser(userRepository, "report-author@example.com");
         User reporter = TestDataFactory.createTestUser(userRepository, "report-reporter@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         UUID commentPublicId = UUID.randomUUID();
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'a reported comment', 0, NOW())",
-                commentPublicId.toString(), planner.getId().toString(), author.getId());
+                commentPublicId.toString(), planner.id().toString(), author.getId());
         Long commentId = jdbc.queryForObject(
                 "SELECT id FROM planner_comments WHERE public_id = UUID_TO_BIN(?)",
                 Long.class, commentPublicId.toString());

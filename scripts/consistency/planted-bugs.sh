@@ -3,13 +3,15 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<EOF
-usage: $0 <clean|all|check|PATCH> [--seeds K] [--out FILE]
+usage: $0 <clean|all|check|compile|PATCH> [--seeds K] [--out FILE]
   PATCH  a planted bug: a file name under backend/src/test/resources/consistency/planted/ without .patch
   check  git apply --check every planted bug against the checkout
+  compile  apply each planted bug in turn, compile main, test and consistency sources with -PplantedBug, revert
   all    clean, then every planted bug
   --seeds K   seeds per variant (default 20)
   --out FILE  markdown table the row is appended to (default backend/build/consistency/planted-bugs.md)
-Exits 0 when ConsistencyRunIT passed on clean and every planted bug run was detected by the checker.
+A measurement run exits 0 when ConsistencyRunIT passed on clean and every planted bug run was detected by the checker;
+check exits 0 when every planted bug applies, compile when every one applies and compiles.
 EOF
   exit 2
 }
@@ -149,7 +151,7 @@ trap 'exit 143' TERM
 apply_patch() {
   local patch="$planted/$1.patch" file
   if [ ! -f "$patch" ]; then
-    echo "unknown variant: $1 (variants: clean all check $(patch_names | tr '\n' ' '))" >&2
+    echo "unknown variant: $1 (variants: clean all check compile $(patch_names | tr '\n' ' '))" >&2
     return 1
   fi
   file=$(patch_target "$patch") || return 1
@@ -161,6 +163,41 @@ apply_patch() {
   applied_patch=$patch
   git -C "$repo" apply "$patch" || return 1
   echo "applied $1 to $file"
+}
+
+# Runs gradlew in the background so the traps can stop it, then puts the tree back; returns Gradle's exit code.
+gradle_then_restore() {
+  local label=$1 rc
+  shift
+  "$repo/backend/gradlew" "$@" &
+  gradle_pid=$!
+  set +e
+  wait "$gradle_pid"
+  rc=$?
+  set -e
+  gradle_pid=""
+  if ! restore; then
+    echo "$label aborted: the planted bug was not reverted" >&2
+    exit 1
+  fi
+  return "$rc"
+}
+
+compile_patches() {
+  require_targets_at_head
+  local name status=0
+  for name in $(patch_names); do
+    apply_patch "$name" || return 1
+    echo "compile $name: gradlew classes testClasses consistencyClasses -PplantedBug"
+    if gradle_then_restore "compile $name" \
+        -p "$repo/backend" --console=plain -q classes testClasses consistencyClasses -PplantedBug; then
+      echo "compiles: $name"
+    else
+      echo "planted bug does not compile: $name" >&2
+      status=1
+    fi
+  done
+  return "$status"
 }
 
 require_targets_at_head() {
@@ -304,20 +341,10 @@ run_variant() {
   fi
   echo "variant $name: gradlew ${gradle_args[*]}"
   started=$SECONDS
-  "$repo/backend/gradlew" "${gradle_args[@]}" &
-  gradle_pid=$!
-  set +e
-  wait "$gradle_pid"
-  gradle_rc=$?
-  set -e
-  gradle_pid=""
+  gradle_rc=0
+  gradle_then_restore "variant $name" "${gradle_args[@]}" || gradle_rc=$?
   elapsed=$((SECONDS - started))
   echo "variant $name: Gradle exited $gradle_rc after ${elapsed}s"
-
-  if ! restore; then
-    echo "variant $name aborted: the planted bug was not reverted" >&2
-    exit 1
-  fi
 
   if ! verdict=$(judge "$name" "$seeds" "${baseline[@]}"); then
     echo "variant $name aborted: judging the test results failed" >&2
@@ -341,6 +368,9 @@ run_variant() {
 case $variant in
   check)
     check_patches
+    ;;
+  compile)
+    compile_patches
     ;;
   all)
     check_patches

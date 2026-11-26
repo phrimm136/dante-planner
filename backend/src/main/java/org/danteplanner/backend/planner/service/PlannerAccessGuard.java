@@ -4,11 +4,12 @@ import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
-import org.danteplanner.backend.shared.freshness.ScopedRead;
-import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.Users;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,20 +26,20 @@ public class PlannerAccessGuard implements PlannerAccess {
         this.plannerRepository = plannerRepository;
     }
 
-    public void requireUser(Long userId) {
-        users.findById(userId);
+    public UserSummary requireUser(Long userId) {
+        return users.findById(userId);
     }
 
     public void holdActiveAccount(Long userId) {
         users.holdActiveById(userId);
     }
 
-    public Planner findPlannerOrThrow(Long userId, UUID id) {
+    public StoredPlanner findPlannerOrThrow(Long userId, UUID id) {
         return plannerRepository.findAggregateForOwner(id, userId)
                 .orElseThrow(() -> absent(id));
     }
 
-    public Planner requireAggregate(UUID id) {
+    public StoredPlanner requireAggregate(UUID id) {
         return plannerRepository.findAggregate(id)
                 .orElseThrow(() -> absent(id));
     }
@@ -49,31 +50,31 @@ public class PlannerAccessGuard implements PlannerAccess {
                 .orElseThrow(() -> absent(id));
     }
 
-    public Planner requirePublished(UUID id) {
+    public StoredPlanner requirePublished(UUID id) {
         return requirePublishedWithAuthor(id).planner();
     }
 
     public PublishedPlannerRow requirePublishedWithAuthor(UUID id) {
         PublishedPlannerRow row = plannerRepository.findAggregateWithAuthor(id)
                 .orElseThrow(() -> absent(id));
-        requireVisible(new PlannerVisibilityFacts(id, row.planner().getUserId(), row.planner().isPublished(),
-                row.author().getDeletedAt() != null));
-        return row;
+        return switch (row.visibility()) {
+            case SHOWN -> row;
+            case HIDDEN -> throw hidden(id, row.planner().userId());
+        };
     }
 
     @Override
     @Transactional(readOnly = true)
     public ScopedRead<UUID> checkPublished(UUID plannerId) {
         PlannerThread planner = requireExisting(plannerId);
-        requireVisible(new PlannerVisibilityFacts(plannerId, planner.ownerId(), planner.published(),
-                planner.ownerDeactivated()));
-        return new ScopedRead<>(plannerId, PlannerVisibility.scopes(plannerId, planner.ownerId()));
+        return switch (planner.visibility()) {
+            case SHOWN -> new ScopedRead<>(plannerId, PlannerVisibility.scopes(plannerId, planner.ownerId()));
+            case HIDDEN -> throw hidden(plannerId, planner.ownerId());
+        };
     }
 
-    private static void requireVisible(PlannerVisibilityFacts facts) {
-        if (!PlannerVisibility.visible(facts)) {
-            throw new PlannerNotFoundException(new PlannerMiss.Hidden(facts.plannerId(), facts.ownerId()));
-        }
+    private static PlannerNotFoundException hidden(UUID plannerId, long ownerId) {
+        return new PlannerNotFoundException(new PlannerMiss.Hidden(plannerId, ownerId));
     }
 
     static PlannerNotFoundException absent(UUID id) {

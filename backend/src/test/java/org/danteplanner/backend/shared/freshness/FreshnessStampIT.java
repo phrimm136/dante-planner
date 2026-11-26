@@ -32,6 +32,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
@@ -107,7 +108,7 @@ class FreshnessStampIT {
                 FreshnessDeclarations.declare(new FreshnessScope.Global());
             }
             if (!gtid.isEmpty()) {
-                writeCapture.recordCommit(gtid, true);
+                writeCapture.recordCommit(gtid, GtidOrigin.TRACKER);
             }
         }
     }

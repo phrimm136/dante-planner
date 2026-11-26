@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -22,6 +23,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @EntityListeners(AuditedTimestampListener.class)
 @Table(name = "domain_events",
        indexes = {
@@ -63,13 +65,5 @@ public class DomainEvent {
 
     public static DomainEvent of(DomainEventType eventType, UUID aggregateId, String payload) {
         return new DomainEvent(eventType, aggregateId, payload);
-    }
-
-    public boolean isDispatched() {
-        return dispatchedAt != null;
-    }
-
-    public void markDispatched(Instant now) {
-        this.dispatchedAt = now;
     }
 }

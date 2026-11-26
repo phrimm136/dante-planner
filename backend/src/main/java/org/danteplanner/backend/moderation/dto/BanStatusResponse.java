@@ -1,6 +1,6 @@
 package org.danteplanner.backend.moderation.dto;
 
-import org.danteplanner.backend.user.api.Restriction;
+import org.danteplanner.backend.shared.restriction.Restriction;
 
 public record BanStatusResponse(boolean banned, String message) {
 

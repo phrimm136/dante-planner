@@ -40,12 +40,14 @@ public class MarkerStamp {
     }
 
     private void judgeUndeclared(GtidWriteCapture.Capture capture) {
-        if (!capture.tracked()) {
-            return;
-        }
-        switch (onUndeclared) {
-            case FAIL -> throw new IllegalStateException(UNDECLARED_MESSAGE);
-            case COUNT -> undeclared.increment();
+        switch (capture.origin()) {
+            case TRACKER -> {
+                switch (onUndeclared) {
+                    case FAIL -> throw new IllegalStateException(UNDECLARED_MESSAGE);
+                    case COUNT -> undeclared.increment();
+                }
+            }
+            case FALLBACK -> { }
         }
     }
 }

@@ -57,6 +57,14 @@ final class Effects {
             "org.springframework.web.ErrorResponseException", "org.springframework.web.method.HandlerMethod",
             "[");
 
+    private static final Set<String> PURE_METHODS = Set.of(
+            "org.springframework.security.core.Authentication.getPrincipal",
+            "org.springframework.security.core.Authentication.getName",
+            "org.springframework.security.core.Authentication.getAuthorities",
+            "org.springframework.security.core.Authentication.getDetails",
+            "org.springframework.security.core.Authentication.getCredentials",
+            "org.springframework.security.core.Authentication.isAuthenticated");
+
     private static final Set<String> EFFECTFUL_JDK = Set.of(
             "java.lang.Object.wait", "java.lang.Object.notify", "java.lang.Object.notifyAll",
             "java.lang.ThreadLocal.set", "java.lang.ThreadLocal.remove", "java.lang.ThreadLocal.get",
@@ -130,7 +138,7 @@ final class Effects {
                     effects.putIfAbsent("jdk " + target, chain);
                 } else if (owner.startsWith("org.slf4j.")) {
                     effects.putIfAbsent("log", chain);
-                } else if (!isPureOwner(owner)) {
+                } else if (!isPureOwner(owner) && !PURE_METHODS.contains(target)) {
                     effects.putIfAbsent("external " + target, chain);
                 }
             }

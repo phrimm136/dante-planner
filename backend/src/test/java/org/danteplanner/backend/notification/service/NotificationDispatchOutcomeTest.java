@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -152,8 +153,8 @@ class NotificationDispatchOutcomeTest {
     private static Notification persisted() {
         Notification notification = new Notification(RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED,
                 new Notification.Content.PlannerScoped(PLANNER_ID, TITLE));
-        notification.setPublicId(SAVED_PUBLIC_ID);
-        notification.setCreatedAt(Instant.parse("2026-01-01T00:00:00Z"));
+        ReflectionTestUtils.setField(notification, "publicId", SAVED_PUBLIC_ID);
+        ReflectionTestUtils.setField(notification, "createdAt", Instant.parse("2026-01-01T00:00:00Z"));
         return notification;
     }
 }

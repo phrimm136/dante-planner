@@ -67,6 +67,26 @@ public class GameDataRegistry {
             PlannerVersions plannerVersions,
             FloorRuleTable floorRules) implements Held {
 
+        public Snapshot {
+            List<String> problems = idMigrations.inconsistenciesWith(
+                    knownIds(identityIds, egoIds, egoGiftIds, themePackIds, seasons));
+            if (!problems.isEmpty()) {
+                throw new IllegalStateException(ID_MIGRATIONS_FILE + " disagrees with the game data: " + problems);
+            }
+        }
+
+        private static Map<Kind, Predicate<String>> knownIds(Set<String> identityIds, Set<String> egoIds,
+                Set<String> egoGiftIds, Set<String> themePackIds, Map<Integer, Season> seasons) {
+            Map<Kind, Predicate<String>> known = new EnumMap<>(Kind.class);
+            known.put(Kind.IDENTITY, identityIds::contains);
+            known.put(Kind.EGO, egoIds::contains);
+            known.put(Kind.EGO_GIFT, egoGiftIds::contains);
+            known.put(Kind.THEME_PACK, themePackIds::contains);
+            known.put(Kind.START_BUFF, id -> seasons.values().stream()
+                    .anyMatch(season -> season.startBuffIds().contains(id)));
+            return known;
+        }
+
         private boolean isPopulated() {
             return !identityIds.isEmpty()
                     && !egoIds.isEmpty()
@@ -75,10 +95,6 @@ public class GameDataRegistry {
                     && !seasons.isEmpty()
                     && seasons.values().stream().allMatch(Season::isPopulated)
                     && !egoGiftThemePackMap.isEmpty();
-        }
-
-        private boolean hasStartBuffInAnySeason(String id) {
-            return seasons.values().stream().anyMatch(season -> season.startBuffIds().contains(id));
         }
 
         public boolean hasIdentity(String id) {
@@ -205,29 +221,12 @@ public class GameDataRegistry {
                 plannerVersions,
                 floorRules);
 
-        requireConsistentMigrations(loaded);
-
         held = loaded;
 
         log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, seasons: {}, giftThemePacks: {}, egoMaxThreadspin: {}, plannerVersions: {}",
                 loaded.identityIds().size(), loaded.egoIds().size(), loaded.egoGiftIds().size(),
                 loaded.themePackIds().size(), loaded.seasons().keySet(),
                 loaded.egoGiftThemePackMap().size(), loaded.egoMaxThreadspin().size(), loaded.plannerVersions());
-    }
-
-    private void requireConsistentMigrations(Snapshot loaded) {
-        Map<Kind, Predicate<String>> known = new EnumMap<>(Kind.class);
-        known.put(Kind.IDENTITY, loaded.identityIds()::contains);
-        known.put(Kind.EGO, loaded.egoIds()::contains);
-        known.put(Kind.EGO_GIFT, loaded.egoGiftIds()::contains);
-        known.put(Kind.THEME_PACK, loaded.themePackIds()::contains);
-        known.put(Kind.START_BUFF, loaded::hasStartBuffInAnySeason);
-
-        List<String> problems = loaded.idMigrations().inconsistenciesWith(known);
-        if (!problems.isEmpty()) {
-            throw new IllegalStateException(
-                    ID_MIGRATIONS_FILE + " at '" + dataPath + "' disagrees with the game data: " + problems);
-        }
     }
 
     public boolean hasSeason(int version) {

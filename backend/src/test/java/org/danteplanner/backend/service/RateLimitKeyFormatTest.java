@@ -4,10 +4,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.danteplanner.backend.shared.ratelimit.ChargeKey;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Freezes what a live production bucket is called and which configured bucket it draws from.
@@ -59,44 +58,43 @@ class RateLimitKeyFormatTest {
             RateLimitPolicy policy,
             String key,
             long capacity,
-            String rejectedUser,
+            String rejectedSubject,
             String rejectedEndpoint,
-            Consumer<RateLimitService> charge) {
+            ChargeKey chargeKey) {
     }
 
     private static final List<FrozenKey> FROZEN_KEYS = List.of(
-            new FrozenKey(RateLimitPolicy.CRUD, "7:vote", CRUD_CAPACITY, String.valueOf(USER_ID), "vote",
-                    service -> service.check(RateLimitPolicy.CRUD, USER_ID, "vote")),
-            new FrozenKey(RateLimitPolicy.SSE, "7:sse", SSE_CAPACITY, String.valueOf(USER_ID), "sse",
-                    service -> service.check(RateLimitPolicy.SSE, USER_ID)),
-            new FrozenKey(RateLimitPolicy.COMMENT, "7:comment", COMMENT_CAPACITY, String.valueOf(USER_ID), "comment",
-                    service -> service.check(RateLimitPolicy.COMMENT, USER_ID)),
-            new FrozenKey(RateLimitPolicy.REPORT, "7:report", REPORT_CAPACITY, String.valueOf(USER_ID), "report",
-                    service -> service.check(RateLimitPolicy.REPORT, USER_ID)),
-            new FrozenKey(RateLimitPolicy.MODERATION, "7:moderation", MODERATION_CAPACITY, String.valueOf(USER_ID), "moderation",
-                    service -> service.check(RateLimitPolicy.MODERATION, USER_ID)),
-            new FrozenKey(RateLimitPolicy.AUTH, "ip:203.0.113.9:auth", AUTH_CAPACITY, "null", "auth",
-                    service -> service.check(RateLimitPolicy.AUTH, "ip:203.0.113.9")),
+            new FrozenKey(RateLimitPolicy.CRUD, "7:vote", CRUD_CAPACITY, "user 7", "vote",
+                    ChargeKey.User.parse(RateLimitPolicy.CRUD, USER_ID, "vote")),
+            new FrozenKey(RateLimitPolicy.SSE, "7:sse", SSE_CAPACITY, "user 7", "sse",
+                    ChargeKey.User.parse(RateLimitPolicy.SSE, USER_ID, "")),
+            new FrozenKey(RateLimitPolicy.COMMENT, "7:comment", COMMENT_CAPACITY, "user 7", "comment",
+                    ChargeKey.User.parse(RateLimitPolicy.COMMENT, USER_ID, "")),
+            new FrozenKey(RateLimitPolicy.REPORT, "7:report", REPORT_CAPACITY, "user 7", "report",
+                    ChargeKey.User.parse(RateLimitPolicy.REPORT, USER_ID, "")),
+            new FrozenKey(RateLimitPolicy.MODERATION, "7:moderation", MODERATION_CAPACITY, "user 7", "moderation",
+                    ChargeKey.User.parse(RateLimitPolicy.MODERATION, USER_ID, "")),
+            new FrozenKey(RateLimitPolicy.AUTH, "ip:203.0.113.9:auth", AUTH_CAPACITY, "client", "auth",
+                    ChargeKey.Client.parse(RateLimitPolicy.AUTH, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.PLANNER_COMMENT_SSE,
                     "device:3f2504e0-4f89-41d3-9a0c-0305e82c3301:planner-comment-sse",
-                    SSE_CAPACITY, "null", "planner-comment-sse",
-                    service -> service.check(
-                            RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
+                    SSE_CAPACITY, "client", "planner-comment-sse",
+                    ChargeKey.Client.parse(RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
             new FrozenKey(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9:public-read",
-                    PUBLIC_READ_CAPACITY, "null", "public-read",
-                    service -> service.check(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")),
+                    PUBLIC_READ_CAPACITY, "client", "public-read",
+                    ChargeKey.Client.parse(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9:planner-stats",
-                    PLANNER_STATS_CAPACITY, "null", "planner-stats",
-                    service -> service.check(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9")),
+                    PLANNER_STATS_CAPACITY, "client", "planner-stats",
+                    ChargeKey.Client.parse(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9:view-record",
-                    VIEW_RECORD_CAPACITY, "null", "view-record",
-                    service -> service.check(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9")));
+                    VIEW_RECORD_CAPACITY, "client", "view-record",
+                    ChargeKey.Client.parse(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9")));
 
     @TestFactory
     Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {
         return FROZEN_KEYS.stream().map(frozen -> DynamicTest.dynamicTest(frozen.policy().name(), () -> {
             InMemoryProxyManager allowing = new InMemoryProxyManager();
-            frozen.charge().accept(new RateLimitService(allowing, properties()));
+            new RateLimitService(allowing, properties()).charge(frozen.policy(), frozen.chargeKey());
 
             assertThat(allowing.charges()).singleElement().satisfies(charge -> {
                 assertThat(charge.key()).isEqualTo(frozen.key());
@@ -107,14 +105,11 @@ class RateLimitKeyFormatTest {
             refusing.denyNext(1);
             RateLimitService refused = new RateLimitService(refusing, properties());
 
-            assertThatThrownBy(() -> frozen.charge().accept(refused))
-                    .isInstanceOf(RateLimitExceededException.class)
-                    .satisfies(thrown -> {
-                        RateLimitExceededException exceeded = (RateLimitExceededException) thrown;
-                        assertThat(exceeded.getMessage())
-                                .startsWith("Rate limit exceeded for user " + frozen.rejectedUser() + " on");
-                        assertThat(exceeded.getEndpoint()).isEqualTo(frozen.rejectedEndpoint());
-                    });
+            assertThat(refused.charge(frozen.policy(), frozen.chargeKey()).isConsumed()).isFalse();
+            RateLimitExceededException exceeded = frozen.chargeKey().refusal(1);
+            assertThat(exceeded.getMessage())
+                    .startsWith("Rate limit exceeded for " + frozen.rejectedSubject() + " on");
+            assertThat(exceeded.getEndpoint()).isEqualTo(frozen.rejectedEndpoint());
         }));
     }
 

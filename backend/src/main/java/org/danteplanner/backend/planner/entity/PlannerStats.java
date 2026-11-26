@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 
@@ -18,6 +19,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @Table(name = "planner_stats")
 @Getter
 @Builder

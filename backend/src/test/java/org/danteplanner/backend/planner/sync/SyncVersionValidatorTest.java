@@ -1,9 +1,12 @@
 package org.danteplanner.backend.planner.sync;
 
+import org.danteplanner.backend.planner.entity.Device;
+import java.time.Instant;
+import java.util.Set;
+import java.util.UUID;
 import tools.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.Test;
@@ -30,16 +33,12 @@ class SyncVersionValidatorTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final Device.Known DEVICE = new Device.Known(UUID.fromString("00000000-0000-0000-0000-0000000000d1"));
+
     private final SyncVersionValidator validator = new SyncVersionValidator();
 
-    private static PlannerContent storedRow() {
-        return StoredPlannerContent.holding(StoredPlannerContent.builder()
-                .title("Stored Title")
-                .status(PlannerStatus.SAVED)
-                .category("5F")
-                .contentSchemaVersion(2)
-                .gameContentVersion(6)
-                .build(), DOCUMENT);
+    private static StoredContent storedRow() {
+        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), DOCUMENT, 2, 6, 1L, DEVICE, Instant.EPOCH);
     }
 
     private static PlannerChange identicalChange() {
@@ -58,6 +57,7 @@ class SyncVersionValidatorTest {
                 .content(DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
+                .device(DEVICE)
                 .build();
     }
 
@@ -69,6 +69,7 @@ class SyncVersionValidatorTest {
                 .content(OTHER_DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
+                .device(DEVICE)
                 .build();
     }
 
@@ -118,13 +119,7 @@ class SyncVersionValidatorTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void arbitrate_WhenStaleAndTheStoredDocumentIsUnparseable_Throws() {
-        PlannerContent unparseable = StoredPlannerContent.holding(StoredPlannerContent.builder()
-                .title("Stored Title")
-                .status(PlannerStatus.SAVED)
-                .category("5F")
-                .contentSchemaVersion(2)
-                .gameContentVersion(6)
-                .build(), "{\"equipment\":");
+        StoredContent unparseable = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), "{\"equipment\":", 2, 6, 1L, DEVICE, Instant.EPOCH);
 
         assertRejected(() -> validator.arbitrate(WriteMode.CHECKED, new PlannerConflictException.Requested.Version(4L), 5L,
                 PlannerChange.between(unparseable, identicalWrite(), MAPPER)))

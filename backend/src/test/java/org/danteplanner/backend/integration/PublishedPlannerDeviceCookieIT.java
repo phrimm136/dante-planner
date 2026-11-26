@@ -59,7 +59,7 @@ class PublishedPlannerDeviceCookieIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "device-cookie-owner@example.com");
-        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
+        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
     }
 
     private static List<String> deviceIdCookies(MockHttpServletResponse response) {

@@ -23,8 +23,6 @@ BUILTIN_GROUPS = {
 OUTSIDE_GROUPS = {
     # ArgoCD's own install (core-install.yaml, applied by the CP boot script)
     "argoproj.io",
-    # the CP boot script, with the External Secrets Helm release
-    "external-secrets.io",
     # the CP boot script, from the Gateway API release
     "gateway.networking.k8s.io",
     # the CP boot script, from the Traefik repository

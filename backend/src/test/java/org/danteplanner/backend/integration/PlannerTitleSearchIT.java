@@ -1,6 +1,6 @@
 package org.danteplanner.backend.integration;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -84,14 +84,14 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
     }
 
     private void publish(String title, Set<String> keywords) {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
     }
 
     // title-search-ngram
@@ -154,12 +154,12 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
         catalogRepository.deleteAll();
         Instant now = Instant.now();
         for (int i = 0; i < 3; i++) {
-            Planner planner = TestDataFactory.planner(owner)
+            StoredPlanner planner = TestDataFactory.planner(owner)
                     .title("Recency " + i)
                     .published(true)
                     .firstPublishedAt(now.minus(3 - i, ChronoUnit.HOURS))
                     .save(plannerRepository);
-            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+            statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
             TestDataFactory.addToCatalog(catalogService, planner);
         }
 

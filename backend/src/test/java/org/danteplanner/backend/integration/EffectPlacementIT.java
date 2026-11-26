@@ -8,7 +8,7 @@ import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.scheduler.DomainEventRelay;
@@ -88,7 +88,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
 
     private User owner;
     private User commenter;
-    private Planner planner;
+    private StoredPlanner planner;
     private SseTopicRecorder recorder;
 
     @BeforeEach
@@ -107,7 +107,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
     @Test
     void rollback_WhenTheWriteFailsAfterRecording_LeavesNoEventAndNothingDerived() {
         assertThatThrownBy(() -> transaction().execute(status -> {
-            commentCommandService.createComment(planner.getId(), commenter.getId(), UUID.randomUUID(),
+            commentCommandService.createComment(planner.id(), commenter.getId(), UUID.randomUUID(),
                     new CreateCommentRequest("A comment whose transaction does not survive", null));
             throw new IllegalStateException("the write fails after recording its event");
         })).isInstanceOf(IllegalStateException.class)
@@ -122,12 +122,12 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
 
         recorder.fence();
         assertThat(recorder.userEvents(owner.getId())).isEmpty();
-        assertThat(recorder.commentEvents(planner.getId())).isEmpty();
+        assertThat(recorder.commentEvents(planner.id())).isEmpty();
     }
 
     @Test
     void commit_WhenTheWriteSucceeds_DerivesTheRowAndBothPushes() {
-        commentCommandService.createComment(planner.getId(), commenter.getId(), UUID.randomUUID(),
+        commentCommandService.createComment(planner.id(), commenter.getId(), UUID.randomUUID(),
                 new CreateCommentRequest("A comment the planner's readers should hear about", null));
 
         assertThat(eventRowsForPlanner())
@@ -144,7 +144,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
     @Test
     void crashWindow_WhenTheEagerHopNeverRuns_TheRelayStillDerivesTheEffect() {
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment nobody announced");
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "A comment nobody announced");
 
         recordEventDirectly(comment.getId());
 
@@ -180,16 +180,16 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
                 VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?),
                         DATE_SUB(NOW(6), INTERVAL 1 MINUTE))
                 """,
-                planner.getId().toString(),
+                planner.id().toString(),
                 commentId));
     }
 
     private void assertAnnouncedOnce() {
         recorder.awaitUserEvents(owner.getId(), SseEventType.NOTIFY_COMMENT, DELIVERY_TIMEOUT);
-        recorder.awaitCommentEvents(planner.getId(), SseEventType.COMMENT_ADDED, DELIVERY_TIMEOUT);
+        recorder.awaitCommentEvents(planner.id(), SseEventType.COMMENT_ADDED, DELIVERY_TIMEOUT);
         recorder.fence();
         assertThat(recorder.userEvents(owner.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
-        assertThat(recorder.commentEvents(planner.getId(), SseEventType.COMMENT_ADDED))
+        assertThat(recorder.commentEvents(planner.id(), SseEventType.COMMENT_ADDED))
                 .extracting(envelope -> envelope.excludeUserId())
                 .containsExactly(commenter.getId());
     }
@@ -199,7 +199,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
         readOnly.setReadOnly(true);
         return readOnly.execute(status -> jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                Integer.class, planner.getId().toString()));
+                Integer.class, planner.id().toString()));
     }
 
     private TransactionTemplate transaction() {
@@ -208,7 +208,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
 
     private List<Notification> notificationsFor(User recipient) {
         return notificationRepository
-                .findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(recipient.getId(), PageRequest.of(0, 10))
+                .findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(recipient.getId(), PageRequest.of(0, 10))
                 .getContent();
     }
 }

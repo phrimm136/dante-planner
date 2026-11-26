@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.dto;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.api.UserProfile;
 
 public record PlannerPublishedPayload(
@@ -10,10 +10,10 @@ public record PlannerPublishedPayload(
     String authorSuffix
 ) {
 
-    public static PlannerPublishedPayload fromEntity(Planner planner, UserProfile author) {
+    public static PlannerPublishedPayload from(StoredPlanner planner, UserProfile author) {
         return new PlannerPublishedPayload(
-                planner.getId().toString(),
-                planner.getTitle(),
+                planner.id().toString(),
+                planner.content().title(),
                 author.getUsernameEpithet(),
                 author.getUsernameSuffix());
     }

@@ -70,7 +70,7 @@ class RoutingDataSourceConfigTest {
 
     private static ReadSourceSelector selector() {
         return new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
-                ReadSourceProperties.PRIMARY, true, new HikariDataSource(), CircuitBreaker.ofDefaults("test"))));
+                ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, new HikariDataSource(), CircuitBreaker.ofDefaults("test"))));
     }
 
     private static AbstractRoutingDataSource routing(
@@ -168,7 +168,7 @@ class RoutingDataSourceConfigTest {
 
         @Test
         void onUndeclaredPrimary_WhenThePropertyIsFail_Throws() {
-            bound("fail").run(context -> assertThatThrownBy(armed(context)::checkDeclared)
+            bound("fail").run(context -> assertThatThrownBy(armed(context)::reportUndeclared)
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("PRIMARY connection acquired outside a transaction: declare the caller with "
                             + "@Transactional(readOnly = true) so the read can route to the replica"));
@@ -177,7 +177,7 @@ class RoutingDataSourceConfigTest {
         @Test
         void onUndeclaredPrimary_WhenThePropertyIsCount_Counts() {
             bound("count").run(context -> {
-                armed(context).checkDeclared();
+                armed(context).reportUndeclared();
 
                 assertThat(meterRegistry.counter("datasource.primary.undeclared").count()).isEqualTo(1.0);
             });

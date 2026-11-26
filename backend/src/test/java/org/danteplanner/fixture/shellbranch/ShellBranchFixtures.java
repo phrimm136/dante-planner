@@ -38,6 +38,15 @@ public class ShellBranchFixtures {
         }
     }
 
+    public void sendEachUnlessEmpty() {
+        for (String item : items) {
+            if (item.isEmpty()) {
+                continue;
+            }
+            port.send();
+        }
+    }
+
     public void drainWhenAllowed(boolean allowed) {
         while (queue.poll() != null) {
             if (allowed) {
@@ -109,6 +118,57 @@ public class ShellBranchFixtures {
         return a > b ? a : b;
     }
 
+    public void guardedByAReturn(boolean x, boolean y) {
+        if (x || y) {
+            return;
+        }
+        port.save();
+    }
+
+    public void guardedByAThrow(boolean x, boolean y) {
+        if (x || y) {
+            throw new IllegalStateException("refused");
+        }
+        port.save();
+    }
+
+    public int guardReturningACall(boolean x) {
+        if (x) {
+            return port.count();
+        }
+        port.send();
+        return 0;
+    }
+
+    public int guardReturningAConstant(boolean x) {
+        if (x) {
+            return 1;
+        }
+        port.send();
+        return 0;
+    }
+
+    public void ternaryInAGuard(boolean x, boolean y) {
+        if (x ? y : !y) {
+            throw new IllegalStateException("refused");
+        }
+        port.save();
+    }
+
+    public void switchOnNull(String value) {
+        switch (value) {
+            case null -> port.a();
+            default -> port.b();
+        }
+    }
+
+    public void switchOnAPattern(Object value) {
+        switch (value) {
+            case String text -> port.send(text.isEmpty());
+            default -> port.b();
+        }
+    }
+
     public void note(boolean x) {
         if (x) {
             LOG.info("noted");
@@ -126,6 +186,8 @@ public class ShellBranchFixtures {
         void a();
 
         void b();
+
+        int count();
     }
 
     public sealed interface Verdict permits A, B {

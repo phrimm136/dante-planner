@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.data.domain.Page;
@@ -31,18 +31,23 @@ public class PlannerQueryService {
     private final PlannerAccessGuard accessGuard;
 
     @Transactional(readOnly = true)
-    public ScopedRead<Page<PlannerSummaryResponse>> getPlanners(
-            Long userId, Pageable pageable, boolean includeDeleted) {
-        Page<PlannerSummaryRow> rows = includeDeleted
-                ? plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable)
-                : plannerRepository.findOwnerSummaries(userId, pageable);
+    public ScopedRead<Page<PlannerSummaryResponse>> getPlanners(Long userId, Pageable pageable) {
+        return ownerSummaries(userId, plannerRepository.findOwnerSummaries(userId, pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public ScopedRead<Page<PlannerSummaryResponse>> getPlannersWithTombstones(Long userId, Pageable pageable) {
+        return ownerSummaries(userId, plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable));
+    }
+
+    private static ScopedRead<Page<PlannerSummaryResponse>> ownerSummaries(Long userId, Page<PlannerSummaryRow> rows) {
         return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.User(userId)));
     }
 
     @Transactional(readOnly = true)
     public ScopedRead<List<PlannerResponse>> getPlanners(Long userId, List<UUID> ids) {
         List<PlannerResponse> planners = plannerRepository.findAggregatesForOwner(ids, userId).stream()
-                .map(PlannerResponse::fromEntity)
+                .map(PlannerResponse::from)
                 .toList();
         Set<FreshnessScope> scopes = ids.stream()
                 .map(FreshnessScope.Planner::new)
@@ -52,7 +57,7 @@ public class PlannerQueryService {
 
     @Transactional(readOnly = true)
     public ScopedRead<PlannerResponse> getPlanner(Long userId, UUID id) {
-        Planner planner = accessGuard.findPlannerOrThrow(userId, id);
-        return new ScopedRead<>(PlannerResponse.fromEntity(planner), Set.of(new FreshnessScope.Planner(id)));
+        StoredPlanner planner = accessGuard.findPlannerOrThrow(userId, id);
+        return new ScopedRead<>(PlannerResponse.from(planner), Set.of(new FreshnessScope.Planner(id)));
     }
 }

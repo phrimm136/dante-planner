@@ -15,13 +15,14 @@ import org.danteplanner.backend.comment.validation.CommentStateValidator.LiveCom
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.api.CommentReports;
-import org.danteplanner.backend.planner.api.PlannerVotes;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -38,7 +39,6 @@ public class CommentEngagementService {
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final CommentQueryService commentQueryService;
     private final CommentReports reportService;
-    private final PlannerVotes plannerVotes;
 
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
@@ -53,7 +53,7 @@ public class CommentEngagementService {
                 statsRepository.incrementUpvoteCount(commentId);
                 FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
             }
-            case NOTHING -> plannerVotes.requireFirstVote(true, plannerId, userId);
+            case NOTHING -> throw CommentStateValidator.alreadyVoted(commentPublicId, userId);
         }
 
         CommentVoteResponse response = new CommentVoteResponse(
@@ -65,42 +65,23 @@ public class CommentEngagementService {
     }
 
     @Transactional
-    public ToggleNotificationResponse toggleNotification(UUID commentPublicId, Long userId, boolean enabled) {
+    public ToggleNotificationResponse toggleNotification(UUID commentPublicId, Long userId,
+            NotificationSetting setting) {
         AuthoredComment authored = AuthoredComment
                 .of(commentQueryService.requireByPublicId(commentPublicId), userId, CommentRefusal.TOGGLE_NOT_AUTHOR)
                 .orElseThrow(CommentRefusal::toException);
 
-        NotificationChoice choice = NotificationChoice.of(enabled);
-        int matched = switch (choice) {
-            case ON -> contentRepository.enableAuthorNotifications(authored.comment().id());
-            case OFF -> contentRepository.disableAuthorNotifications(authored.comment().id());
-        };
-        switch (WriteOutcome.of(matched)) {
+        switch (WriteOutcome.of(contentRepository.setAuthorNotifications(authored.comment().id(),
+                setting == NotificationSetting.ON))) {
             case APPLIED ->
                     FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().plannerId()));
             case NOTHING -> throw CommentStateValidator.gone(commentPublicId);
         }
 
-        ToggleNotificationResponse response = new ToggleNotificationResponse(enabled);
+        log.info("User {} toggled notifications {} for comment {}", userId,
+                setting.name().toLowerCase(Locale.ROOT), commentPublicId);
 
-        log.info("User {} toggled notifications {} for comment {}", userId, choice.label, commentPublicId);
-
-        return response;
-    }
-
-    private enum NotificationChoice {
-        ON("on"),
-        OFF("off");
-
-        private final String label;
-
-        NotificationChoice(String label) {
-            this.label = label;
-        }
-
-        static NotificationChoice of(boolean enabled) {
-            return enabled ? ON : OFF;
-        }
+        return ToggleNotificationResponse.of(setting);
     }
 
     public CommentReportResponse reportComment(UUID commentPublicId, Long userId, CommentReportRequest request) {

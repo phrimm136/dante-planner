@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,9 +40,10 @@ public class PlannerQueryController {
             Pageable pageable,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
-        Page<PlannerSummaryResponse> planners =
-                plannerQueryService.getPlanners(member.userId(), pageable, includeDeleted).value();
-        return ResponseEntity.ok(planners);
+        ScopedRead<Page<PlannerSummaryResponse>> planners = includeDeleted
+                ? plannerQueryService.getPlannersWithTombstones(member.userId(), pageable)
+                : plannerQueryService.getPlanners(member.userId(), pageable);
+        return ResponseEntity.ok(planners.value());
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")

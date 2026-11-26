@@ -21,9 +21,6 @@ STACKS=(oregon seoul rds secrets cloudflare)
 # refuses to plan it: a plan missing an input that gates a resource reports that resource's
 # destruction as drift.
 declare -A VAR_FILE=(
-  [oregon]=prod.tfvars
-  [seoul]=prod.tfvars
-  [secrets]=prod.tfvars
   [cloudflare]=prod.tfvars
 )
 caller_account=""

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
 import org.danteplanner.backend.support.CommentRows;
@@ -156,7 +157,7 @@ class CommentCommandServiceNotificationTest {
     private void givenAPublishedPlanner() {
         users.add(TestDataFactory.unsavedUser(COMMENTER_ID));
         when(plannerRepository.findThread(PLANNER_ID))
-                .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, PLANNER_OWNER_ID, Visibility.SHOWN)));
     }
 
     private static CommentRow parent() {

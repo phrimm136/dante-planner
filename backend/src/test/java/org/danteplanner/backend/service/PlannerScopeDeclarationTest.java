@@ -1,5 +1,7 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
+import org.danteplanner.backend.planner.api.Visibility;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,10 +30,9 @@ import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
-import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.planner.api.PlannerThread;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
@@ -40,7 +41,6 @@ import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -61,6 +61,7 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -73,8 +74,10 @@ import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +92,11 @@ class PlannerScopeDeclarationTest {
 
     @Mock
     private PlannerRepository plannerRepository;
+
+
+    @Mock
+
+    private PlannerContentRepository contentRepository;
 
     @Mock
     private PlannerEntityFilterRepository entityFilterRepository;
@@ -128,10 +136,13 @@ class PlannerScopeDeclarationTest {
             ReflectionTestUtils.setField(row, "id", 1L);
             return row;
         });
+        lenient().when(contentRepository.replaceAtVersion(any(), anyLong(), any())).thenReturn(1);
+        lenient().when(contentRepository.migrateContent(any(), anyLong(), any(), any())).thenReturn(1);
+        lenient().when(contentRepository.markDeleted(any(), any())).thenReturn(1);
         TransactionSynchronizationManager.initSynchronization();
         lenient().when(publicationRepository.publishFirst(any(), any())).thenReturn(1);
         lenient().when(publicationRepository.unpublish(any())).thenReturn(1);
-        lenient().when(publicationRepository.disableOwnerNotifications(any())).thenReturn(1);
+        lenient().when(publicationRepository.setOwnerNotifications(any(), anyBoolean())).thenReturn(1);
         lenient().when(moderationRepository.takeDown(any(), any())).thenReturn(1);
         lenient().when(moderationRepository.hide(any(), any(), any(), any())).thenReturn(1);
         FreshnessDeclarations.begin();
@@ -158,9 +169,9 @@ class PlannerScopeDeclarationTest {
     }
 
     private PlannerCommandService commandService(PlannerContentValidator contentValidator) {
-        return new PlannerCommandService(plannerRepository, statsRepository, publicationRepository, contentValidator,
+        return new PlannerCommandService(plannerRepository, contentRepository, statsRepository, publicationRepository, contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()), catalogService(), accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), new PlannerCategoryValidator(),
+                new RestrictionCheckService(users, Clock.systemUTC()), new PlannerCategoryValidator(),
                 new PlannerLimitValidator(), new PlannerOwnershipValidator(), new SyncVersionValidator(), mapper, Clock.systemUTC(),
                 MAX_PLANNERS, SCHEMA_VERSION);
     }
@@ -170,7 +181,7 @@ class PlannerScopeDeclarationTest {
         return new PlannerPublishingService(plannerRepository, statsRepository, publicationRepository,
                 moderationRepository, commandService(contentValidator), contentValidator, catalogService(),
                 new PlannerSubscriptionService(subscriptionRepository, accessGuard,
-                        new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), Clock.systemUTC()),
+                        new RestrictionCheckService(users, Clock.systemUTC()), Clock.systemUTC()),
                 accessGuard, new PlannerOwnershipValidator(), new PlannerPublishValidator(),
                 new PlannerCategoryValidator(), recorder(), Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
     }
@@ -188,13 +199,13 @@ class PlannerScopeDeclarationTest {
                 new FloorRules(registry));
     }
 
-    private Planner planner(boolean published) {
+    private StoredPlanner planner(boolean published) {
         return TestDataFactory.planner(owner).published(published).build();
     }
 
-    private Planner stored(Planner planner) {
-        when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-        lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+    private StoredPlanner stored(StoredPlanner planner) {
+        when(plannerRepository.findAggregate(planner.id())).thenReturn(Optional.of(planner));
+        lenient().when(plannerRepository.findOwnershipById(planner.id()))
                 .thenReturn(Optional.of(OwnershipRows.of(planner)));
         return planner;
     }
@@ -202,10 +213,9 @@ class PlannerScopeDeclarationTest {
     @Test
     void upsertAggregate_WhenThePlannerIsNew_DeclaresItsPlannerAndItsOwner() {
         UUID id = UUID.randomUUID();
-        when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         commandService(TestDataFactory.contentValidator())
-                .upsertAggregate(OWNER_ID, null, id, UpsertRequests.draft().build(), WriteMode.CHECKED);
+                .upsertAggregate(OWNER_ID, UUID.randomUUID(), id, UpsertRequests.draft().build(), WriteMode.CHECKED);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                 new FreshnessScope.Planner(id), new FreshnessScope.User(OWNER_ID));
@@ -213,100 +223,100 @@ class PlannerScopeDeclarationTest {
 
     @Test
     void upsertAggregate_WhenAPublishedPlannerChanges_DeclaresItsPlannerItsOwnerAndGlobal() {
-        Planner planner = planner(true);
+        StoredPlanner planner = planner(true);
 
         edit(planner);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID),
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.User(OWNER_ID),
                 new FreshnessScope.Global());
     }
 
     @Test
     void upsertAggregate_WhenADraftChanges_DeclaresItsPlannerAndItsOwnerOnly() {
-        Planner planner = planner(false);
+        StoredPlanner planner = planner(false);
 
         edit(planner);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID));
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.User(OWNER_ID));
     }
 
-    private void edit(Planner planner) {
-        when(plannerRepository.findAggregateForOwner(planner.getId(), OWNER_ID)).thenReturn(Optional.of(planner));
-        lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+    private void edit(StoredPlanner planner) {
+        when(plannerRepository.findAggregateForOwner(planner.id(), OWNER_ID)).thenReturn(Optional.of(planner));
+        lenient().when(plannerRepository.findOwnershipById(planner.id()))
                 .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
-        commandService(TestDataFactory.contentValidator()).upsertAggregate(OWNER_ID, null, planner.getId(),
-                UpsertRequests.draft().id(planner.getId().toString()).title("edited-" + UUID.randomUUID()).build(),
+        commandService(TestDataFactory.contentValidator()).upsertAggregate(OWNER_ID, UUID.randomUUID(), planner.id(),
+                UpsertRequests.draft().id(planner.id().toString()).title("edited-" + UUID.randomUUID()).build(),
                 WriteMode.FORCED);
     }
 
     @Test
     void deletePlanner_WhenItSucceeds_DeclaresItsPlannerItsOwnerAndGlobal() {
-        Planner planner = planner(true);
-        when(plannerRepository.findAggregateForOwner(planner.getId(), OWNER_ID)).thenReturn(Optional.of(planner));
-        lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+        StoredPlanner planner = planner(true);
+        when(plannerRepository.findAggregateForOwner(planner.id(), OWNER_ID)).thenReturn(Optional.of(planner));
+        lenient().when(plannerRepository.findOwnershipById(planner.id()))
                 .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
-        commandService(TestDataFactory.contentValidator()).deletePlanner(OWNER_ID, planner.getId());
+        commandService(TestDataFactory.contentValidator()).deletePlanner(OWNER_ID, planner.id());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID),
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.User(OWNER_ID),
                 new FreshnessScope.Global());
     }
 
     @Test
     void publish_WhenTheStoredContentMigrates_DeclaresItsPlannerItsOwnerAndGlobal() throws IOException {
         PlannerContentValidator renaming = validatorRenaming("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
-        Planner planner = stored(TestDataFactory.planner(owner).published(false)
+        StoredPlanner planner = stored(TestDataFactory.planner(owner).published(false)
                 .content(TestDataFactory.VALID_CONTENT.replace(
                         "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]"))
                 .build());
 
-        publishingService(renaming).publish(OWNER_ID, planner.getId());
+        publishingService(renaming).publish(OWNER_ID, planner.id());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID),
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.User(OWNER_ID),
                 new FreshnessScope.Global());
     }
 
     @Test
     void publish_WhenTheContentNeedsNoMigration_DeclaresItsPlannerAndGlobal() {
-        Planner planner = stored(planner(false));
+        StoredPlanner planner = stored(planner(false));
 
-        publishingService(TestDataFactory.contentValidator()).publish(OWNER_ID, planner.getId());
+        publishingService(TestDataFactory.contentValidator()).publish(OWNER_ID, planner.id());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.Global());
     }
 
     @Test
     void unpublish_WhenThePlannerWasPublished_DeclaresItsPlannerAndGlobal() {
-        Planner planner = stored(planner(true));
+        StoredPlanner planner = stored(planner(true));
 
-        publishingService(TestDataFactory.contentValidator()).unpublish(OWNER_ID, planner.getId());
+        publishingService(TestDataFactory.contentValidator()).unpublish(OWNER_ID, planner.id());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.Global());
     }
 
     @Test
     void withdrawFromPublicView_WhenItTakesThePlannerDown_DeclaresItsPlannerAndGlobal() {
-        Planner planner = stored(planner(true));
+        StoredPlanner planner = stored(planner(true));
 
-        publishingService(TestDataFactory.contentValidator()).withdrawFromPublicView(planner.getId(),
+        publishingService(TestDataFactory.contentValidator()).withdrawFromPublicView(planner.id(),
                 new ModeratorAction.TakeDown());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.Global());
     }
 
     @Test
     void changeRecommendedListing_WhenItHidesThePlanner_DeclaresGlobalOnly() {
-        Planner planner = stored(planner(true));
+        StoredPlanner planner = stored(planner(true));
 
-        publishingService(TestDataFactory.contentValidator()).changeRecommendedListing(planner.getId(),
+        publishingService(TestDataFactory.contentValidator()).changeRecommendedListing(planner.id(),
                 new ModeratorAction.Hide(READER_ID, "freshness"));
 
         assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
@@ -314,30 +324,31 @@ class PlannerScopeDeclarationTest {
 
     @Test
     void toggleOwnerNotifications_WhenTheOwnerToggles_DeclaresItsPlannerOnly() {
-        Planner planner = stored(planner(true));
+        StoredPlanner planner = stored(planner(true));
 
-        publishingService(TestDataFactory.contentValidator()).toggleOwnerNotifications(OWNER_ID, planner.getId(),
-                false);
+        publishingService(TestDataFactory.contentValidator()).toggleOwnerNotifications(OWNER_ID, planner.id(),
+                NotificationSetting.OFF);
 
-        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(planner.getId()));
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(planner.id()));
     }
 
     @Test
     void castVote_WhenItIsTheFirstVote_DeclaresItsPlannerAndGlobal() {
-        Planner planner = planner(true);
-        when(plannerRepository.findAggregateWithAuthor(planner.getId()))
-                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+        StoredPlanner planner = planner(true);
+        when(plannerRepository.findAggregateWithAuthor(planner.id()))
+                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner), Visibility.SHOWN)));
         PlannerAccessGuard accessGuard = accessGuard();
         PlannerEngagementService engagement = new PlannerEngagementService(voteRepository,
                 new PlannerStatsService(statsRepository), catalogService(), recorder(), accessGuard,
                 new PlannerReportService(reportRepository, new PlannerModerationTargetAdapter(null, accessGuard),
                         new ReportUniquenessValidator()),
-                new VoteUniquenessValidator(), RECOMMENDED_THRESHOLD);
+                Clock.systemUTC(), RECOMMENDED_THRESHOLD);
+        when(voteRepository.insertIgnore(any(), any(), any(), any())).thenReturn(1);
 
-        engagement.castVote(READER_ID, planner.getId(), VoteType.UP);
+        engagement.castVote(READER_ID, planner.id(), VoteType.UP);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
+                new FreshnessScope.Planner(planner.id()), new FreshnessScope.Global());
     }
 
     @Test
@@ -395,7 +406,7 @@ class PlannerScopeDeclarationTest {
 
     @Test
     void unsubscribe_WhenCalled_DeclaresItsPlannerOnly() {
-        UUID plannerId = publishedThread();
+        UUID plannerId = UUID.randomUUID();
 
         subscriptionService().unsubscribe(READER_ID, plannerId);
 
@@ -405,12 +416,12 @@ class PlannerScopeDeclarationTest {
     private UUID publishedThread() {
         UUID plannerId = UUID.randomUUID();
         when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, Visibility.SHOWN)));
         return plannerId;
     }
 
     private PlannerSubscriptionService subscriptionService() {
         return new PlannerSubscriptionService(subscriptionRepository, accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), Clock.systemUTC());
+                new RestrictionCheckService(users, Clock.systemUTC()), Clock.systemUTC());
     }
 }

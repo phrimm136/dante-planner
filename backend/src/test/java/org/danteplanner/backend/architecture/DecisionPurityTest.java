@@ -27,6 +27,8 @@ import com.tngtech.archunit.thirdparty.org.objectweb.asm.MethodVisitor;
 import com.tngtech.archunit.thirdparty.org.objectweb.asm.Opcodes;
 import com.tngtech.archunit.thirdparty.org.objectweb.asm.Type;
 
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DecisionPurityTest {
@@ -40,6 +42,8 @@ class DecisionPurityTest {
     private static final String PROJECT = "org.danteplanner";
 
     private static final String OUTCOME_SUFFIX = "Outcome";
+
+    private static final Set<String> CONTEXT_READS = Set.of("viewer", "requestValue", "transactionScope");
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
@@ -116,7 +120,21 @@ class DecisionPurityTest {
                         "Ledger.counted", "PublicPortReader.decide", "ClockReader.decide", "FutureReader.decide",
                         "Minter.decide", "Cache.decide", "Tally.decide", "Seen.decide", "Slots.decide",
                         "Pool.decide", "Broken.decide", "MonitorWaiter.decide", "BaseCaller.decide",
-                        "AskerCaller.decide");
+                        "AskerCaller.decide", "Unsigner.decide", "Saver.decide");
+    }
+
+    @Test
+    void branchFreeWrite_WhenTheRuleRunsOverTheFixture_IsNamed() {
+        assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE)).containsEntry("Saver.decide", Set.of("port Store.save"));
+    }
+
+    @Test
+    void authentication_WhenTheRuleRunsOverTheFixture_IsPureToReadAndAnEffectToChange() {
+        Map<String, Set<String>> offenders = offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE);
+
+        assertThat(offenders).doesNotContainKey("Signer.decide");
+        assertThat(offenders).containsEntry("Unsigner.decide",
+                Set.of("external org.springframework.security.core.Authentication.setAuthenticated"));
     }
 
     @Test
@@ -203,11 +221,11 @@ class DecisionPurityTest {
         Map<String, Set<String>> offenders = new TreeMap<>();
         for (JavaClass clazz : classes) {
             for (JavaMethod method : clazz.getMethods()) {
-                if (!isDecision(method, within) || isAccessor(method)) {
+                if (!isDecision(method, within) || isAccessor(method) || isContextRead(method)) {
                     continue;
                 }
-                Map<String, List<String>> effects =
-                        Effects.reachableFrom(method, within, DecisionPurityTest::isAccessor);
+                Map<String, List<String>> effects = Effects.reachableFrom(method, within,
+                        unit -> isAccessor(unit) || isContextRead(unit));
                 if (!effects.isEmpty()) {
                     offenders.computeIfAbsent(clazz.getSimpleName() + "." + method.getName(), key -> new TreeSet<>())
                             .addAll(effects.keySet());
@@ -248,6 +266,10 @@ class DecisionPurityTest {
             }
         }
         return unpaired;
+    }
+
+    private static boolean isContextRead(JavaCodeUnit unit) {
+        return unit.getOwner().isEquivalentTo(SpringContextAdapter.class) && CONTEXT_READS.contains(unit.getName());
     }
 
     private static boolean isAccessor(JavaCodeUnit unit) {

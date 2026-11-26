@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -8,7 +9,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -70,8 +70,10 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
     @Autowired
     private UserRepository userRepository;
 
+
     @Autowired
-    private PlannerRepository plannerRepository;
+
+    private PlannerContentRepository contentRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -134,7 +136,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
     }
 
     private PlannerContent storedRow(UUID id) {
-        return plannerRepository.findAggregateForOwner(id, owner.getId()).orElseThrow().getContent();
+        return contentRepository.findById(id).orElseThrow();
     }
 
     private RowState stateOf(UUID id) throws Exception {
@@ -175,7 +177,6 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         long stored = storedRow(id).getSyncVersion();
         Instant modifiedBefore = storedRow(id).getLastModifiedAt();
         String bytesBefore = storedRow(id).getContent();
-        long lockBefore = storedRow(id).getRowLockVersion();
 
         send(id, write(id).syncVersion(stored - 1).build(), false)
                 .andExpect(status().isOk())
@@ -185,9 +186,6 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         assertThat(after.getSyncVersion()).isEqualTo(stored);
         assertThat(after.getContent()).isEqualTo(bytesBefore);
         assertThat(after.getLastModifiedAt()).isEqualTo(modifiedBefore);
-        assertThat(after.getRowLockVersion())
-                .as("the arbitration branch performs no write, so the row lock version cannot move")
-                .isEqualTo(lockBefore);
     }
 
     // retry-after-committed-save-is-idempotent
@@ -202,7 +200,6 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.syncVersion").value(consumed + 1));
 
         Instant modifiedBefore = storedRow(id).getLastModifiedAt();
-        long lockBefore = storedRow(id).getRowLockVersion();
 
         send(id, committing, false)
                 .andExpect(status().isOk())
@@ -211,7 +208,6 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         PlannerContent after = storedRow(id);
         assertThat(after.getSyncVersion()).isEqualTo(consumed + 1);
         assertThat(after.getLastModifiedAt()).isEqualTo(modifiedBefore);
-        assertThat(after.getRowLockVersion()).isEqualTo(lockBefore);
     }
 
     // pulled-rendering-counts-as-identical

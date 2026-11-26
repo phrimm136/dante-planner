@@ -30,14 +30,15 @@ import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
+import org.danteplanner.backend.comment.exception.CommentVoteAlreadyExistsException;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.CommentConstants;
@@ -82,7 +83,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     private User first;
     private User second;
     private User moderator;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -118,7 +119,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
             UUID comment = comment();
 
             assertThat(atOnce(comment, this::upvoteByFirst, this::upvoteByFirst)).singleElement()
-                    .isInstanceOf(VoteAlreadyExistsException.class);
+                    .isInstanceOf(CommentVoteAlreadyExistsException.class);
 
             assertThat(voters(comment)).containsExactly(first.getId());
             assertThat(shown(comment, first).upvoteCount()).isEqualTo(1);
@@ -138,7 +139,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
                         .andExpect(status().isConflict())
                         .andExpect(jsonPath("$.code").value("VOTE_ALREADY_EXISTS"))
                         .andExpect(jsonPath("$.detail").value("User " + first.getId()
-                                + " has already voted on planner " + planner.getId()
+                                + " has already voted on comment " + comment
                                 + ". Votes are permanent and cannot be changed."));
             } catch (Exception e) {
                 throw new AssertionError(e);
@@ -323,7 +324,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     private UUID comment() {
-        return commandService.createComment(planner.getId(), author.getId(), UUID.randomUUID(),
+        return commandService.createComment(planner.id(), author.getId(), UUID.randomUUID(),
                 new CreateCommentRequest("original", null)).id();
     }
 
@@ -348,11 +349,11 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     private void silence(UUID comment) {
-        engagementService.toggleNotification(comment, author.getId(), false);
+        engagementService.toggleNotification(comment, author.getId(), NotificationSetting.OFF);
     }
 
     private CommentTreeNode shown(UUID comment, User viewer) {
-        return queryService.getCommentTree(planner.getId(), Viewer.of(viewer.getId())).value().stream()
+        return queryService.getCommentTree(planner.id(), new Viewer.Member(viewer.getId())).value().stream()
                 .filter(node -> node.id().equals(comment))
                 .findFirst()
                 .orElseThrow();
@@ -375,7 +376,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
 
     private int commentCount() {
         Integer count = jdbc.queryForObject("SELECT comment_count FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)",
-                Integer.class, planner.getId().toString());
+                Integer.class, planner.id().toString());
         return count != null ? count : -1;
     }
 }

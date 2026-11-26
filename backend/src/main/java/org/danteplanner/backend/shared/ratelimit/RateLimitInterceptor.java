@@ -7,8 +7,6 @@ import java.util.function.Supplier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -17,12 +15,12 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.TimeoutException;
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
@@ -32,6 +30,8 @@ import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RoleGated;
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 
 /**
@@ -118,18 +118,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
         return rateLimit.call(service -> {
             try {
-                chargeBucket(service, declaration, request, response);
-                markStoreAvailable();
-                return true;
+                return chargeBucket(service, declaration, request, response);
             } catch (RedisException | TimeoutException unavailable) {
                 warnStoreUnavailable(declaration, unavailable);
                 return withoutStore(declaration, response, () -> unavailable);
-            } catch (RateLimitExceededException refused) {
-                if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
-                    throw refused;
-                }
-                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refused.getMessage());
-                return redirectToLogin(response, LoginRedirect.RATE_LIMITED);
             }
         }, () -> withoutStore(declaration, response, () -> new RedisConnectionException(BREAKER_OPEN)));
     }
@@ -142,8 +134,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private boolean withoutStore(
             RateLimited declaration, HttpServletResponse response, Supplier<RuntimeException> unavailable) {
-        return switch (OutageResponse.of(declaration.value().onStoreFailure(), declaration.denial())) {
-            case FAIL -> throw unavailable.get();
+        return switch (Admission.ofOutage(declaration.value().onStoreFailure(), declaration.denial())) {
+            case REFUSE -> throw unavailable.get();
             case REDIRECT_LOGIN -> redirectToLogin(response, LoginRedirect.UNAVAILABLE);
             case ADMIT -> {
                 meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, declaration.value().name()).increment();
@@ -153,8 +145,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private void warnStoreUnavailable(RateLimited declaration, RuntimeException unavailable) {
-        switch (OutageResponse.of(declaration.value().onStoreFailure(), declaration.denial())) {
-            case FAIL -> { }
+        switch (Admission.ofOutage(declaration.value().onStoreFailure(), declaration.denial())) {
+            case REFUSE -> { }
             case REDIRECT_LOGIN -> log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}",
                     unavailable.getMessage());
             case ADMIT -> warnUnmetered(declaration.value(), unavailable);
@@ -170,18 +162,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 
-    private enum OutageResponse {
-        FAIL,
-        REDIRECT_LOGIN,
-        ADMIT;
+    private enum Admission {
+        ADMIT,
+        REFUSE,
+        REDIRECT_LOGIN;
 
-        static OutageResponse of(RateLimitPolicy.OnStoreFailure onStoreFailure, RateLimitDenial denial) {
+        static Admission ofOutage(RateLimitPolicy.OnStoreFailure onStoreFailure, RateLimitDenial denial) {
             return switch (onStoreFailure) {
                 case ADMIT -> ADMIT;
-                case REFUSE -> switch (denial) {
-                    case RESPOND -> FAIL;
-                    case REDIRECT_LOGIN -> REDIRECT_LOGIN;
-                };
+                case REFUSE -> refused(denial);
+            };
+        }
+
+        static Admission refused(RateLimitDenial denial) {
+            return switch (denial) {
+                case RESPOND -> REFUSE;
+                case REDIRECT_LOGIN -> REDIRECT_LOGIN;
             };
         }
     }
@@ -201,64 +197,45 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 
-    private void chargeBucket(RateLimitService rateLimitService, RateLimited declaration, HttpServletRequest request,
+    private boolean chargeBucket(RateLimitService service, RateLimited declaration, HttpServletRequest request,
             HttpServletResponse response) {
         RateLimitPolicy policy = declaration.value();
+        ChargeKey key = switch (policy.subject()) {
+            case CLIENT -> ChargeKey.Client.parse(policy, ClientIpResolver.resolveClientIdentifier(
+                    request, securityProperties, () -> deviceIdResolver.resolve(request, response)));
+            case USER -> ChargeKey.User.parse(policy, authenticatedUserId(), declaration.endpoint());
+        };
+        ConsumptionProbe probe = service.charge(policy, key);
+        Admission admission = probe.isConsumed() ? Admission.ADMIT : Admission.refused(declaration.denial());
+        return switch (admission) {
+            case ADMIT -> {
+                markStoreAvailable();
+                yield true;
+            }
+            case REFUSE -> throw refusalOf(key, probe);
+            case REDIRECT_LOGIN -> {
+                RateLimitExceededException refusal = refusalOf(key, probe);
+                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refusal.getMessage());
+                yield redirectToLogin(response, LoginRedirect.RATE_LIMITED);
+            }
+        };
+    }
 
-        if (policy.subject() == RateLimitPolicy.Subject.CLIENT) {
-            String identifier = ClientIpResolver.resolveClientIdentifier(
-                    request, securityProperties, () -> deviceIdResolver.resolve(request, response));
-            rateLimitService.check(policy, identifier);
-            return;
-        }
-
-        long userId = authenticatedUserId();
-        if (declaration.endpoint().isEmpty()) {
-            rateLimitService.check(policy, userId);
-        } else {
-            rateLimitService.check(policy, userId, declaration.endpoint());
-        }
+    private static RateLimitExceededException refusalOf(ChargeKey key, ConsumptionProbe probe) {
+        long retryAfterSeconds = RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill());
+        return key.refusal(retryAfterSeconds);
     }
 
     private long authenticatedUserId() {
-        return switch (SignIn.of(SecurityContextHolder.getContext().getAuthentication())) {
-            case SignIn.Absent absent -> throw unauthenticatedCharge();
-            case SignIn.Present present -> switch (Payer.of(present.authentication().getPrincipal())) {
-                case Payer.User user -> user.userId();
-                case Payer.Unidentified unidentified -> throw unauthenticatedCharge();
-            };
+        return switch (SpringContextAdapter.viewer()) {
+            case Viewer.Guest guest -> throw unauthenticatedCharge();
+            case Viewer.Member member -> member.userId();
         };
     }
 
     private static IllegalStateException unauthenticatedCharge() {
         return new IllegalStateException(
                 "A user-keyed rate-limit policy was charged without an authenticated principal");
-    }
-
-    private sealed interface SignIn {
-
-        record Present(Authentication authentication) implements SignIn {
-        }
-
-        record Absent() implements SignIn {
-        }
-
-        static SignIn of(@Nullable Authentication authentication) {
-            return authentication == null ? new Absent() : new Present(authentication);
-        }
-    }
-
-    private sealed interface Payer {
-
-        record User(long userId) implements Payer {
-        }
-
-        record Unidentified() implements Payer {
-        }
-
-        static Payer of(@Nullable Object principal) {
-            return principal instanceof Long userId ? new User(userId) : new Unidentified();
-        }
     }
 
     private boolean deny(HandlerMethod handlerMethod, HttpServletRequest request,

@@ -18,6 +18,10 @@ FLEET_VERIFY_SCRIPT = "scripts/ops/fleet-verify.sh"
 NODES_SCRIPT = "scripts/ops/access/fleet-nodes.sh"
 BOOTLOG_SCRIPT = "scripts/ops/access/boot-log.sh"
 APP_SCRIPT = "scripts/ops/access/argocd-app.sh"
+RULES_LOADER = "deploy/grafana/rules.py"
+PRESENCE_LABEL = "metric"
+READER_RANGE = "1m"
+DEFAULT_SERIES_WINDOW = "24h"
 CP_OVERRIDE_ENV = "CP_INSTANCE_ID"
 STS_ARGV = ("aws", "sts", "get-caller-identity", "--output", "json")
 

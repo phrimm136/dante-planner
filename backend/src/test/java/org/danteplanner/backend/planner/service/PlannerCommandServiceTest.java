@@ -5,20 +5,21 @@ import ch.qos.logback.classic.Level;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.support.LogCapture;
-import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
-import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
+import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.StoredPlannerContent;
+import org.danteplanner.backend.planner.repository.ContentWrite;
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.support.MockCalls;
 import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.support.FakeUsers;
@@ -27,6 +28,7 @@ import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
+import org.danteplanner.backend.planner.exception.PlannerConcurrentWriteException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -65,6 +67,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
@@ -77,6 +81,9 @@ class PlannerCommandServiceTest {
 
     @Mock
     private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerContentRepository contentRepository;
 
     @Mock
     private PlannerEntityFilterRepository entityFilterRepository;
@@ -119,11 +126,14 @@ class PlannerCommandServiceTest {
         testUser = users.add(TestDataFactory.unsavedUser(1L));
 
         deviceId = UUID.randomUUID();
+        lenient().when(contentRepository.replaceAtVersion(any(), anyLong(), any())).thenReturn(1);
+        lenient().when(contentRepository.markDeleted(any(), any())).thenReturn(1);
     }
 
     private PlannerCommandService commandServiceWith(PlannerContentValidator contentValidator) {
         return new PlannerCommandService(
                 plannerRepository,
+                contentRepository,
                 statsRepository,
                 publicationRepository,
                 contentValidator,
@@ -151,11 +161,35 @@ class PlannerCommandServiceTest {
         }
     }
 
-    private Planner testPlanner(long syncVersion, boolean published) {
+    private PlannerContent insertedContent() {
+        ArgumentCaptor<PlannerContent> content = ArgumentCaptor.forClass(PlannerContent.class);
+        verify(plannerRepository).insertAggregate(any(), content.capture(), any(), any());
+        return content.getValue();
+    }
+
+    private ContentWrite replacedWith(StoredPlanner planner) {
+        ArgumentCaptor<ContentWrite> write = ArgumentCaptor.forClass(ContentWrite.class);
+        verify(contentRepository).replaceAtVersion(eq(planner.id()), eq(planner.content().syncVersion()),
+                write.capture());
+        return write.getValue();
+    }
+
+    private TestDataFactory.PlannerBuilder resendable(long syncVersion, boolean published, String content) {
+        return TestDataFactory.planner(testUser)
+                .title("Test Planner")
+                .status(PlannerStatus.DRAFT)
+                .content(content)
+                .published(published)
+                .syncVersion(syncVersion)
+                .schemaVersion(CURRENT_SCHEMA_VERSION)
+                .deviceId(deviceId);
+    }
+
+    private StoredPlanner testPlanner(long syncVersion, boolean published) {
         return testPlanner(syncVersion, published, "{\"data\": \"test\"}");
     }
 
-    private Planner testPlanner(long syncVersion, boolean published, String content) {
+    private StoredPlanner testPlanner(long syncVersion, boolean published, String content) {
         return TestDataFactory.planner(testUser)
                 .title("Test Planner")
                 .status(PlannerStatus.DRAFT)
@@ -173,10 +207,6 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = UpsertRequests.draft().title("Test Planner").category("5F").build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
-            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
 
             // Act
             PlannerResponse response = commandService.createPlanner(testUser.getId(), deviceId, request);
@@ -199,7 +229,7 @@ class PlannerCommandServiceTest {
                     .withCode("PLANNER_LIMIT_EXCEEDED")
                     .satisfies(rejection -> assertThat(rejection.getMessage())
                             .contains(String.valueOf(MAX_PLANNERS_PER_USER)));
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
 
         @Test
@@ -216,7 +246,7 @@ class PlannerCommandServiceTest {
                                     .isEqualTo("User not found with id: " + nonExistentUserId);
                         assertThat(exception.getMessage()).contains(nonExistentUserId.toString());
                     });
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
 
         @Test
@@ -225,17 +255,11 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = UpsertRequests.draft().title(null).build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
 
-            ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
-            when(plannerRepository.insert(plannerCaptor.capture())).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
-
             // Act
             commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert
-            assertThat(plannerCaptor.getValue().getTitle()).isEqualTo("Untitled");
+            assertThat(insertedContent().getTitle()).isEqualTo("Untitled");
         }
 
         @Test
@@ -247,7 +271,7 @@ class PlannerCommandServiceTest {
             // Act & Assert
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, unknownIdentity))
                     .withViolation("UNKNOWN_IDENTITY");
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
 
         @Test
@@ -281,7 +305,7 @@ class PlannerCommandServiceTest {
                     .withViolation("INVALID_CONTENT_VERSION")
                     .isInstanceOfSatisfying(PlannerValidationException.class,
                             exception -> assertThat(exception.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
     }
 
@@ -307,15 +331,15 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenCategoryAndContentVersionChange_ValidatesTheContent() {
-            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest request = UpsertRequests.resending(planner)
                     .category("10F")
                     .contentVersion(99)
                     .build();
 
-            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request,
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(), request,
                     WriteMode.CHECKED))
                     .withViolation("UNKNOWN_VERSION")
                     .isInstanceOfSatisfying(PlannerValidationException.class,
@@ -326,17 +350,17 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenTheCategoryIsInvalid_LogsTheRefusal() {
-            Planner planner = TestDataFactory.planner(testUser)
+            StoredPlanner planner = TestDataFactory.planner(testUser)
                     .plannerType(PlannerType.REFRACTED_RAILWAY)
                     .category("RR_PLACEHOLDER")
                     .content(TestDataFactory.VALID_CONTENT)
                     .build();
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest request = UpsertRequests.resending(planner).build();
 
             try (LogCapture capture = LogCapture.onThisThread(PlannerCommandService.class)) {
-                assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+                assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(),
                         request, WriteMode.CHECKED))
                         .withViolation("INVALID_CATEGORY", "");
                 assertThat(capture.at(Level.WARN)).extracting(ILoggingEvent::getFormattedMessage)
@@ -346,11 +370,9 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenAStaleResendOmitsTitleAndStatus_AcksKeepingTheStoredOnes() {
-            Planner planner = testPlanner(3L, false, TestDataFactory.VALID_CONTENT);
-            planner.getContent().setStatus(PlannerStatus.SAVED);
-            planner.getContent().setDeviceId(deviceId);
-            planner.getContent().setContentSchemaVersion(CURRENT_SCHEMA_VERSION);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = resendable(3L, false, TestDataFactory.VALID_CONTENT)
+                    .status(PlannerStatus.SAVED).build();
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest request = UpsertRequests.resending(planner)
                     .title(null)
@@ -358,22 +380,24 @@ class PlannerCommandServiceTest {
                     .syncVersion(2L)
                     .build();
 
-            UpsertResult result = commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+            SaveOutcome result = commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(),
                     request, WriteMode.CHECKED);
 
-            assertThat(result.response().syncVersion()).isEqualTo(3L);
-            assertThat(planner.getTitle()).isEqualTo("Test Planner");
-            assertThat(planner.getStatus()).isEqualTo(PlannerStatus.SAVED);
+            assertThat(result).isInstanceOf(SaveOutcome.Acknowledged.class);
+            assertThat(result.planner().content().syncVersion()).isEqualTo(3L);
+            assertThat(result.planner().content().title()).isEqualTo("Test Planner");
+            assertThat(result.planner().content().status()).isEqualTo(PlannerStatus.SAVED);
+            verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
         }
 
         @Test
         void upsertPlanner_WhenCategoryIsUnchanged_ValidatesTheContent() {
-            Planner planner = testPlanner(1L, false, UNKNOWN_IDENTITY_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = testPlanner(1L, false, UNKNOWN_IDENTITY_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
 
-            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled,
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(), retitled,
                     WriteMode.CHECKED))
                     .withViolation("UNKNOWN_IDENTITY");
         }
@@ -384,17 +408,18 @@ class PlannerCommandServiceTest {
             PlannerContentValidator renaming = validatorRenaming("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
             String stored = TestDataFactory.VALID_CONTENT.replace(
                     "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]");
-            Planner planner = testPlanner(1L, true, stored);
-            planner.getContent().setCategory("10F");
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = TestDataFactory.planner(testUser).title("Test Planner").status(PlannerStatus.DRAFT)
+                    .content(stored).published(true).category("10F").build();
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
 
-            commandServiceWith(renaming).upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+            commandServiceWith(renaming).upsertPlanner(testUser.getId(), deviceId, planner.id(),
                     UpsertRequests.resending(planner).category("5F").build(), WriteMode.CHECKED);
 
-            JsonNode saved = new ObjectMapper().readTree(planner.getContentJson());
+            ContentWrite write = replacedWith(planner);
+            JsonNode saved = new ObjectMapper().readTree(write.json());
             assertThat(saved.path("observationGiftIds")).isEqualTo(new ObjectMapper().createArrayNode().add("19002"));
-            assertThat(planner.getCategory()).isEqualTo("5F");
+            assertThat(write.category()).isEqualTo("5F");
         }
     }
 
@@ -408,11 +433,11 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenThePlannerExists_LocksTheContentRowBeforeLoadingIt() {
-            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
 
-            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(),
                     UpsertRequests.resending(planner).title("Locked First").build(), WriteMode.CHECKED);
 
             assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent", "findAggregateForOwner");
@@ -420,25 +445,25 @@ class PlannerCommandServiceTest {
 
         @Test
         void deletePlanner_WhenCalled_LocksTheContentRowBeforeLoadingIt() {
-            Planner planner = testPlanner(1L, true);
-            when(plannerRepository.findOwnershipById(planner.getId()))
+            StoredPlanner planner = testPlanner(1L, true);
+            when(plannerRepository.findOwnershipById(planner.id()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             TransactionSynchronizationManager.initSynchronization();
 
-            commandService.deletePlanner(testUser.getId(), planner.getId());
+            commandService.deletePlanner(testUser.getId(), planner.id());
 
             assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent", "findAggregateForOwner");
         }
 
         @Test
         void deletePlanner_WhenAnotherUserAsks_FailsWithoutTakingTheLock() {
-            Planner planner = testPlanner(1L, true);
-            when(plannerRepository.findOwnershipById(planner.getId()))
+            StoredPlanner planner = testPlanner(1L, true);
+            when(plannerRepository.findOwnershipById(planner.id()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
-            assertRejected(() -> commandService.deletePlanner(testUser.getId() + 1, planner.getId()))
+            assertRejected(() -> commandService.deletePlanner(testUser.getId() + 1, planner.id()))
                     .withCode("PLANNER_NOT_FOUND");
             assertThat(plannerCalls()).containsExactly("findOwnershipById");
         }
@@ -456,46 +481,46 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.deletePlanner(testUser.getId(), plannerId))
                     .withCode("PLANNER_NOT_FOUND");
 
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
 
         @Test
         void deletePlanner_WhenPublishedPlanner_UnpublishesFirst() {
             // Arrange
-            Planner planner = testPlanner(1L, true);
-            assertThat(planner.isPublished()).isTrue();
+            StoredPlanner planner = testPlanner(1L, true);
+            assertThat(planner.publication().isPublished()).isTrue();
 
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(plannerRepository.findOwnershipById(planner.getId()))
+            when(plannerRepository.findOwnershipById(planner.id()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
             TransactionSynchronizationManager.initSynchronization();
 
             // Act
-            commandService.deletePlanner(testUser.getId(), planner.getId());
+            commandService.deletePlanner(testUser.getId(), planner.id());
 
             // Assert
-            verify(publicationRepository).unpublish(planner.getId());
-            assertThat(planner.getContent().getDeletedAt()).isNotNull(); // Then soft deleted
+            verify(publicationRepository).unpublish(planner.id());
+            verify(contentRepository).markDeleted(eq(planner.id()), any());
         }
 
         @Test
         void deletePlanner_WhenUnpublishedPlanner_NoPublishChange() {
             // Arrange
-            Planner planner = testPlanner(1L, false);
+            StoredPlanner planner = testPlanner(1L, false);
 
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(plannerRepository.findOwnershipById(planner.getId()))
+            when(plannerRepository.findOwnershipById(planner.id()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
             TransactionSynchronizationManager.initSynchronization();
 
             // Act
-            commandService.deletePlanner(testUser.getId(), planner.getId());
+            commandService.deletePlanner(testUser.getId(), planner.id());
 
             // Assert
             verifyNoInteractions(publicationRepository);
-            assertThat(planner.getContent().getDeletedAt()).isNotNull();
+            verify(contentRepository).markDeleted(eq(planner.id()), any());
         }
     }
 
@@ -507,10 +532,6 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = UpsertRequests.draft().title("Test Planner").build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (MAX_PLANNERS_PER_USER - 1));
-            when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                return PlannerContentLifecycle.asPersisted(planner);
-            });
 
             // Act & Assert - should not throw
             PlannerResponse response = commandService.createPlanner(testUser.getId(), deviceId, request);
@@ -530,7 +551,7 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
                     .withCode("PLANNER_LIMIT_EXCEEDED");
 
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
 
         @Test
@@ -544,7 +565,7 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
                     .withCode("PLANNER_LIMIT_EXCEEDED")
                     .satisfies(rejection -> assertThat(rejection.getMessage()).contains(String.valueOf(activeCount)));
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
     }
 
@@ -555,19 +576,16 @@ class PlannerCommandServiceTest {
         void upsertPlanner_WhenBannedUser_IsNotBlockedByTheGuard() {
             TestDataFactory.ban(testUser, java.time.Instant.now(), 1L);
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            when(plannerRepository.insert(any(Planner.class)))
-                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
-                            (Planner) invocation.getArgument(0)));
 
             UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
 
             UUID plannerId = UUID.randomUUID();
 
             // A ban withdraws distribution (publish, comment), never possession.
-            UpsertResult result = commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED);
+            SaveOutcome result = commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED);
 
-            assertThat(result.isCreated()).as("a banned user must keep private planner work").isTrue();
-            assertThat(result.response().id()).isEqualTo(plannerId);
+            assertThat(result).as("a banned user must keep private planner work").isInstanceOf(SaveOutcome.Created.class);
+            assertThat(result.planner().id()).isEqualTo(plannerId);
         }
 
         @Test
@@ -575,9 +593,6 @@ class PlannerCommandServiceTest {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
-            when(plannerRepository.insert(any(Planner.class)))
-                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
-                            (Planner) invocation.getArgument(0)));
 
             UpsertPlannerRequest request = UpsertRequests.draft()
                     .id(null)
@@ -588,14 +603,14 @@ class PlannerCommandServiceTest {
             UUID plannerId = UUID.randomUUID();
 
             // Act
-            UpsertResult result = commandService.upsertPlanner(
+            SaveOutcome result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED);
 
             // Assert
             assertThat(result).isNotNull();
-            assertThat(result.isCreated()).isTrue();
-            assertThat(result.response().id()).isEqualTo(plannerId);
-            assertThat(result.response().title()).isEqualTo("Test Planner");
+            assertThat(result).isInstanceOf(SaveOutcome.Created.class);
+            assertThat(result.planner().id()).isEqualTo(plannerId);
+            assertThat(result.planner().content().title()).isEqualTo("Test Planner");
         }
     }
 
@@ -605,25 +620,25 @@ class PlannerCommandServiceTest {
         @Test
         void upsertPlanner_WhenBannedOwnerEditsAPublishedPlanner_RefusesWithUserBanned() {
             TestDataFactory.ban(testUser, Instant.now(), 2L);
-            Planner planner = testPlanner(1L, true, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = testPlanner(1L, true, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
 
-            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled,
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(), retitled,
                     WriteMode.CHECKED)).withCode("USER_BANNED");
-            assertThat(planner.getTitle()).isEqualTo("Test Planner");
+            verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
         }
 
         @Test
         void upsertPlanner_WhenTimedOutOwnerEditsAPublishedPlanner_RefusesBeforeTheSyncVersionCheck() {
             TestDataFactory.timeOut(testUser, Instant.now().plusSeconds(3600));
-            Planner planner = testPlanner(5L, true, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = testPlanner(5L, true, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest stale = UpsertRequests.resending(planner).title("Renamed").syncVersion(1L).build();
 
-            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), stale,
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(), stale,
                     WriteMode.CHECKED)).withCode("USER_TIMED_OUT");
             assertThat(restrictionCheck.decisions()).containsExactly(Decision.CHECKED);
         }
@@ -631,23 +646,22 @@ class PlannerCommandServiceTest {
         @Test
         void upsertPlanner_WhenBannedOwnerEditsAPrivatePlanner_SavesAndRecordsAPrivateDecision() {
             TestDataFactory.ban(testUser, Instant.now(), 2L);
-            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
 
-            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, WriteMode.CHECKED);
+            SaveOutcome result = commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(), retitled,
+                    WriteMode.CHECKED);
 
-            assertThat(planner.getTitle()).isEqualTo("Renamed");
+            assertThat(result.planner().content().title()).isEqualTo("Renamed");
+            assertThat(replacedWith(planner).title()).isEqualTo("Renamed");
             assertThat(restrictionCheck.decisions()).containsExactly(Decision.PRIVATE);
         }
 
         @Test
         void upsertPlanner_WhenCreatingAPlanner_RecordsAPrivateDecision() {
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            when(plannerRepository.insert(any(Planner.class)))
-                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
-                            (Planner) invocation.getArgument(0)));
 
             commandService.upsertPlanner(testUser.getId(), deviceId, UUID.randomUUID(),
                     UpsertRequests.draft().id(null).status(null).build(), WriteMode.CHECKED);
@@ -683,7 +697,7 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED))
                     .withCode("PLANNER_NOT_FOUND");
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
             verify(plannerRepository, never()).countActiveByUserId(any());
         }
 
@@ -697,7 +711,7 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED))
                     .withCode("PLANNER_FORBIDDEN");
-            verify(plannerRepository, never()).insert(any());
+            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
         }
 
         @Test
@@ -710,75 +724,57 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.empty());
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
-            when(plannerRepository.insert(any(Planner.class)))
-                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
-                            (Planner) invocation.getArgument(0)));
 
-            UpsertResult result = commandService.upsertPlanner(
+            SaveOutcome result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED);
 
-            assertThat(result.isCreated()).isTrue();
+            assertThat(result).isInstanceOf(SaveOutcome.Created.class);
         }
     }
 
     @Nested
     class WriteModeTests {
 
-        private List<String> infoOf(WriteMode mode, Planner planner, UpsertPlannerRequest request) {
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+        private List<String> infoOf(WriteMode mode, StoredPlanner planner, UpsertPlannerRequest request) {
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             return LogCapture.during(() -> commandService.upsertPlanner(
-                            testUser.getId(), deviceId, planner.getId(), request, mode),
+                            testUser.getId(), deviceId, planner.id(), request, mode),
                     Level.INFO, PlannerCommandService.class).stream().map(ILoggingEvent::getFormattedMessage).toList();
         }
 
         @Test
         void upsertPlanner_WhenForcedAtAStaleVersion_WritesAndLogsTheForce() {
-            Planner planner = testPlanner(3L, false, TestDataFactory.VALID_CONTENT);
+            StoredPlanner planner = testPlanner(3L, false, TestDataFactory.VALID_CONTENT);
             UpsertPlannerRequest stale = UpsertRequests.resending(planner).syncVersion(1L).build();
 
             assertThat(infoOf(WriteMode.FORCED, planner, stale)).containsExactly(
-                    "Planner " + planner.getId() + " exists for user 1, updating (force=true)",
-                    "Updated planner " + planner.getId() + " via upsert, new syncVersion: 4");
-            assertThat(planner.getSyncVersion()).isEqualTo(4L);
+                    "Planner " + planner.id() + " exists for user 1, updating (force=true)",
+                    "Updated planner " + planner.id() + " via upsert, new syncVersion: 4");
+            assertThat(replacedWith(planner).syncVersion()).isEqualTo(4L);
         }
 
         @Test
         void upsertPlanner_WhenAStaleResendMovesNothing_LogsTheAcknowledgement() {
-            Planner planner = testPlanner(3L, false, TestDataFactory.VALID_CONTENT);
-            planner.getContent().setDeviceId(deviceId);
-            planner.getContent().setContentSchemaVersion(CURRENT_SCHEMA_VERSION);
+            StoredPlanner planner = resendable(3L, false, TestDataFactory.VALID_CONTENT).build();
             UpsertPlannerRequest stale = UpsertRequests.resending(planner).syncVersion(1L).build();
 
             assertThat(infoOf(WriteMode.CHECKED, planner, stale)).containsExactly(
-                    "Planner " + planner.getId() + " exists for user 1, updating (force=false)",
-                    "Upsert of planner " + planner.getId()
+                    "Planner " + planner.id() + " exists for user 1, updating (force=false)",
+                    "Upsert of planner " + planner.id()
                             + " would move no field, acknowledging syncVersion 3 without a write");
         }
 
         @Test
-        void upsertPlanner_WhenTheRequestCarriesNoDevice_KeepsTheStoredDevice() {
-            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
-            planner.getContent().setDeviceId(deviceId);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-
-            commandService.upsertPlanner(testUser.getId(), null, planner.getId(),
-                    UpsertRequests.resending(planner).title("Renamed").build(), WriteMode.CHECKED);
-
-            assertThat(planner.getDeviceId()).isEqualTo(deviceId);
-        }
-
-        @Test
         void upsertPlanner_WhenThePlannerIsDeletedBeforeTheLock_RefusesOnTheRowReadAfterIt() {
-            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findOwnershipById(planner.getId()))
+            StoredPlanner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findOwnershipById(planner.id()))
                     .thenReturn(Optional.of(OwnershipRows.of(testUser.getId(), null)))
                     .thenReturn(Optional.of(OwnershipRows.of(testUser.getId(), Instant.EPOCH)));
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.empty());
 
-            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(),
                     UpsertRequests.resending(planner).build(), WriteMode.FORCED))
                     .withCode("PLANNER_NOT_FOUND");
             assertThat(MockCalls.inOrder(plannerRepository)).containsExactly(
@@ -795,13 +791,9 @@ class PlannerCommandServiceTest {
         private static final String BURST_CONTENT = TestDataFactory.withSelectedKeywords(
                 TestDataFactory.VALID_CONTENT, java.util.Set.of("Burst"));
 
-        private Planner storedWithSinking() {
-            Planner planner = testPlanner(3L, false);
-            StoredPlannerContent.holding(planner.getContent(), SINKING_CONTENT);
-            planner.getContent().setSelectedKeywords(java.util.Set.of("Sinking"));
-            planner.getContent().setContentSchemaVersion(CURRENT_SCHEMA_VERSION);
-            planner.getContent().setDeviceId(deviceId);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+        private StoredPlanner storedWithSinking() {
+            StoredPlanner planner = resendable(3L, false, SINKING_CONTENT).build();
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             return planner;
         }
@@ -814,40 +806,75 @@ class PlannerCommandServiceTest {
                     .selectedKeywords(java.util.Set.of("Burst"))
                     .build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
-            when(plannerRepository.insert(plannerCaptor.capture()))
-                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted((Planner) invocation.getArgument(0)));
-
             commandService.createPlanner(testUser.getId(), deviceId, request);
 
-            assertThat(plannerCaptor.getValue().getSelectedKeywords()).isEqualTo(java.util.Set.of("Sinking"));
+            assertThat(insertedContent().getSelectedKeywords()).isEqualTo(java.util.Set.of("Sinking"));
         }
 
         @Test
         void upsertPlanner_WhenTopLevelKeywordsAreAbsent_DerivesTheColumnFromTheNewContent() {
-            Planner planner = storedWithSinking();
+            StoredPlanner planner = storedWithSinking();
 
-            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(),
                     UpsertRequests.resending(planner).content(BURST_CONTENT).build(), WriteMode.CHECKED);
 
-            assertThat(planner.getSelectedKeywords()).isEqualTo(java.util.Set.of("Burst"));
+            assertThat(replacedWith(planner).keywords()).isEqualTo(java.util.Set.of("Burst"));
         }
 
         @Test
         void upsertPlanner_WhenAStaleSaveDiffersOnlyInTopLevelKeywords_AcknowledgesWithoutConflict() {
-            Planner planner = storedWithSinking();
-            long storedVersion = planner.getSyncVersion();
+            StoredPlanner planner = storedWithSinking();
+            long storedVersion = planner.content().syncVersion();
 
-            UpsertResult result = commandService.upsertPlanner(testUser.getId(), deviceId,
-                    planner.getId(), UpsertRequests.resending(planner)
+            SaveOutcome result = commandService.upsertPlanner(testUser.getId(), deviceId,
+                    planner.id(), UpsertRequests.resending(planner)
                             .content(SINKING_CONTENT)
                             .selectedKeywords(java.util.Set.of("Burst"))
                             .syncVersion(storedVersion - 1)
                             .build(),
                     WriteMode.CHECKED);
 
-            assertThat(result.response().syncVersion()).isEqualTo(storedVersion);
-            assertThat(planner.getSelectedKeywords()).isEqualTo(java.util.Set.of("Sinking"));
+            assertThat(result.planner().content().syncVersion()).isEqualTo(storedVersion);
+            assertThat(result.planner().content().keywords()).isEqualTo(java.util.Set.of("Sinking"));
+            verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
+        }
+    }
+
+    @Nested
+    class ConcurrentWriteTests {
+
+        @Test
+        void upsertPlanner_WhenTheVersionedUpdateMatchesNoRow_RefusesWithoutTouchingTheCatalogOrDeclaringFreshness() {
+            StoredPlanner planner = testPlanner(1L, true, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(contentRepository.replaceAtVersion(eq(planner.id()), eq(1L), any())).thenReturn(0);
+            FreshnessDeclarations.begin();
+            try {
+                assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.id(),
+                        UpsertRequests.resending(planner).title("Renamed").build(), WriteMode.CHECKED))
+                        .withCode("CONCURRENT_WRITE")
+                        .isInstanceOf(PlannerConcurrentWriteException.class);
+
+                assertThat(FreshnessDeclarations.declared()).isEmpty();
+            } finally {
+                FreshnessDeclarations.clear();
+            }
+            verifyNoInteractions(catalogRepository, entityFilterRepository, keywordFilterRepository);
+        }
+
+        @Test
+        void deletePlanner_WhenTheTombstoneUpdateMatchesNoRow_RefusesAsAbsent() {
+            StoredPlanner planner = testPlanner(1L, false);
+            when(plannerRepository.findOwnershipById(planner.id()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(contentRepository.markDeleted(eq(planner.id()), any())).thenReturn(0);
+
+            assertRejected(() -> commandService.deletePlanner(testUser.getId(), planner.id()))
+                    .withCode("PLANNER_NOT_FOUND");
+            verifyNoInteractions(catalogRepository);
         }
     }
 }

@@ -6,7 +6,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.user.entity.User;
@@ -40,7 +40,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     private User testUser;
-    private Planner testPlanner;
+    private StoredPlanner testPlanner;
 
     @BeforeEach
     void setUp() {
@@ -59,12 +59,12 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     @Test
     void saveAndFindVote_WhenSaved_RetrievableByUserAndPlanner() {
         // Arrange
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP);
 
         // Act
         PlannerVote saved = plannerVoteRepository.save(vote);
         Optional<PlannerVote> found = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
+                testUser.getId(), testPlanner.id());
 
         // Assert
         assertThat(saved).isNotNull();
@@ -72,7 +72,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         assertThat(found).isPresent();
         assertThat(found.get().getVoteType()).isEqualTo(VoteType.UP);
         assertThat(found.get().getUserId()).isEqualTo(testUser.getId());
-        assertThat(found.get().getPlannerId()).isEqualTo(testPlanner.getId());
+        assertThat(found.get().getPlannerId()).isEqualTo(testPlanner.id());
     }
 
     @Test
@@ -91,16 +91,16 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         User secondUser = TestDataFactory.createTestUser(userRepository, "second@example.com");
 
         // Act - Both users upvote
-        PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        PlannerVote vote2 = new PlannerVote(secondUser.getId(), testPlanner.getId(), VoteType.UP);
+        PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP);
+        PlannerVote vote2 = new PlannerVote(secondUser.getId(), testPlanner.id(), VoteType.UP);
         plannerVoteRepository.save(vote1);
         plannerVoteRepository.save(vote2);
 
         // Assert
         Optional<PlannerVote> user1Vote = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
+                testUser.getId(), testPlanner.id());
         Optional<PlannerVote> user2Vote = plannerVoteRepository.findByUserIdAndPlannerId(
-                secondUser.getId(), testPlanner.getId());
+                secondUser.getId(), testPlanner.id());
 
         assertThat(user1Vote).isPresent();
         assertThat(user2Vote).isPresent();
@@ -111,7 +111,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     @Test
     void save_WhenSameUserVotesMultiplePlanners_AllPersisted() {
         // Arrange - Create another planner
-        Planner secondPlanner = TestDataFactory.planner(testUser)
+        StoredPlanner secondPlanner = TestDataFactory.planner(testUser)
                 .title("Second Planner")
                 .category("10F")
                 .status(PlannerStatus.DRAFT)
@@ -119,16 +119,16 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
 
         // Act - User upvotes both planners
-        PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        PlannerVote vote2 = new PlannerVote(testUser.getId(), secondPlanner.getId(), VoteType.UP);
+        PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP);
+        PlannerVote vote2 = new PlannerVote(testUser.getId(), secondPlanner.id(), VoteType.UP);
         plannerVoteRepository.save(vote1);
         plannerVoteRepository.save(vote2);
 
         // Assert
         Optional<PlannerVote> planner1Vote = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
+                testUser.getId(), testPlanner.id());
         Optional<PlannerVote> planner2Vote = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), secondPlanner.getId());
+                testUser.getId(), secondPlanner.id());
 
         assertThat(planner1Vote).isPresent();
         assertThat(planner2Vote).isPresent();

@@ -1,9 +1,7 @@
 package org.danteplanner.backend.shared.outbox.repository;
 
-import jakarta.persistence.LockModeType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,9 +14,9 @@ import java.util.Optional;
 
 public interface DomainEventRepository extends JpaRepository<DomainEvent, Long> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT e FROM DomainEvent e WHERE e.id = :id")
-    Optional<DomainEvent> findForDispatch(@Param("id") Long id);
+    @Modifying
+    @Query("UPDATE DomainEvent e SET e.dispatchedAt = :at WHERE e.id = :id AND e.dispatchedAt IS NULL")
+    int claim(@Param("id") Long id, @Param("at") Instant at);
 
     @Query(value = """
             SELECT id FROM domain_events

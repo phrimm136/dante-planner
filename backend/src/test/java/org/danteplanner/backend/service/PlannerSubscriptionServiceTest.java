@@ -1,8 +1,10 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.RecordingRestrictionCheck;
 import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
+import org.danteplanner.backend.shared.restriction.UnrestrictedMember;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
 import org.danteplanner.backend.user.entity.User;
@@ -67,7 +69,7 @@ class PlannerSubscriptionServiceTest {
 
     private void published() {
         when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
     }
 
     private void toggles(int affectedRows, boolean entered) {
@@ -86,6 +88,8 @@ class PlannerSubscriptionServiceTest {
             assertThat(subscriptionService.toggleSubscription(testUser.getId(), plannerId)).isTrue();
 
             assertThat(restrictionCheck.decisions()).containsExactly(Decision.CHECKED);
+            assertThat(restrictionCheck.clearances()).singleElement().isInstanceOfSatisfying(
+                    UnrestrictedMember.class, member -> assertThat(member.userId()).isEqualTo(testUser.getId()));
         }
 
         @Test
@@ -148,22 +152,19 @@ class PlannerSubscriptionServiceTest {
     }
 
     @Test
-    void unsubscribe_WhenPublished_WritesTheUnsubscribedStateWhetherOrNotARowMatched() {
-        published();
-
+    void unsubscribe_WhenThePlannerIsNotReadable_WritesTheUnsubscribedStateWithoutAskingForIt() {
         subscriptionService.unsubscribe(testUser.getId(), plannerId);
 
         verify(subscriptionRepository).unsubscribe(testUser.getId(), plannerId);
         verifyNoMoreInteractions(subscriptionRepository);
+        verifyNoInteractions(plannerRepository);
     }
 
     @Test
-    void subscribeAndUnsubscribe_WhenPlannerMissing_WriteNothing() {
+    void subscribe_WhenPlannerMissing_WritesNothing() {
         when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
 
         assertRejected(() -> subscriptionService.subscribe(testUser.getId(), plannerId)).withCode("PLANNER_NOT_FOUND");
-        assertRejected(() -> subscriptionService.unsubscribe(testUser.getId(), plannerId))
-                .withCode("PLANNER_NOT_FOUND");
 
         verifyNoInteractions(subscriptionRepository);
     }

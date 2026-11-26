@@ -27,7 +27,7 @@ module_spec = importlib.util.spec_from_loader("ops_cli", cli_loader)
 ops_entry = importlib.util.module_from_spec(module_spec)
 sys.modules["ops_cli"] = ops_entry
 cli_loader.exec_module(ops_entry)
-MODULE_NAMES = ("paths", "redaction", "session", "commands", "terraform", "hook")
+MODULE_NAMES = ("paths", "redaction", "session", "series", "commands", "terraform", "hook")
 MODULE_FILES = [SKILL_DIR / "lib" / "opscli" / f"{module_name}.py" for module_name in MODULE_NAMES]
 ops_cli = types.SimpleNamespace(main=ops_entry.main)
 for module_name in MODULE_NAMES:
@@ -252,6 +252,7 @@ class DispatchTest(unittest.TestCase):
             ("tunnel", "scripts/ops/access/rds-tunnel.sh", "read"),
             ("verify db", "scripts/ops/access/db-observability-check.sh", "read"),
             ("verify fleet", "scripts/ops/fleet-verify.sh", "read"),
+            ("verify rules", "scripts/ops/access/metrics-query.sh", "read"),
             ("nodes", "scripts/ops/access/fleet-nodes.sh", "read"),
             ("bootlog", "scripts/ops/access/boot-log.sh", "read"),
             ("app", "scripts/ops/access/argocd-app.sh", "read"),
@@ -1142,10 +1143,12 @@ class RealSettingsTest(unittest.TestCase):
             with self.subTest(settings_path=str(settings_path.relative_to(REPO_ROOT))):
                 self.assertEqual(account_bound_shapes(settings_path.read_text()), [])
 
-    def test_the_real_rds_stack_is_moved_and_takes_the_account(self):
-        rds_stack = ops_cli.stack_info(REPO_ROOT, "rds")
-        self.assertEqual((rds_stack.is_moved, rds_stack.takes_account), (True, True))
-        self.assertFalse(ops_cli.stack_info(REPO_ROOT, "oregon").is_moved)
+    def test_the_real_moved_stacks_take_the_account(self):
+        for stack_name in ("rds", "oregon", "seoul", "secrets"):
+            with self.subTest(stack_name=stack_name):
+                moved_stack = ops_cli.stack_info(REPO_ROOT, stack_name)
+                self.assertEqual((moved_stack.is_moved, moved_stack.takes_account), (True, True))
+        self.assertFalse(ops_cli.stack_info(REPO_ROOT, "cloudflare").is_moved)
 
     def test_settings_files_are_tracked_and_other_tfvars_stay_ignored(self):
         for relative_path, ignore_exit in (("terraform/rds/envs/prod.tfvars", 1), ("terraform/oregon/envs/prod.tfvars", 1),
@@ -1603,9 +1606,13 @@ HOOK_CASES = (
      f"{CLI_TEXT} tf plan rds -- -refresh=false"),
     ("scripts/ops/terraform-run.sh -chdir=terraform/rds plan -var-file prod.tfvars", f"{CLI_TEXT} tf plan rds"),
     ("scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars -refresh=false",
-     f"{CLI_TEXT} tf plan oregon -- -var-file=prod.tfvars -refresh=false"),
+     f"{CLI_TEXT} tf plan oregon -- -refresh=false"),
     ("AWS_PROFILE=staging scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=staging.tfvars",
-     f"{CLI_TEXT} --env staging tf plan secrets -- -var-file=staging.tfvars"),
+     f"{CLI_TEXT} --env staging tf plan secrets"),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars -refresh=false",
+     f"{CLI_TEXT} tf plan cloudflare -- -var-file=prod.tfvars -refresh=false"),
+    ("AWS_PROFILE=staging scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=staging.tfvars",
+     f"{CLI_TEXT} --env staging tf plan cloudflare -- -var-file=staging.tfvars"),
     ("scripts/ops/access/metrics-query.sh 'rate(x[5m])' 6h 1m",
      f"{CLI_TEXT} metrics 'rate(x[5m])' --since 6h --step 1m"),
     ("scripts/ops/access/logs-query.sh --day 2026-07-23 '{app=\"backend\"}' 9",
@@ -1732,6 +1739,7 @@ ORDINARY_CASES = (
     f"{CLI_TEXT} tf plan oregon",
     f"{CLI_TEXT} list",
     f"{CLI_TEXT} help",
+    f"{CLI_TEXT} verify rules --since 2d",
     "python3 -m unittest discover -s .claude/skills/ops/tests",
     'git commit -m "ops tf apply reads the verdict file"',
     "scripts/ops/terraform-run.sh -chdir=terraform/seoul show -json x.plan",
@@ -1865,13 +1873,190 @@ class ProfileTest(unittest.TestCase):
             fake_aws.chmod(0o755)
             child_env = {env_key: env_value for env_key, env_value in os.environ.items()
                          if not env_key.startswith("AWS_")}
-            child_env["PATH"] = f"{fake_dir}:/usr/bin:/bin"
+            child_env["PATH"] = ":".join(path_dir for path_dir in (
+                fake_dir, os.environ.get("TOOLING_SLEEP_GUARD_DIR", ""), "/usr/bin", "/bin") if path_dir)
             script_run = subprocess.run([str(REPO_ROOT / ops_cli.SQL_SCRIPT), "SELECT 1"], env=child_env,
                                         capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
         self.assertNotEqual(script_run.returncode, 0)
         self.assertIn(f"{CLI_TEXT} doctor", script_run.stderr)
         self.assertIn("AWS_PROFILE=prod", script_run.stderr)
         self.assertIn("aws sso login --sso-session danteplanner", script_run.stderr)
+
+
+
+SITE_CASES = (
+    ("max(redis_master_repl_offset{job=\"redis-auth\",cluster=\"seoul\"}) == bool 0",
+     (("redis_master_repl_offset", ("seoul",)),)),
+    ("sum without (pod) (rate(aaa_total[5m:1m] offset 1h)) * on (cluster) group_left (region) "
+     "bbb_info{cluster=\"oregon\"}",
+     (("aaa_total", ("oregon", "seoul")), ("bbb_info", ("oregon",)))),
+    ("ccc_up{cluster=\"oregon\"} or ccc_up{cluster!=\"oregon\"}", (("ccc_up", ("oregon", "seoul")),)),
+    ("ccc_up{cluster=\"oregon\"} or ccc_up{cluster=\"seoul\"}", (("ccc_up", ("oregon", "seoul")),)),
+)
+READER_FAILURE = "jq: error (at <stdin>:1): Cannot iterate over null (null)\n"
+
+
+def prometheus_rule(rule_name, expr_text):
+    return (f"- name: {rule_name}\n  kind: prometheus\n  for: 1m\n  expr: '{expr_text}'\n  cases:\n"
+            "    fires:\n      - series:\n          - series: 'aaa_total'\n            values: '1'\n        at: 1m\n"
+            "    quiet:\n      - series:\n          - series: 'aaa_total'\n            values: '0'\n        at: 1m\n")
+
+
+LOKI_RULE = ("- name: loki-errors\n  kind: loki\n  for: 1m\n  expr: 'count_over_time({app=\"backend\"}[5m]) > 0'\n"
+             "  cases:\n    fires:\n      - lines:\n          - stream: {app: backend}\n            line: x\n"
+             "    quiet:\n      - lines:\n          - stream: {app: backend}\n            line: y\n")
+MIXED_RULES = (prometheus_rule("both-sites", "sum by (cluster) (rate(aaa_total[5m])) > 0")
+               + prometheus_rule("two-metrics", "bbb_ready == 0 unless on (cluster) ccc_up")
+               + prometheus_rule("seoul-pinned", "max(ccc_up{cluster=\"seoul\"}) == 0")
+               + prometheus_rule("never-emitted", "increase(ddd_total[10m]) > 0"))
+
+
+class SeriesReadTest(unittest.TestCase):
+    def test_each_metric_is_checked_in_the_sites_its_selectors_pin(self):
+        rules_module = ops_cli.rule_loader(REPO_ROOT)
+        for expr_text, expected_reads in SITE_CASES:
+            with self.subTest(expr_text=expr_text):
+                self.assertEqual(tuple((metric_read.metric_name, metric_read.site_names) for metric_read in
+                                       ops_cli.metric_reads(rules_module.expression_selectors(expr_text))),
+                                 expected_reads)
+
+    def test_a_metric_the_rule_declares_absent_until_an_event_is_marked(self):
+        rules_module = ops_cli.rule_loader(REPO_ROOT)
+        self.assertEqual([(metric_read.metric_name, metric_read.absent_until_event) for metric_read in
+                          ops_cli.metric_reads(rules_module.expression_selectors("aaa_total > bbb_total"),
+                                               ["bbb_total"])],
+                         [("aaa_total", False), ("bbb_total", True)])
+
+    def test_the_presence_query_labels_each_metric_it_counts(self):
+        self.assertEqual(ops_cli.presence_query(["aaa_total", "bbb_ready"], "2d"),
+                         'label_replace(count by (cluster) (last_over_time(aaa_total[2d])), "metric", "aaa_total", '
+                         '"", "") or label_replace(count by (cluster) (last_over_time(bbb_ready[2d])), "metric", '
+                         '"bbb_ready", "", "")')
+
+    def test_the_reader_output_becomes_the_sites_of_each_metric(self):
+        presence_read = ops_cli.parse_presence((FIXTURE_DIR / "metrics-query-presence.txt").read_text())
+        self.assertEqual((presence_read.metric_sites, presence_read.read_problem),
+                         ({"aaa_total": {"oregon", "seoul"}, "bbb_ready": {"oregon"}, "ccc_up": {"seoul"}}, ""))
+        self.assertIn("reader line 1 is not <time> <value> <labels>",
+                      ops_cli.parse_presence("2026-11-26T02:40:00Z  3  cluster=oregon\n").read_problem)
+
+    def test_verify_rules_takes_only_a_window(self):
+        rules_invocation = ops_cli.build_invocation(["verify", "rules"], "/")
+        self.assertEqual((rules_invocation.series_window, rules_invocation.needs_session), ("24h", True))
+        self.assertEqual(ops_cli.build_invocation(["verify", "rules", "--since=2d"], "/").series_window, "2d")
+        with self.assertRaisesRegex(ops_cli.OpsError, "--since takes a window"):
+            ops_cli.build_invocation(["verify", "rules", "--since", "yesterday"], "/")
+        with self.assertRaisesRegex(ops_cli.OpsError, "ops verify rules: takes only --since, not 'seoul'"):
+            ops_cli.build_invocation(["verify", "rules", "seoul"], "/")
+        with self.assertRaisesRegex(ops_cli.OpsError, "unknown option --site"):
+            ops_cli.build_invocation(["verify", "rules", "--site", "seoul"], "/")
+
+
+class SeriesRunTest(RepoCase):
+    def write_rules(self, cluster_text, app_text="[]\n"):
+        rules_dir = self.repo_root / "deploy" / "grafana" / "rules"
+        rules_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy(REPO_ROOT / ops_cli.RULES_LOADER, self.repo_root / ops_cli.RULES_LOADER)
+        (rules_dir / "cluster-rules.yaml").write_text(cluster_text)
+        (rules_dir / "app-rules.yaml").write_text(app_text)
+
+    def presence_effects(self, **effect_args):
+        return FakeEffects(stream_text=(FIXTURE_DIR / "metrics-query-presence.txt").read_text(), **effect_args)
+
+    def test_a_rule_without_series_names_each_missing_metric_and_site(self):
+        self.write_rules(MIXED_RULES, LOKI_RULE)
+        fake_effects = self.presence_effects()
+        exit_code, out_text, err_text = self.run_main(["verify", "rules"], fake_effects)
+        self.assertEqual(out_text.splitlines(), [
+            "ok                      both-sites",
+            "NO SERIES               two-metrics  bbb_ready (seoul), ccc_up (oregon)",
+            "ok                      seoul-pinned",
+            "NO SERIES               never-emitted  ddd_total (oregon, seoul)",
+            "4 prometheus rules over 4 metrics in oregon, seoul, window 24h: 2 ok, 0 absent until event, "
+            "2 with no series, 0 unreadable; "
+            "not checked, they read no Mimir metric: 1 loki",
+        ])
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(len(fake_effects.stream_calls), 1)
+        command_argv, child_env, work_dir, _ = fake_effects.stream_calls[0]
+        self.assertEqual((command_argv[0], command_argv[2:]),
+                         (str(self.repo_root / ops_cli.METRICS_SCRIPT), ("1m", "1m")))
+        for metric_name in ("aaa_total", "bbb_ready", "ccc_up", "ddd_total"):
+            self.assertIn(f"last_over_time({metric_name}[24h])", command_argv[1])
+        self.assertEqual((child_env["AWS_PROFILE"], work_dir), ("prod", self.repo_root))
+        log_path = self.log_dir / f"ops-verify-rules-{STAMP_TEXT}.log"
+        log_text = log_path.read_text()
+        self.assertIn("cluster=seoul,metric=ccc_up", log_text)
+        self.assertIn("NO SERIES               never-emitted  ddd_total (oregon, seoul)", log_text)
+        self.assertIn("# ops: exit 1", log_text)
+        self.assertIn(f"ops: exit 1, log {log_path}", err_text)
+
+    def test_every_rule_with_series_exits_zero_in_the_given_window(self):
+        self.write_rules(prometheus_rule("both-sites", "sum by (cluster) (rate(aaa_total[5m])) > 0")
+                         + prometheus_rule("seoul-pinned", "max(ccc_up{cluster=\"seoul\"}) == 0"))
+        fake_effects = self.presence_effects()
+        exit_code, out_text, _ = self.run_main(["--env", "staging", "verify", "rules", "--since", "2d"], fake_effects)
+        self.assertEqual(out_text.splitlines(), [
+            "ok                      both-sites",
+            "ok                      seoul-pinned",
+            "2 prometheus rules over 2 metrics in oregon, seoul, window 2d: 2 ok, 0 absent until event, "
+            "0 with no series, 0 unreadable",
+        ])
+        self.assertEqual(exit_code, 0)
+        command_argv, child_env, _, _ = fake_effects.stream_calls[0]
+        self.assertIn("last_over_time(ccc_up[2d])", command_argv[1])
+        self.assertEqual(child_env["AWS_PROFILE"], "staging")
+
+    def test_a_metric_absent_until_an_event_is_ok_and_named(self):
+        self.write_rules(prometheus_rule("both-sites", "sum by (cluster) (rate(aaa_total[5m])) > 0")
+                         + prometheus_rule("waiting", "ddd_total == 1 or aaa_total == 0").replace(
+                             "  cases:", "  absent_until_event: [ddd_total]\n  cases:", 1)
+                         + prometheus_rule("partly-declared", "ddd_total > eee_total").replace(
+                             "  cases:", "  absent_until_event: [ddd_total]\n  cases:", 1))
+        exit_code, out_text, _ = self.run_main(["verify", "rules"], self.presence_effects())
+        self.assertEqual(out_text.splitlines(), [
+            "ok                      both-sites",
+            "ok (absent until event) waiting  ddd_total (oregon, seoul)",
+            "NO SERIES               partly-declared  eee_total (oregon, seoul)",
+            "3 prometheus rules over 3 metrics in oregon, seoul, window 24h: 1 ok, 1 absent until event, "
+            "1 with no series, 0 unreadable",
+        ])
+        self.assertEqual(exit_code, 1)
+
+    def test_an_unreadable_mimir_makes_every_rule_unreadable(self):
+        self.write_rules(MIXED_RULES)
+        fake_effects = FakeEffects(stream_exit=5, stream_text="", stream_err=READER_FAILURE)
+        exit_code, out_text, _ = self.run_main(["verify", "rules"], fake_effects)
+        reason_text = "the Mimir read exited 5: jq: error (at <stdin>:1): Cannot iterate over null (null)"
+        self.assertEqual(out_text.splitlines()[:4], [f"unreadable              both-sites  {reason_text}",
+                                                     f"unreadable              two-metrics  {reason_text}",
+                                                     f"unreadable              seoul-pinned  {reason_text}",
+                                                     f"unreadable              never-emitted  {reason_text}"])
+        self.assertIn("0 ok, 0 absent until event, 0 with no series, 4 unreadable", out_text)
+        self.assertEqual(exit_code, 2)
+
+    def test_an_expression_without_a_metric_is_unreadable_and_not_queried(self):
+        self.write_rules(prometheus_rule("both-sites", "sum by (cluster) (rate(aaa_total[5m])) > 0")
+                         + prometheus_rule("constant", "vector(1) > 0"))
+        fake_effects = self.presence_effects()
+        exit_code, out_text, _ = self.run_main(["verify", "rules"], fake_effects)
+        self.assertEqual(out_text.splitlines()[:2], ["ok                      both-sites",
+                                                     "unreadable              constant  expr not read: the expression names no "
+                                                     "metric"])
+        self.assertEqual(exit_code, 2)
+        self.assertNotIn("vector", fake_effects.stream_calls[0][0][1])
+
+    def test_an_expired_session_stops_before_mimir_is_read(self):
+        self.write_rules(MIXED_RULES)
+        fake_effects = self.presence_effects(session_rows={"prod": (255, EXPIRED_STDERR)})
+        with self.assertRaisesRegex(ops_cli.OpsError, "has expired; run: aws sso login"):
+            self.run_main(["verify", "rules"], fake_effects)
+        self.assertEqual(fake_effects.stream_calls, [])
+
+    def test_a_rule_file_that_does_not_load_is_an_ops_error(self):
+        self.write_rules("- name: broken\n  kind: prometheus\n")
+        with self.assertRaisesRegex(ops_cli.OpsError, "the alert rules do not load .*missing required field"):
+            self.run_main(["verify", "rules"], self.presence_effects())
 
 
 if __name__ == "__main__":

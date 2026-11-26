@@ -4,7 +4,7 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
@@ -137,18 +137,18 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private void cleanUp() {
     }
 
-    private Planner publishedPlanner(String title, Set<String> keywords) {
-        Planner planner = TestDataFactory.planner(owner)
+    private StoredPlanner publishedPlanner(String title, Set<String> keywords) {
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         // MySQL re-serializes a JSON column, so "the content did not change" is only
         // expressible against the stored form, not the string handed to the insert.
-        return plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()).orElseThrow();
+        return plannerRepository.findAggregateForOwner(planner.id(), owner.getId()).orElseThrow();
     }
 
     private void plantUnreachableEntityRow(UUID plannerId) {
@@ -170,27 +170,27 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> extractorOracle(Planner planner) throws Exception {
-        return entityExtractor.extract(objectMapper.readTree(planner.getContentJson()),
-                        MDCategory.fromValue(planner.getCategory())).stream()
+    private Set<String> extractorOracle(StoredPlanner planner) throws Exception {
+        return entityExtractor.extract(objectMapper.readTree(planner.content().json()),
+                        MDCategory.fromValue(planner.content().category())).stream()
                 .map(ref -> ref.type() + ":" + ref.id())
                 .collect(Collectors.toSet());
     }
 
-    private UpsertPlannerRequest edit(Planner planner, String title, Set<String> keywords) {
+    private UpsertPlannerRequest edit(StoredPlanner planner, String title, Set<String> keywords) {
         return UpsertRequests.resending(planner)
                 .title(title)
                 .status(PlannerStatus.SAVED)
-                .content(keywords == null ? planner.getContentJson()
-                        : TestDataFactory.withSelectedKeywords(planner.getContentJson(), keywords))
+                .content(keywords == null ? planner.content().json()
+                        : TestDataFactory.withSelectedKeywords(planner.content().json(), keywords))
                 .selectedKeywords(keywords)
                 .build();
     }
 
     @Test
     void edit_WhenCompositionUnchanged_LeavesFilterIndexUntouched() {
-        Planner planner = publishedPlanner("Before Edit", Set.of("Sinking", "Combustion"));
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = publishedPlanner("Before Edit", Set.of("Sinking", "Combustion"));
+        UUID plannerId = planner.id();
         plantUnreachableEntityRow(plannerId);
         Set<String> entityIndexBefore = entityIndex(plannerId);
 
@@ -215,13 +215,13 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     void edit_WhenCompositionChanged_RebuildsBothFilterIndexes() throws Exception {
-        Planner planner = publishedPlanner("Keyword Edit", Set.of("Sinking"));
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = publishedPlanner("Keyword Edit", Set.of("Sinking"));
+        UUID plannerId = planner.id();
         plantUnreachableEntityRow(plannerId);
 
         // Re-read: publishing fires AFTER_COMMIT listeners that bump this row's version, so the
         // instance returned by publishedPlanner() is already stale by the time the edit is built.
-        planner = plannerRepository.findById(plannerId).orElseThrow();
+        planner = plannerRepository.findAggregate(plannerId).orElseThrow();
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
                 edit(planner, "Keyword Edit", Set.of("Combustion", "Burst")), WriteMode.CHECKED);
 
@@ -240,8 +240,8 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     void softDelete_WhenApplied_WithdrawsPlannerFromEveryProjection() {
-        Planner planner = publishedPlanner("Doomed", Set.of("Sinking"));
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = publishedPlanner("Doomed", Set.of("Sinking"));
+        UUID plannerId = planner.id();
         assertThat(entityIndex(plannerId)).isNotEmpty();
         assertThat(keywordIndex(plannerId)).isNotEmpty();
 
@@ -268,16 +268,16 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     void edit_WhenAFiveFloorPlannerSavesASixthFloor_IndexesOnlyTheRenderedFloors() throws Exception {
-        UUID plannerId = publishedPlanner("Hidden Floor", Set.of("Sinking")).getId();
-        Planner planner = plannerRepository.findById(plannerId).orElseThrow();
+        UUID plannerId = publishedPlanner("Hidden Floor", Set.of("Sinking")).id();
+        StoredPlanner planner = plannerRepository.findAggregate(plannerId).orElseThrow();
 
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId, UpsertRequests.resending(planner)
                 .status(PlannerStatus.SAVED)
                 .content(SIX_FLOOR_CONTENT)
                 .build(), WriteMode.CHECKED);
 
-        Planner saved = plannerRepository.findById(plannerId).orElseThrow();
-        assertThat(saved.getContentJson()).contains("1006");
+        StoredPlanner saved = plannerRepository.findAggregate(plannerId).orElseThrow();
+        assertThat(saved.content().json()).contains("1006");
         assertThat(entityIndex(plannerId))
                 .doesNotContain("THEME_PACK:1006", "EGO_GIFT:9004")
                 .contains("THEME_PACK:1001", "THEME_PACK:1002", "THEME_PACK:1003", "THEME_PACK:1004",
@@ -297,21 +297,21 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
             .flatMap(floor -> Stream.of("THEME_PACK:" + (1001 + floor), "EGO_GIFT:" + (9101 + floor)))
             .collect(Collectors.toSet());
 
-    private Planner fifteenFloorPlanner(String category) {
-        Planner planner = TestDataFactory.planner(owner)
+    private StoredPlanner fifteenFloorPlanner(String category) {
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Category Switch " + category)
                 .category(category)
                 .content(FIFTEEN_FLOOR_CONTENT)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
-        return plannerRepository.findById(planner.getId()).orElseThrow();
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
+        return plannerRepository.findAggregate(planner.id()).orElseThrow();
     }
 
-    private void switchCategory(Planner planner, String category) {
-        commandService.upsertPlanner(owner.getId(), deviceId, planner.getId(), UpsertRequests.resending(planner)
+    private void switchCategory(StoredPlanner planner, String category) {
+        commandService.upsertPlanner(owner.getId(), deviceId, planner.id(), UpsertRequests.resending(planner)
                 .category(category)
                 .status(PlannerStatus.SAVED)
                 .build(), WriteMode.CHECKED);
@@ -320,14 +320,14 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     @Test
     void edit_WhenAFifteenFloorPlannerSwitchesToFiveFloorsWithIdenticalContent_DropsFloorsSixToFifteen()
             throws Exception {
-        Planner planner = fifteenFloorPlanner("15F");
-        assertThat(entityIndex(planner.getId())).containsAll(FLOORS_SIX_TO_FIFTEEN);
+        StoredPlanner planner = fifteenFloorPlanner("15F");
+        assertThat(entityIndex(planner.id())).containsAll(FLOORS_SIX_TO_FIFTEEN);
 
         switchCategory(planner, "5F");
 
-        Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
-        assertThat(saved.getCategory()).isEqualTo("5F");
-        assertThat(entityIndex(planner.getId()))
+        StoredPlanner saved = plannerRepository.findAggregate(planner.id()).orElseThrow();
+        assertThat(saved.content().category()).isEqualTo("5F");
+        assertThat(entityIndex(planner.id()))
                 .doesNotContainAnyElementsOf(FLOORS_SIX_TO_FIFTEEN)
                 .contains("THEME_PACK:1001", "THEME_PACK:1005", "EGO_GIFT:9101", "EGO_GIFT:9105")
                 .isEqualTo(extractorOracle(saved));
@@ -336,14 +336,14 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     @Test
     void edit_WhenAFiveFloorPlannerSwitchesToFifteenFloorsWithIdenticalContent_IndexesFloorsSixToFifteen()
             throws Exception {
-        Planner planner = fifteenFloorPlanner("5F");
-        assertThat(entityIndex(planner.getId())).doesNotContainAnyElementsOf(FLOORS_SIX_TO_FIFTEEN);
+        StoredPlanner planner = fifteenFloorPlanner("5F");
+        assertThat(entityIndex(planner.id())).doesNotContainAnyElementsOf(FLOORS_SIX_TO_FIFTEEN);
 
         switchCategory(planner, "15F");
 
-        Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
-        assertThat(saved.getCategory()).isEqualTo("15F");
-        assertThat(entityIndex(planner.getId()))
+        StoredPlanner saved = plannerRepository.findAggregate(planner.id()).orElseThrow();
+        assertThat(saved.content().category()).isEqualTo("15F");
+        assertThat(entityIndex(planner.id()))
                 .containsAll(FLOORS_SIX_TO_FIFTEEN)
                 .isEqualTo(extractorOracle(saved));
     }

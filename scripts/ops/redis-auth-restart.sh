@@ -27,6 +27,7 @@ BACKEND_CONTAINER="backend"
 EXPORTER_SELECTOR="app=redis-exporter-auth"
 READY_TIMEOUT="300s"
 COMMAND_BOUND_SECONDS=3900
+POD_READ=".claude/skills/ops/bin/ops verify fleet --site oregon"
 
 usage() {
     cat <<EOF
@@ -35,6 +36,8 @@ Restart Oregon's auth Redis so it picks up $PASSWORD_KEY, then its exporter.
 Usage:
   scripts/ops/redis-auth-restart.sh [--dry-run]    pre-checks only (default)
   scripts/ops/redis-auth-restart.sh --apply        pre-checks, then restart
+  scripts/ops/redis-auth-restart.sh --exporter-only
+                                                   check $REDIS_POD requires AUTH, then restart only its exporter
   CP_INSTANCE_ID=i-0abc scripts/ops/redis-auth-restart.sh ...
 
 Runs k3s kubectl on the Oregon CP via SSM send-command. Prints no secret values.
@@ -49,7 +52,40 @@ remote_prelude() {
 }
 
 run_on_cp() {
-    run_on_control_plane "$AWS_REGION" "$1" "$(remote_prelude)"$'\n'"$2" "$COMMAND_BOUND_SECONDS" || true
+    run_on_control_plane "$AWS_REGION" "$1" "$(remote_prelude)"$'\n'"$2" "$COMMAND_BOUND_SECONDS"
+}
+
+step_ending() {
+    cat "$CONTROL_PLANE_ENDING_FILE"
+}
+
+next_action() {
+    case "$1 $2" in
+        "pre-check "* | "AUTH check "*)
+            log_info "the $1 only reads; a rerun is safe" ;;
+        "Redis restart NOT_SENT")
+            log_info "nothing ran; a rerun is safe" ;;
+        "Redis restart "*)
+            log_warn "$REDIS_POD may already be restarted, and the exporter is not; read the pods' AGE first: $POD_READ"
+            log_warn "a rerun of --apply restarts auth Redis again" ;;
+        "exporter restart NOT_SENT")
+            log_warn "nothing ran; $REDIS_POD already requires AUTH, and the $EXPORTER_SELECTOR pods are not restarted"
+            log_info "rerun with --exporter-only to restart only the exporter" ;;
+        "exporter restart "*)
+            log_warn "the $EXPORTER_SELECTOR pods may already be restarted; read their AGE first: $POD_READ"
+            log_info "rerun with --exporter-only to restart only the exporter" ;;
+    esac
+}
+
+stop_after() {
+    local ending
+    ending=$(step_ending)
+    if [[ -n "$2" ]]; then
+        printf '%s\n' "$2"
+    fi
+    log_error "the $1 command ended $ending on the control plane; stopping" >&2
+    next_action "$1" "$ending" >&2
+    exit 1
 }
 
 PRECHECK=$(cat <<'REMOTE'
@@ -69,6 +105,15 @@ done
 REMOTE
 )
 
+AUTH_CHECK=$(cat <<'REMOTE'
+if k3s kubectl -n "$NS" exec "$REDIS_POD" -c "$REDIS_CONTAINER" -- redis-cli ping 2>&1 | grep -q NOAUTH; then
+  echo AUTH_REQUIRED
+else
+  echo AUTH_NOT_REQUIRED
+fi
+REMOTE
+)
+
 RESTART_REDIS=$(cat <<'REMOTE'
 old=$(k3s kubectl -n "$NS" get pod "$REDIS_POD" -o jsonpath='{.metadata.uid}')
 k3s kubectl -n "$NS" delete pod "$REDIS_POD" --wait=true
@@ -84,13 +129,8 @@ else
   k3s kubectl -n "$NS" get pod "$REDIS_POD" --no-headers
   exit 0
 fi
-if k3s kubectl -n "$NS" exec "$REDIS_POD" -c "$REDIS_CONTAINER" -- redis-cli ping 2>&1 | grep -q NOAUTH; then
-  echo AUTH_REQUIRED
-else
-  echo AUTH_NOT_REQUIRED
-fi
 REMOTE
-)
+)$'\n'"$AUTH_CHECK"
 
 RESTART_EXPORTER=$(cat <<'REMOTE'
 k3s kubectl -n "$NS" delete pod -l "$EXPORTER_SELECTOR" --wait=true
@@ -158,31 +198,21 @@ Verify Seoul caught up (Seoul replica offset should climb above 0, keys-with-exp
 EOF
 }
 
-main() {
-    local mode="dry-run" cp_id output
-    case "${1:-}" in
-        "" | --dry-run) mode="dry-run" ;;
-        --apply) mode="apply" ;;
-        -h | --help) usage; exit 0 ;;
-        *) usage >&2; exit 2 ;;
-    esac
-    require_cmd jq
-    require_cmd aws
-    require_aws_session
-    cp_id=$(control_plane_id "$TF_DIR")
-    log_info "Pre-checks on Oregon CP $cp_id ($AWS_REGION)"
-    output=$(run_on_cp "$cp_id" "$PRECHECK")
+precheck_then_restart_redis() {
+    local output
+    log_info "Pre-checks on Oregon CP $1 ($AWS_REGION)"
+    output=$(run_on_cp "$1" "$PRECHECK") || stop_after "pre-check" "$output"
     if ! report_prechecks "$output"; then
         log_error "pre-checks failed; not restarting"
         exit 1
     fi
-    if [[ "$mode" == "dry-run" ]]; then
+    if [[ "$2" == "dry-run" ]]; then
         log_info "pre-checks passed; re-run with --apply to restart"
         exit 0
     fi
 
     log_info "Restarting $REDIS_POD"
-    output=$(run_on_cp "$cp_id" "$RESTART_REDIS")
+    output=$(run_on_cp "$1" "$RESTART_REDIS") || stop_after "Redis restart" "$output"
     echo "$output"
     if ! grep -qx REDIS_READY <<<"$output"; then
         log_error "$REDIS_POD not Ready; exporter left untouched"
@@ -193,9 +223,43 @@ main() {
         exit 1
     fi
     log_info "$REDIS_POD Ready and requires AUTH"
+}
+
+require_auth() {
+    local output
+    log_info "Checking that $REDIS_POD requires AUTH on Oregon CP $1 ($AWS_REGION)"
+    output=$(run_on_cp "$1" "$AUTH_CHECK") || stop_after "AUTH check" "$output"
+    echo "$output"
+    if ! grep -qx AUTH_REQUIRED <<<"$output"; then
+        log_error "$REDIS_POD does not require AUTH; exporter left untouched; run --apply to restart $REDIS_POD first"
+        exit 1
+    fi
+    log_info "$REDIS_POD requires AUTH"
+}
+
+main() {
+    local mode="dry-run" cp_id output
+    case "${1:-}" in
+        "" | --dry-run) mode="dry-run" ;;
+        --apply) mode="apply" ;;
+        --exporter-only) mode="exporter-only" ;;
+        -h | --help) usage; exit 0 ;;
+        *) usage >&2; exit 2 ;;
+    esac
+    require_cmd jq
+    require_cmd aws
+    require_aws_session
+    CONTROL_PLANE_ENDING_FILE=$(mktemp)
+    trap 'rm -f "$CONTROL_PLANE_ENDING_FILE"' EXIT
+    cp_id=$(control_plane_id "$TF_DIR")
+    if [[ "$mode" == "exporter-only" ]]; then
+        require_auth "$cp_id"
+    else
+        precheck_then_restart_redis "$cp_id" "$mode"
+    fi
 
     log_info "Restarting auth exporter pods ($EXPORTER_SELECTOR)"
-    output=$(run_on_cp "$cp_id" "$RESTART_EXPORTER")
+    output=$(run_on_cp "$cp_id" "$RESTART_EXPORTER") || stop_after "exporter restart" "$output"
     echo "$output"
     if ! grep -qx EXPORTER_READY <<<"$output"; then
         log_error "auth exporter not Ready"

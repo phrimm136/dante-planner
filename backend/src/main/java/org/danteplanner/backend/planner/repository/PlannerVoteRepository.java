@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +24,7 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
      * MySQL forbids a subquery on the delete target table
      * (error 1093), which a JPQL {@code DELETE ... WHERE plannerId IN (SELECT ...)} would emit.
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query(value = "DELETE v FROM planner_votes v "
             + "JOIN planner_votes s ON v.planner_id = s.planner_id "
             + "WHERE v.user_id = :userId AND s.user_id = :sentinelId",
@@ -34,11 +35,10 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
     @Query("UPDATE PlannerVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
     int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
-    /**
-     * The key is the (user, planner) pair the caller supplies, so no id-null guard can tell a
-     * new row from an existing one: passing a row that already exists overwrites it.
-     */
-    default PlannerVote insert(PlannerVote vote) {
-        return save(vote);
-    }
+    @Modifying
+    @Query(value = "INSERT IGNORE INTO planner_votes (user_id, planner_id, vote_type, created_at) "
+            + "VALUES (:userId, :plannerId, :voteType, :now)",
+            nativeQuery = true)
+    int insertIgnore(@Param("userId") Long userId, @Param("plannerId") UUID plannerId,
+            @Param("voteType") String voteType, @Param("now") Instant now);
 }

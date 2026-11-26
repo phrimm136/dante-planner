@@ -30,7 +30,10 @@ deploy/
     mysqld-exporter-config.yaml  ConfigMap with the RDS CA bundle that mysqld-exporter mounts
     redis-exporter.yaml    ArgoCD Applications of the redis-exporter chart, one per Redis, on role=data
     alloy-logs.yaml        ArgoCD Application `alloy` (namespace argocd) that installs the Alloy chart on role=data, and the config and Loki credentials it reads; its config reloader applies a changed config without a restart
+    external-secrets.yaml  ArgoCD Application (namespace argocd) that installs the External Secrets chart in namespace external-secrets on role=app
     privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + ArgoCD Application of the node-exporter chart, a DaemonSet on every node
+    aws-ebs-csi-driver.yaml  ArgoCD Application of the aws-ebs-csi-driver chart in kube-system, controller and node plugin on role=data
+    storageclass-ebs.yaml  StorageClass ebs-gp3-retain: encrypted gp3 EBS volumes, kept on PVC deletion (Retain); not the default class
   chart/values.yaml        values common to both regions
   chart/values-oregon.yaml region-specific values (image tag, endpoints)
   chart/values-seoul.yaml  the same for Seoul
@@ -70,6 +73,24 @@ annotations or `app` label, the args of node-exporter or mysqld-exporter, mysqld
 endpoint, credentials, my.cnf or CA mount, the Secret keys and CA file behind them, or a Redis
 exporter's args or env are no longer rendered as the metrics need them.
 
+External Secrets is the exception: Renovate does not raise it (`enabled: false` for
+`external-secrets` in `renovate.json`), because the CP boot script installs the same chart and the
+version of the Application must equal the `external_secrets_chart_version` defaults in
+`terraform/modules/fleet`, `terraform/oregon` and `terraform/seoul`.
+`scripts/ops/tests/test_external_secrets_application.py` fails when they differ. Raise all of them in one
+change, one minor version at a time.
+
+The values of the External Secrets Application are the flags of the boot script plus the scrape
+annotations that `/usr/local/bin/scrape-annotate.sh` writes on the controller's pod template; the
+same test fails when they differ. Its live objects carry `app.kubernetes.io/instance: external-secrets`,
+so ArgoCD counts them as the Application's own. Its finalizer deletes the operator, but not its CRDs,
+when the Application is removed from the chart. To stop managing the operator and keep it, remove the
+finalizer in one merge, wait until both regions have synced it, and remove the Application in the next.
+
+The `render` stage runs `.github/scripts/rendered-redis-probes.py` over the region renders: it fails
+when redis-auth or redis-ratelimit loses its TCP liveness probe or its readiness probe that passes
+only when PING answers PONG, which keeps a Redis replaying its AOF out of its Service.
+
 Renovate also raises the pins of the CI scripts:
 
 - The k3s release, in one pull request (group `k3s`) that opens only after it is approved on the
@@ -108,9 +129,23 @@ scrapes can come before the custom-resource series appear.
 | Workload | placement | set by |
 |----------|-----------|--------|
 | Spring DaemonSet | `nodeSelector: role=app` | app ASG user-data `--node-label role=app` |
-| Redis + Prometheus + kube-state-metrics + Alloy | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
+| Redis + Prometheus + kube-state-metrics + Alloy + EBS CSI driver | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
 | Traefik Gateway | ingress node (`role=ingress`) | ingress user-data `--node-label role=ingress` |
 | ArgoCD core | CP node, tolerates `node-role.kubernetes.io/control-plane=true:NoSchedule` | CP user-data `--node-taint` |
+
+## EBS volumes
+
+`aws-ebs-csi-driver.yaml` installs the AWS EBS CSI driver, which creates an EBS volume for a
+PersistentVolumeClaim of class `ebs-gp3-retain` and attaches it to the node the pod runs on. Its
+controller and its node plugin run only on the data node, the one node with stateful workloads,
+and call the EC2 API with the data node's instance profile. Both take the region from the
+instance metadata service, so the Application is identical in both regions. The driver tags
+every volume it creates `ebs.csi.aws.com/cluster=true`. `local-path` stays the
+default StorageClass, so only a claim that names `ebs-gp3-retain` gets an EBS volume. The node
+plugin is privileged: kube-system carries no Pod Security label and the k3s API server has no
+admission config, so it is admitted. The chart adds its snapshotter only where the
+`snapshot.storage.k8s.io` CRDs exist, and nothing in this repository installs them. The chart's
+Checkov findings are recorded as `checkov.io/skip<n>` annotations on its Deployment and DaemonSet.
 
 ## Image tag flow (CI arm64 → ECR → tag bump)
 
@@ -162,7 +197,8 @@ the chart, because the API server rejects a custom resource whose CRD is absent:
 
 - **Gateway API CRDs** (`gateway_api_version`) — k3s ships none and the bundled Traefik is
   disabled; the authored `Gateway`/`HTTPRoute`/`GatewayClass` need these kinds.
-- **External Secrets Operator** (`external_secrets_chart_version`, Helm) — CRDs + controller,
+- **External Secrets Operator** (`external_secrets_chart_version`, Helm) — CRDs + controller, the
+  same chart and release that `chart/templates/external-secrets.yaml` then manages,
   pinned `nodeSelector.role=app` so its credential resolves to the app node instance profile
   (the role granted `secretsmanager:GetSecretValue`). This is what makes the ESO no-IRSA
   boundary work.

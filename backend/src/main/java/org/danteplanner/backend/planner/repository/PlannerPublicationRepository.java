@@ -39,10 +39,10 @@ public interface PlannerPublicationRepository extends JpaRepository<PlannerPubli
     int unpublish(@Param("plannerId") UUID plannerId);
 
     @Modifying(flushAutomatically = true)
-    @Query("UPDATE PlannerPublication p SET p.ownerNotificationsEnabled = TRUE WHERE p.plannerId = :plannerId")
-    int enableOwnerNotifications(@Param("plannerId") UUID plannerId);
+    @Query("UPDATE PlannerPublication p SET p.ownerNotificationsEnabled = :enabled WHERE p.plannerId = :plannerId")
+    int setOwnerNotifications(@Param("plannerId") UUID plannerId, @Param("enabled") boolean enabled);
 
-    @Modifying(flushAutomatically = true)
-    @Query("UPDATE PlannerPublication p SET p.ownerNotificationsEnabled = FALSE WHERE p.plannerId = :plannerId")
-    int disableOwnerNotifications(@Param("plannerId") UUID plannerId);
+    default PlannerPublication insert(PlannerPublication row) {
+        return save(row);
+    }
 }

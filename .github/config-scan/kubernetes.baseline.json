@@ -26,6 +26,81 @@
       ]
     },
     {
+      "file": "/chart-external-secrets.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_155"
+          ],
+          "resource": "ClusterRole.default.external-secrets-cert-controller"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_10",
+            "CKV_K8S_11",
+            "CKV_K8S_12",
+            "CKV_K8S_13",
+            "CKV_K8S_15",
+            "CKV_K8S_29",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.external-secrets.external-secrets"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_10",
+            "CKV_K8S_11",
+            "CKV_K8S_12",
+            "CKV_K8S_13",
+            "CKV_K8S_15",
+            "CKV_K8S_29",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8"
+          ],
+          "resource": "Deployment.external-secrets.external-secrets-cert-controller"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_10",
+            "CKV_K8S_11",
+            "CKV_K8S_12",
+            "CKV_K8S_13",
+            "CKV_K8S_15",
+            "CKV_K8S_29",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8"
+          ],
+          "resource": "Deployment.external-secrets.external-secrets-webhook"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.external-secrets.external-secrets-cert-controller.app.kubernetes.io/name-external-secrets-cert-controller.app.kubernetes.io/instance-external-secrets.app.kubernetes.io/managed-by-Helm"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.external-secrets.external-secrets-webhook.app.kubernetes.io/name-external-secrets-webhook.app.kubernetes.io/instance-external-secrets.app.kubernetes.io/managed-by-Helm"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.external-secrets.external-secrets.app.kubernetes.io/name-external-secrets.app.kubernetes.io/instance-external-secrets.app.kubernetes.io/managed-by-Helm"
+        }
+      ]
+    },
+    {
       "file": "/chart-kube-state-metrics.yaml",
       "findings": [
         {
@@ -230,9 +305,7 @@
             "CKV_K8S_22",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "Deployment.danteplanner.redis-ratelimit"
         },
@@ -274,9 +347,7 @@
             "CKV_K8S_35",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "StatefulSet.danteplanner.redis-auth"
         }
@@ -344,9 +415,7 @@
             "CKV_K8S_22",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "Deployment.danteplanner.redis-ratelimit"
         },
@@ -388,9 +457,7 @@
             "CKV_K8S_35",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "StatefulSet.danteplanner.redis-auth"
         }

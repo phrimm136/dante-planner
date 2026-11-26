@@ -9,7 +9,6 @@ import org.danteplanner.backend.shared.exception.Problems;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class AuthDegradationResponder {
 
     private void write(HttpServletRequest request, HttpServletResponse response,
             DegradationErrorConstants.Entry entry) throws IOException {
-        SecurityContextHolder.clearContext();
+        SpringContextAdapter.signOut();
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.RETRY_AFTER, DegradationErrorConstants.RETRY_AFTER_SECONDS);
         problemWriter.write(request, response,

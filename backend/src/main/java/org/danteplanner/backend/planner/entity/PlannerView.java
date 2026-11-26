@@ -12,6 +12,8 @@ import jakarta.persistence.Transient;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
 
+import org.hibernate.annotations.Immutable;
+
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 
 import java.time.Instant;
@@ -23,6 +25,7 @@ import java.util.UUID;
  * which doesn't insert new entities properly without this interface.
  */
 @Entity
+@Immutable
 @EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_views")
 @IdClass(PlannerViewId.class)
@@ -77,31 +80,15 @@ public class PlannerView implements Persistable<PlannerViewId> {
         return plannerId;
     }
 
-    public void setPlannerId(UUID plannerId) {
-        this.plannerId = plannerId;
-    }
-
     public String getViewerHash() {
         return viewerHash;
-    }
-
-    public void setViewerHash(String viewerHash) {
-        this.viewerHash = viewerHash;
     }
 
     public LocalDate getViewDate() {
         return viewDate;
     }
 
-    public void setViewDate(LocalDate viewDate) {
-        this.viewDate = viewDate;
-    }
-
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
     }
 }

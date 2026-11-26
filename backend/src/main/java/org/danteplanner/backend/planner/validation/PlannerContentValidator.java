@@ -4,7 +4,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.gamedata.IdentityLevels;
@@ -15,7 +15,7 @@ import org.danteplanner.backend.planner.validation.floor.FloorBoundary;
 import org.danteplanner.backend.planner.validation.floor.FloorReferenceData;
 import org.danteplanner.backend.planner.validation.floor.FloorReferences;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.validation.identity.IdentityRules;
 import org.danteplanner.backend.planner.validation.sinner.DeploymentOrder;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
@@ -79,8 +79,12 @@ public class PlannerContentValidator {
         return new Season(gameDataRegistry.snapshot(), version);
     }
 
-    public Stage stageOf(Planner planner) {
-        return planner.isPublished() ? Stage.PUBLISH : Stage.DRAFT;
+    public Stage stageOf(Publication publication) {
+        return switch (publication) {
+            case Publication.Published published -> Stage.PUBLISH;
+            case Publication.Draft draft -> Stage.DRAFT;
+            case Publication.Unpublished unpublished -> Stage.DRAFT;
+        };
     }
 
     private static PlannerDocument accepted(ContentVerdict verdict) {

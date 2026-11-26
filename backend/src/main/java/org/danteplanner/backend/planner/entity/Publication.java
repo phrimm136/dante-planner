@@ -16,19 +16,15 @@ public sealed interface Publication {
     record Unpublished(Instant firstAt) implements Publication {
     }
 
-    static Publication of(Planner planner) {
-        Instant firstAt = planner.getFirstPublishedAt();
-        if (planner.isPublished()) {
-            return new Published(requireFirstAt(planner.getId(), firstAt));
-        }
-        return firstAt == null ? new Draft() : new Unpublished(firstAt);
-    }
-
-    private static Instant requireFirstAt(UUID plannerId, @Nullable Instant firstAt) {
+    static Published listed(UUID plannerId, @Nullable Instant firstAt) {
         if (firstAt == null) {
             throw new IllegalStateException("planner " + plannerId + " is listed without a publication time");
         }
-        return firstAt;
+        return new Published(firstAt);
+    }
+
+    static Publication unlisted(@Nullable Instant firstAt) {
+        return firstAt == null ? new Draft() : new Unpublished(firstAt);
     }
 
     default Published published(Instant now) {

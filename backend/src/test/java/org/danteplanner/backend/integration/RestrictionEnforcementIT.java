@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +35,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import tools.jackson.databind.ObjectMapper;
@@ -44,9 +44,10 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.shared.restriction.RestrictionDutyInterceptor;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
@@ -102,8 +103,11 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping handlerMapping;
 
+    @Autowired
+    private RestrictionDutyInterceptor restrictionDutyInterceptor;
+
     private User author;
-    private Planner publishedPlanner;
+    private StoredPlanner publishedPlanner;
     private PlannerComment comment;
 
     @BeforeEach
@@ -111,7 +115,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         author = TestDataFactory.createTestUser(userRepository, "restriction-author@example.com");
         publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         comment = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                publishedPlanner.getId(), author.getId(), null, 0), "a comment to engage with");
+                publishedPlanner.id(), author.getId(), null, 0), "a comment to engage with");
     }
 
     @AfterEach
@@ -123,7 +127,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void plannerUpvote_WhenTimedOut_Returns403WithTheTimeoutCode() throws Exception {
         User reader = timedOut(reader());
 
-        perform(post("/api/planner/md/{id}/upvote", publishedPlanner.getId())
+        perform(post("/api/planner/md/{id}/upvote", publishedPlanner.id())
                 .content("{\"voteType\":\"UP\"}"), reader)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(TIMED_OUT_CODE));
@@ -142,7 +146,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void plannerReport_WhenTimedOut_Returns403WithTheTimeoutCode() throws Exception {
         User reader = timedOut(reader());
 
-        perform(post("/api/planner/md/{id}/report", publishedPlanner.getId()), reader)
+        perform(post("/api/planner/md/{id}/report", publishedPlanner.id()), reader)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(TIMED_OUT_CODE));
     }
@@ -161,11 +165,11 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void subscribe_WhenBanned_Returns403AndLeavesNoSubscription() throws Exception {
         User reader = banned(reader());
 
-        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.getId()), reader)
+        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.id()), reader)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(BANNED_CODE));
 
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id()))
                 .isEmpty();
     }
 
@@ -173,27 +177,27 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void subscribe_WhenTimedOut_Returns403AndLeavesNoSubscription() throws Exception {
         User reader = timedOut(reader());
 
-        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.getId()), reader)
+        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.id()), reader)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(TIMED_OUT_CODE));
 
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id()))
                 .isEmpty();
     }
 
     @Test
     void unsubscribe_WhenAlreadySubscribedAndBanned_Returns200AndTurnsTheSubscriptionOff() throws Exception {
         User reader = reader();
-        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.getId()), reader)
+        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.id()), reader)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subscribed").value(true));
         banned(reader);
 
-        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.getId()), reader)
+        perform(post("/api/planner/md/{id}/subscribe", publishedPlanner.id()), reader)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subscribed").value(false));
 
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id()))
                 .contains(false);
     }
 
@@ -202,18 +206,18 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         User reader = reader();
 
         for (int repeat = 0; repeat < 2; repeat++) {
-            perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+            perform(put("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.plannerId").value(publishedPlanner.getId().toString()))
+                    .andExpect(jsonPath("$.plannerId").value(publishedPlanner.id().toString()))
                     .andExpect(jsonPath("$.subscribed").value(true));
-            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).contains(true);
+            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).contains(true);
         }
         for (int repeat = 0; repeat < 2; repeat++) {
-            perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+            perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.plannerId").value(publishedPlanner.getId().toString()))
+                    .andExpect(jsonPath("$.plannerId").value(publishedPlanner.id().toString()))
                     .andExpect(jsonPath("$.subscribed").value(false));
-            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).contains(false);
+            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).contains(false);
         }
     }
 
@@ -221,11 +225,11 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void removeSubscription_WhenNoneExists_AnswersUnsubscribedAndWritesNoRow() throws Exception {
         User reader = reader();
 
-        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subscribed").value(false));
 
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).isEmpty();
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).isEmpty();
     }
 
     @Test
@@ -233,38 +237,39 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         User banned = banned(reader());
         User timedOut = timedOut(reader());
 
-        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), banned)
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.id()), banned)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(BANNED_CODE));
-        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), timedOut)
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.id()), timedOut)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(TIMED_OUT_CODE));
 
-        assertThat(subscriptionRepository.findEnabledOf(banned.getId(), publishedPlanner.getId())).isEmpty();
-        assertThat(subscriptionRepository.findEnabledOf(timedOut.getId(), publishedPlanner.getId())).isEmpty();
+        assertThat(subscriptionRepository.findEnabledOf(banned.getId(), publishedPlanner.id())).isEmpty();
+        assertThat(subscriptionRepository.findEnabledOf(timedOut.getId(), publishedPlanner.id())).isEmpty();
     }
 
     @Test
     void removeSubscription_WhenSubscribedAndBanned_Returns200AndTurnsTheSubscriptionOff() throws Exception {
         User reader = reader();
-        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
                 .andExpect(status().isOk());
         banned(reader);
 
-        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subscribed").value(false));
 
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).contains(false);
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).contains(false);
     }
 
     @Test
-    void subscriptionRequests_WhenThePlannerIsMissingOrUnpublished_AnswerAsTheToggleDoes() throws Exception {
+    void joinRequests_WhenThePlannerIsMissingOrUnpublished_AnswerAsTheToggleDoes() throws Exception {
         User reader = reader();
-        UUID unpublished = TestDataFactory.createTestPlanner(plannerRepository, author, false).getId();
+        UUID unpublished = TestDataFactory.createTestPlanner(plannerRepository, author, false).id();
 
         for (UUID id : List.of(UUID.randomUUID(), unpublished)) {
-            for (MockHttpServletRequestBuilder request : subscriptionRequests(id)) {
+            for (MockHttpServletRequestBuilder request : List.of(post("/api/planner/md/{id}/subscribe", id),
+                    put("/api/planner/md/{id}/subscription", id))) {
                 perform(request, reader)
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -274,8 +279,35 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
+    void removeSubscription_WhenThePlannerWasWithdrawn_Returns200AndTurnsTheSubscriptionOff() throws Exception {
+        User reader = reader();
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
+                .andExpect(status().isOk());
+        perform(post("/api/planner/md/{id}/unpublish", publishedPlanner.id()), author)
+                .andExpect(status().isOk());
+
+        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscribed").value(false));
+
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).contains(false);
+    }
+
+    @Test
+    void removeSubscription_WhenThePlannerDoesNotExist_AnswersUnsubscribed() throws Exception {
+        User reader = reader();
+        UUID missing = UUID.randomUUID();
+
+        perform(delete("/api/planner/md/{id}/subscription", missing), reader)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscribed").value(false));
+
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), missing)).isEmpty();
+    }
+
+    @Test
     void subscriptionRequests_WhenSentByAGuest_AnswerAsTheToggleDoes() throws Exception {
-        for (MockHttpServletRequestBuilder request : subscriptionRequests(publishedPlanner.getId())) {
+        for (MockHttpServletRequestBuilder request : subscriptionRequests(publishedPlanner.id())) {
             mockMvc.perform(request.with(withCsrf())).andExpect(status().isUnauthorized());
         }
     }
@@ -283,12 +315,12 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void subscriptionRequests_WhenSentWithoutACsrfToken_AreRefusedAsTheToggleIs() throws Exception {
         User reader = reader();
-        for (MockHttpServletRequestBuilder request : subscriptionRequests(publishedPlanner.getId())) {
+        for (MockHttpServletRequestBuilder request : subscriptionRequests(publishedPlanner.id())) {
             mockMvc.perform(request.cookie(AuthCookies.accessToken(
                             TestDataFactory.generateAccessToken(jwtTokenService, reader))))
                     .andExpect(status().isForbidden());
         }
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).isEmpty();
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).isEmpty();
     }
 
     private static List<MockHttpServletRequestBuilder> subscriptionRequests(UUID id) {
@@ -319,10 +351,10 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void deleteOwnPlanner_WhenBanned_Succeeds() throws Exception {
         User owner = reader();
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         banned(owner);
 
-        perform(delete("/api/planner/md/{id}", planner.getId()), owner)
+        perform(delete("/api/planner/md/{id}", planner.id()), owner)
                 .andExpect(status().isNoContent());
     }
 
@@ -330,7 +362,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void deleteOwnComment_WhenBanned_Succeeds() throws Exception {
         User reader = reader();
         PlannerComment own = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                publishedPlanner.getId(), reader.getId(), null, 0), "my own words");
+                publishedPlanner.id(), reader.getId(), null, 0), "my own words");
         banned(reader);
 
         perform(delete("/api/comments/{id}", own.getPublicId()), reader)
@@ -340,10 +372,10 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void unpublishOwnPlanner_WhenBanned_Succeeds() throws Exception {
         User owner = reader();
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         banned(owner);
 
-        perform(post("/api/planner/md/{id}/unpublish", planner.getId()), owner)
+        perform(post("/api/planner/md/{id}/unpublish", planner.id()), owner)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(false));
     }
@@ -383,14 +415,14 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void upsertPublishedPlanner_WhenBannedWithAStaleSyncVersion_Returns403NotTheConflict() throws Exception {
         User owner = reader();
-        Planner planner = TestDataFactory.planner(owner).published(true).syncVersion(3L).save(plannerRepository);
+        StoredPlanner planner = TestDataFactory.planner(owner).published(true).syncVersion(3L).save(plannerRepository);
         String stale = json(UpsertRequests.resending(planner).title("Renamed").syncVersion(1L).build());
 
-        perform(put("/api/planner/md/{id}", planner.getId()).content(stale), owner)
+        perform(put("/api/planner/md/{id}", planner.id()).content(stale), owner)
                 .andExpect(status().isConflict());
         banned(owner);
 
-        perform(put("/api/planner/md/{id}", planner.getId()).content(stale), owner)
+        perform(put("/api/planner/md/{id}", planner.id()).content(stale), owner)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(BANNED_CODE));
     }
@@ -398,10 +430,10 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void upsertPrivatePlanner_WhenBanned_Saves() throws Exception {
         User owner = reader();
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         banned(owner);
 
-        perform(put("/api/planner/md/{id}", planner.getId())
+        perform(put("/api/planner/md/{id}", planner.id())
                 .content(json(UpsertRequests.resending(planner).title("Renamed").build())), owner)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Renamed"));
@@ -413,31 +445,31 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
 
         Throwable undecided = withinRequest("toggleSubscription", reader, () -> new TransactionTemplate(
                 transactionManager).executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
-                        reader.getId(), publishedPlanner.getId(), Instant.now())));
+                        reader.getId(), publishedPlanner.id(), Instant.now())));
 
         assertThat(undecided)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("PlannerEngagementController.toggleSubscription is @RestrictedByState");
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id()))
                 .isEmpty();
     }
 
     @Test
     void restrictedRequest_WhenItRunsTwoWriteTransactions_ChecksOnlyTheFirst() {
         User reader = reader();
-        Planner second = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner second = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         TransactionTemplate writes = new TransactionTemplate(transactionManager);
 
         Throwable failure = withinRequest("createComment", reader, () -> {
             writes.executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
-                        reader.getId(), publishedPlanner.getId(), Instant.now()));
+                        reader.getId(), publishedPlanner.id(), Instant.now()));
             banned(reader);
             writes.executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
-                        reader.getId(), second.getId(), Instant.now()));
+                        reader.getId(), second.id(), Instant.now()));
         });
 
         assertThat(failure).isNull();
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), second.getId())).isPresent();
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), second.id())).isPresent();
     }
 
     @Test
@@ -446,7 +478,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
 
         Throwable refused = withinRequest("createComment", reader, () -> new TransactionTemplate(transactionManager)
                 .executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
-                        reader.getId(), publishedPlanner.getId(), Instant.now())));
+                        reader.getId(), publishedPlanner.id(), Instant.now())));
 
         assertRejected(() -> {
             if (refused != null) {
@@ -455,7 +487,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         }).withCode(BANNED_CODE);
         assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
         assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
-        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id()))
                 .isEmpty();
     }
 
@@ -486,7 +518,6 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
                 .findFirst()
                 .orElseThrow();
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
         RequestAttributes previousRequest = RequestContextHolder.getRequestAttributes();
         SecurityContext previousSecurity = SecurityContextHolder.getContext();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
@@ -494,6 +525,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         context.setAuthentication(new UsernamePasswordAuthenticationToken(principal.getId(), null, List.of()));
         SecurityContextHolder.setContext(context);
         try {
+            restrictionDutyInterceptor.preHandle(request, new MockHttpServletResponse(), handler);
             body.run();
             return null;
         } catch (RuntimeException failure) {

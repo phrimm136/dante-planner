@@ -107,7 +107,12 @@ jobs:
       - name: Lane input lists cover every Dockerfile COPY source and every ../ path the builds read
         if: ${{ !cancelled() }}
         run: .github/scripts/check-deploy-inputs.sh
-      - name: Skill CLI and git-hook test suites
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
+        if: ${{ !cancelled() }}
+        with:
+          terraform_version: 1.15.9
+          terraform_wrapper: false
+      - name: Skill CLI, git-hook and ops script test suites
         if: ${{ !cancelled() }}
         run: .github/scripts/tooling-tests.sh
 
@@ -152,6 +157,8 @@ jobs:
         env:
           UNIT_ONLY: ${{ github.event_name == 'pull_request' && '-PexcludeTags=containerized' || '' }}
         run: ./gradlew check -q --continue $UNIT_ONLY
+      - name: Every planted bug applies and compiles
+        run: scripts/consistency/planted-bugs.sh compile
       - name: Save Gradle caches
         if: github.ref == 'refs/heads/main' && success() && steps.gradle-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
@@ -215,15 +222,6 @@ jobs:
         run: |
           mkdir -p "$TF_PLUGIN_CACHE_DIR"
           .github/scripts/terraform-validate.sh
-      - name: Bootstrap state move against throwaway local-backend stacks
-        run: scripts/ops/provision/tests/bootstrap-state-to-s3.sh
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
-        with:
-          python-version: '3.13'
-      - name: Boot template and fleet script tests
-        run: |
-          python -m pip install pyyaml==6.0.3
-          python -m unittest discover -s scripts/ops/tests
       - name: Save Terraform plugin cache
         if: github.ref == 'refs/heads/main' && success() && steps.terraform-plugin-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0

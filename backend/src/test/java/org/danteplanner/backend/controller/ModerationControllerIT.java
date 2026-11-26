@@ -8,7 +8,7 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import static org.hamcrest.Matchers.hasItem;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -79,7 +79,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     private User regularUser;
     private User adminUser;
     private User moderatorUser;
-    private Planner testPlanner;
+    private StoredPlanner testPlanner;
     private String regularUserToken;
     private String adminToken;
     private String moderatorToken;
@@ -249,24 +249,24 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unpublishPlanner_WhenModerator_Returns200WithPlannerShape() throws Exception {
-            mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", testPlanner.id()).with(withCsrf())
                             .cookie(moderatorCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.plannerId").value(testPlanner.getId().toString()))
+                    .andExpect(jsonPath("$.plannerId").value(testPlanner.id().toString()))
                     .andExpect(jsonPath("$.published").value(false))
                     .andExpect(jsonPath("$.message").value("Planner unpublished successfully"));
         }
 
         @Test
         void unpublishPlanner_WhenNormalUser_Returns403() throws Exception {
-            mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", testPlanner.id()).with(withCsrf())
                             .cookie(regularUserCookie()))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         void unpublishPlanner_WhenUnauthenticated_Returns401() throws Exception {
-            mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", testPlanner.getId()).with(withCsrf()))
+            mockMvc.perform(put("/api/moderation/planner/{id}/unpublish", testPlanner.id()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -468,18 +468,18 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void takedownPlanner_WhenModerator_Returns200WithPlannerShape() throws Exception {
-            mockMvc.perform(post("/api/moderation/planner/{id}/takedown", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/takedown", testPlanner.id()).with(withCsrf())
                             .cookie(moderatorCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Content violates community guidelines\"}"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.plannerId").value(testPlanner.getId().toString()))
+                    .andExpect(jsonPath("$.plannerId").value(testPlanner.id().toString()))
                     .andExpect(jsonPath("$.message").value("Planner taken down successfully"));
         }
 
         @Test
         void takedownPlanner_WhenNormalUser_Returns403() throws Exception {
-            mockMvc.perform(post("/api/moderation/planner/{id}/takedown", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/takedown", testPlanner.id()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Content violates community guidelines\"}"))
@@ -488,7 +488,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void takedownPlanner_WhenUnauthenticated_Returns401() throws Exception {
-            mockMvc.perform(post("/api/moderation/planner/{id}/takedown", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/takedown", testPlanner.id()).with(withCsrf())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Content violates community guidelines\"}"))
                     .andExpect(status().isUnauthorized());
@@ -500,7 +500,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         private PlannerComment createComment() {
             PlannerComment comment = new PlannerComment(
-                    testPlanner.getId(), regularUser.getId(), null, 0);
+                    testPlanner.id(), regularUser.getId(), null, 0);
             return StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), comment,
                     "A comment to be moderated");
         }

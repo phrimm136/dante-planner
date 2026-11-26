@@ -12,7 +12,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -80,8 +80,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
     private User testUser;
     private User otherUser;
-    private Planner publishedPlanner;
-    private Planner unpublishedPlanner;
+    private StoredPlanner publishedPlanner;
+    private StoredPlanner unpublishedPlanner;
     private String accessToken;
     private String otherUserAccessToken;
 
@@ -107,7 +107,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
     private PlannerComment createComment(Long parentId, int expectedDepth) {
         PlannerComment comment = new PlannerComment(
-                publishedPlanner.getId(),
+                publishedPlanner.id(),
                 testUser.getId(),
                 parentId,
                 expectedDepth
@@ -122,7 +122,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void getComments_WhenPublishedPlanner_Returns200() throws Exception {
             createComment(null, 0);
 
-            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
+            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.id()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
                     .andExpect(jsonPath("$[0].content").value("Test comment content"));
@@ -130,7 +130,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getComments_WhenUnpublishedPlanner_Returns404() throws Exception {
-            mockMvc.perform(get("/api/planner/{id}/comments", unpublishedPlanner.getId())
+            mockMvc.perform(get("/api/planner/{id}/comments", unpublishedPlanner.id())
                             .cookie(otherUserAccessTokenCookie()))
                     .andExpect(status().isNotFound());
         }
@@ -139,12 +139,12 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBodyAndMaskedNameAndKeepsTheRowContent() throws Exception {
             PlannerComment leaf = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                    publishedPlanner.getId(), otherUser.getId(), null, 0), "still here");
+                    publishedPlanner.id(), otherUser.getId(), null, 0), "still here");
             transactionTemplate.executeWithoutResult(status ->
                     userRepository.softDelete(
                             otherUser.getId(), Instant.now(), Instant.now().plus(Duration.ofDays(30))));
 
-            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
+            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.id()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.length()").value(1))
                     .andExpect(jsonPath("$[0].id").value(leaf.getPublicId().toString()))
@@ -159,14 +159,14 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getComments_WhenParentAuthorDeactivated_ServesTheReply() throws Exception {
             PlannerComment parent = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                    publishedPlanner.getId(), otherUser.getId(), null, 0), "still here");
+                    publishedPlanner.id(), otherUser.getId(), null, 0), "still here");
             PlannerComment reply = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                    publishedPlanner.getId(), testUser.getId(), parent.getId(), 1), "a reply");
+                    publishedPlanner.id(), testUser.getId(), parent.getId(), 1), "a reply");
             transactionTemplate.executeWithoutResult(status ->
                     userRepository.softDelete(
                             otherUser.getId(), Instant.now(), Instant.now().plus(Duration.ofDays(30))));
 
-            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
+            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.id()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].id").value(parent.getPublicId().toString()))
                     .andExpect(jsonPath("$[0].content").value(CommentConstants.DELETED_CONTENT))
@@ -176,7 +176,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getComments_WhenNoComments_ReturnsEmptyArray() throws Exception {
-            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
+            mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.id()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
                     .andExpect(jsonPath("$").isEmpty());
@@ -190,7 +190,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void createComment_WhenValidTopLevel_Returns201() throws Exception {
             String requestBody = "{\"content\":\"New comment\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -205,7 +205,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
             String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parent.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -213,7 +213,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database
-            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.id());
             CommentRow reply = comments.stream()
                     .filter(c -> c.parentCommentId() != null)
                     .findFirst()
@@ -225,7 +225,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void createComment_WhenUnauthenticated_Returns401() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isUnauthorized());
@@ -235,7 +235,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void createComment_WhenUnpublishedPlanner_Returns403() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", unpublishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", unpublishedPlanner.id()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -246,7 +246,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void createComment_WhenEmptyContent_Returns400() throws Exception {
             String requestBody = "{\"content\":\"\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -257,7 +257,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void createComment_WhenTopLevel_HasDepth0() throws Exception {
             String requestBody = "{\"content\":\"Top-level\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -265,7 +265,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database
-            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.id());
             assertThat(comments).hasSize(1);
             assertThat(comments.get(0).depth()).isEqualTo(0);
         }
@@ -275,7 +275,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
             PlannerComment depth0 = createComment(null, 0);
             String requestBody1 = "{\"content\":\"Depth 1\",\"parentCommentId\":\"" + depth0.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody1))
@@ -283,7 +283,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database
-            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.id());
             CommentRow reply = comments.stream()
                     .filter(c -> c.parentCommentId() != null)
                     .findFirst()
@@ -302,7 +302,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
             String requestBody = "{\"content\":\"Depth 6 reply\",\"parentCommentId\":\"" + depth5.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -310,7 +310,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database - no flattening with MAX_DEPTH=MAX_VALUE
-            List<CommentRow> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> allComments = commentRepository.findByPlannerId(publishedPlanner.id());
             CommentRow reply = allComments.stream()
                     .filter(c -> c.content().equals("Depth 6 reply"))
                     .findFirst()
@@ -330,14 +330,14 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
             String requestBody = "{\"content\":\"Depth 6 comment\",\"parentCommentId\":\"" + depth5.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").exists());
 
-            List<CommentRow> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> allComments = commentRepository.findByPlannerId(publishedPlanner.id());
             // With MAX_DEPTH=MAX_VALUE, there's 1 comment at each depth 0-6
             long depth6Count = allComments.stream().filter(c -> c.depth() == 6).count();
             assertThat(depth6Count).isEqualTo(1);
@@ -349,7 +349,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
             String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parentComment.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -364,7 +364,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void createComment_WhenTopLevelOnPlanner_CreatesNotification() throws Exception {
             String requestBody = "{\"content\":\"Top-level comment\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.id()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -588,7 +588,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     private List<Notification> notificationsOf(Long userId) {
-        return notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        return notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 userId, org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
     }
 

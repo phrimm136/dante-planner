@@ -13,6 +13,11 @@ FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 INTERVAL_SECONDS = 21600
 ANSI_PATTERN = re.compile(r"\x1b\[[0-9;]*m")
 METRIC_PATH = "/api/v1/namespaces/danteplanner/services/kube-state-metrics:8080/proxy/metrics"
+CLOCK_NOW = 1767225600
+FAKE_DATE = f"""#!/bin/sh
+[ "$*" = +%s ] && {{ printf '%s\\n' {CLOCK_NOW}; exit 0; }}
+PATH=${{PATH#*:}}; export PATH; exec date "$@"
+"""
 
 FAKE_K3S = """#!/bin/sh
 case "$*" in
@@ -35,7 +40,7 @@ exit 0
 
 
 def iso_time(seconds_ago):
-    moment = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(seconds=seconds_ago)
+    moment = datetime.datetime.fromtimestamp(CLOCK_NOW, datetime.timezone.utc) - datetime.timedelta(seconds=seconds_ago)
     return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
@@ -62,6 +67,8 @@ class FleetVerifyTest(unittest.TestCase):
         fake_bin.mkdir()
         (fake_bin / "k3s").write_text(FAKE_K3S.replace("#!/bin/sh\n", f"#!{self.shell_path}\n", 1))
         (fake_bin / "k3s").chmod(0o755)
+        (fake_bin / "date").write_text(FAKE_DATE.replace("#!/bin/sh\n", f"#!{self.shell_path}\n", 1))
+        (fake_bin / "date").chmod(0o755)
         self.base_env = {"PATH": f"{fake_bin}:{os.environ['PATH']}", "FAKE_DIR": str(self.work_dir)}
 
     def tearDown(self):
@@ -88,7 +95,7 @@ class FleetVerifyTest(unittest.TestCase):
         self.assertIn("count=2\ns3_count=2", output_text)
         exit_code, verdict_lines = self.snapshot_verdict(output_text)
         self.assertEqual(exit_code, 0, verdict_lines)
-        self.assertRegex(verdict_lines[0], r"^SNAPSHOTS: count 2, 2 in S3, newest 36\d\ds old \(limit 32400s\)$")
+        self.assertRegex(verdict_lines[0], r"^SNAPSHOTS: count 2, 2 in S3, newest 3600s old \(limit 32400s\)$")
         self.assertEqual(verdict_lines[1], "SNAPSHOT METRIC: 2 kube_etcd_snapshot_creation_timestamp_seconds series")
 
     def test_zero_snapshots_are_fatal(self):
@@ -107,7 +114,7 @@ class FleetVerifyTest(unittest.TestCase):
     def test_a_stale_newest_snapshot_is_fatal(self):
         exit_code, verdict_lines = self.snapshot_verdict(self.remote_output(snapshot_ages=(40000,), series_count=1))
         self.assertEqual(exit_code, 1)
-        self.assertRegex(verdict_lines[0], r"^SNAPSHOTS: count 1, 1 in S3, newest 400\d\ds old, over 32400s "
+        self.assertRegex(verdict_lines[0], r"^SNAPSHOTS: count 1, 1 in S3, newest 40000s old, over 32400s "
                                            r"\(1\.5 x the 21600s schedule\)$")
 
     def test_snapshots_only_on_the_node_are_fatal(self):
@@ -182,17 +189,18 @@ esac
 class CommandStatusTest(unittest.TestCase):
     def setUp(self):
         self.work_handle = tempfile.TemporaryDirectory()
-        fake_bin = Path(self.work_handle.name)
-        (fake_bin / "aws").write_text(FAKE_AWS)
-        (fake_bin / "aws").chmod(0o755)
-        self.fake_path = f"{fake_bin}:{os.environ['PATH']}"
+        self.fake_bin = Path(self.work_handle.name)
+        for tool_name, tool_text in (("aws", FAKE_AWS), ("sleep", "#!/bin/sh\nexit 0\n")):
+            (self.fake_bin / tool_name).write_text(tool_text)
+            (self.fake_bin / tool_name).chmod(0o755)
 
     def tearDown(self):
         self.work_handle.cleanup()
 
     def run_main(self, status_text):
         return run_bash("CHECK_BOUND_SECONDS=1; POLL_SECONDS=1; main seoul",
-                        extra_env={"PATH": self.fake_path, "CP_INSTANCE_ID": "i-0test", "FAKE_STATUS": status_text})
+                        extra_env={"PATH": f"{self.fake_bin}:{os.environ['PATH']}", "CP_INSTANCE_ID": "i-0test",
+                                   "FAKE_STATUS": status_text})
 
     def test_a_command_that_never_finishes_is_a_named_failure(self):
         main_run = self.run_main("InProgress")

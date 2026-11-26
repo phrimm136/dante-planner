@@ -34,4 +34,8 @@ public interface PlannerModerationRepository extends JpaRepository<PlannerModera
     @Query("UPDATE PlannerModeration m SET m.hiddenFromRecommended = FALSE, m.hiddenByModeratorId = NULL, "
             + "m.hiddenReason = NULL, m.hiddenAt = NULL WHERE m.plannerId = :plannerId")
     int unhide(@Param("plannerId") UUID plannerId);
+
+    default PlannerModeration insert(PlannerModeration row) {
+        return save(row);
+    }
 }

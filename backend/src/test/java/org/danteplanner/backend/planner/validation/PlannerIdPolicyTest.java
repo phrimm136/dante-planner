@@ -11,7 +11,7 @@ import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.gamedata.MirrorDungeonSeason;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.Test;

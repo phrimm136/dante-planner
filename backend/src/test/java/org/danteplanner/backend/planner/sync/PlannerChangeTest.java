@@ -1,11 +1,12 @@
 package org.danteplanner.backend.planner.sync;
 
+import org.danteplanner.backend.planner.entity.Device;
 import tools.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -40,27 +41,19 @@ class PlannerChangeTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static PlannerContent storedRow() {
+    private static StoredContent storedRow() {
         return storedRow(DOCUMENT);
     }
 
-    private static PlannerContent storedRow(String document) {
-        return StoredPlannerContent.holding(StoredPlannerContent.builder()
-                .title("Stored Title")
-                .status(PlannerStatus.SAVED)
-                .category("5F")
-                .selectedKeywords(Set.of("Combustion", "Sinking"))
-                .contentSchemaVersion(2)
-                .gameContentVersion(6)
-                .deviceId(DEVICE)
-                .build(), document);
+    private static StoredContent storedRow(String document) {
+        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of("Combustion", "Sinking"), document, 2, 6, 1L, new Device.Known(DEVICE), Instant.EPOCH);
     }
 
-    private static PlannerChange change(PlannerContent stored, CarriedWrite carried) {
+    private static PlannerChange change(StoredContent stored, CarriedWrite carried) {
         return PlannerChange.between(stored, carried, MAPPER);
     }
 
-    private static boolean isNone(PlannerContent stored, CarriedWrite carried) {
+    private static boolean isNone(StoredContent stored, CarriedWrite carried) {
         return change(stored, carried).isNone();
     }
 
@@ -73,7 +66,7 @@ class PlannerChangeTest {
                 .content(DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
-                .deviceId(DEVICE);
+                .device(new Device.Known(DEVICE));
     }
 
     // stale-identical-save-acks-current-version
@@ -95,7 +88,7 @@ class PlannerChangeTest {
 
     @Test
     void isNone_WhenContentDiffersOnlyInNumberRendering_IsTrue() {
-        PlannerContent stored = storedRow("{\"deploymentOrder\":[5.0],\"equipment\":{}}");
+        StoredContent stored = storedRow("{\"deploymentOrder\":[5.0],\"equipment\":{}}");
         CarriedWrite carried = carryingStoredValues()
                 .content("{\"equipment\":{},\"deploymentOrder\":[5]}")
                 .build();
@@ -122,15 +115,7 @@ class PlannerChangeTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void isNone_WhenStoredContentIsUnparseable_IsFalse() {
-        PlannerContent stored = StoredPlannerContent.holding(StoredPlannerContent.builder()
-                .title("Stored Title")
-                .status(PlannerStatus.SAVED)
-                .category("5F")
-                .selectedKeywords(Set.of("Combustion", "Sinking"))
-                .contentSchemaVersion(2)
-                .gameContentVersion(6)
-                .deviceId(DEVICE)
-                .build(), "{\"equipment\":");
+        StoredContent stored = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of("Combustion", "Sinking"), "{\"equipment\":", 2, 6, 1L, new Device.Known(DEVICE), Instant.EPOCH);
 
         assertThat(isNone(stored, carryingStoredValues().build())).isFalse();
     }
@@ -170,7 +155,7 @@ class PlannerChangeTest {
     @Test
     void isNone_WhenDeviceIdDiffers_IsFalse() {
         assertThat(isNone(storedRow(),
-                carryingStoredValues().deviceId(UUID.randomUUID()).build())).isFalse();
+                carryingStoredValues().device(new Device.Known(UUID.randomUUID())).build())).isFalse();
     }
 
     @Test

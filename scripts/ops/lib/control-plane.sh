@@ -21,14 +21,20 @@ control_plane_id() {
 
 # The remote script is JSON-encoded line-by-line with jq so quoting inside the commands
 # (the pod's own $MYSQL_HOST, kubectl -o custom-columns) survives the send-command boundary.
+report_control_plane_ending() {
+    if [[ -n "${CONTROL_PLANE_ENDING_FILE:-}" ]]; then
+        printf '%s\n' "$1" >"$CONTROL_PLANE_ENDING_FILE"
+    fi
+}
+
 run_on_control_plane() {
     local region="$1" cp_id="$2" bound="${4:-$CHECK_BOUND_SECONDS}" params cmd_id status waited=0
-    params=$(jq -n --arg s "$3" '{commands: ($s | split("\n"))}') || return 1
+    params=$(jq -n --arg s "$3" '{commands: ($s | split("\n"))}') || { report_control_plane_ending NOT_SENT; return 1; }
     cmd_id=$(aws ssm send-command --region "$region" \
         --instance-ids "$cp_id" \
         --document-name "AWS-RunShellScript" \
         --parameters "$params" \
-        --query 'Command.CommandId' --output text) || return 1
+        --query 'Command.CommandId' --output text) || { report_control_plane_ending NOT_SENT; return 1; }
     while :; do
         status=$(aws ssm get-command-invocation --region "$region" --command-id "$cmd_id" \
             --instance-id "$cp_id" --query 'Status' --output text 2>/dev/null || echo Pending)
@@ -38,6 +44,7 @@ run_on_control_plane() {
         esac
         if [[ "$waited" -ge "$bound" ]]; then
             log_error "the control plane did not answer within ${bound} seconds; status $status" >&2
+            report_control_plane_ending SENT_OUTCOME_UNKNOWN
             return 1
         fi
         sleep "$POLL_SECONDS"
@@ -45,12 +52,18 @@ run_on_control_plane() {
     done
     aws ssm get-command-invocation --region "$region" \
         --command-id "$cmd_id" --instance-id "$cp_id" \
-        --query 'StandardOutputContent' --output text || return 1
+        --query 'StandardOutputContent' --output text || { report_control_plane_ending SENT_OUTCOME_UNKNOWN; return 1; }
     if [[ "$status" != Success ]]; then
         log_error "the check command on the control plane ended with status $status" >&2
         aws ssm get-command-invocation --region "$region" \
             --command-id "$cmd_id" --instance-id "$cp_id" \
             --query 'StandardErrorContent' --output text >&2 || true
+        if [[ "$status" == Failed ]]; then
+            report_control_plane_ending SENT_FAILED
+        else
+            report_control_plane_ending SENT_OUTCOME_UNKNOWN
+        fi
         return 1
     fi
+    report_control_plane_ending SUCCESS
 }

@@ -1,9 +1,10 @@
 package org.danteplanner.backend.planner.validation;
 
+import org.danteplanner.backend.planner.service.SaveOutcome;
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
-import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -31,8 +32,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
@@ -48,6 +55,11 @@ class SaveStageKeywordsTest {
     @Mock
     private PlannerRepository plannerRepository;
 
+
+    @Mock
+
+    private PlannerContentRepository contentRepository;
+
     @Mock
     private PlannerStatsRepository statsRepository;
 
@@ -59,6 +71,7 @@ class SaveStageKeywordsTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(contentRepository.replaceAtVersion(any(), anyLong(), any())).thenReturn(1);
         GameDataRegistry registry = new GameDataRegistry(new GameDataLoader(MAPPER), STATIC_DATA);
         registry.init();
         PlannerContentValidator contentValidator = new PlannerContentValidator(MAPPER,
@@ -66,13 +79,14 @@ class SaveStageKeywordsTest {
                 registry, new SinnerIdValidator(), new FloorRules(registry));
         commandService = new PlannerCommandService(
                 plannerRepository,
+                contentRepository,
                 statsRepository,
                 null,
                 contentValidator,
                 null,
                 null,
                 new PlannerAccessGuard(users, plannerRepository),
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()),
+                new RestrictionCheckService(users, Clock.systemUTC()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
@@ -82,19 +96,18 @@ class SaveStageKeywordsTest {
                 2);
     }
 
-    private Planner stored(Planner planner) {
-        when(plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()))
+    private StoredPlanner stored(StoredPlanner planner) {
+        when(plannerRepository.findAggregateForOwner(planner.id(), owner.getId()))
                 .thenReturn(Optional.of(planner));
         return planner;
     }
 
     @Test
     void upsertPlanner_WhenAPublishedPlannerIsSavedWithAnUnknownKeyword_RefusesWithUnknownKeyword() {
-        Planner planner = stored(TestDataFactory.planner(owner).published(true).build());
-        String before = planner.getContentJson();
+        StoredPlanner planner = stored(TestDataFactory.planner(owner).published(true).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED))
+                        owner.getId(), UUID.randomUUID(), planner.id(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getBody().getProperties()).containsEntry("code", "UNKNOWN_KEYWORD");
@@ -102,16 +115,16 @@ class SaveStageKeywordsTest {
                     assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
                             "selectedKeywords[0]", "selectedKeywords ID 'Nope' not found or invalid"));
                 });
-        assertThat(planner.getContentJson()).isEqualTo(before);
+        verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
     }
 
     @Test
     void upsertPlanner_WhenAnUnpublishedPlannerIsSavedWithAnUnknownKeyword_AcceptsTheDraft() {
-        Planner planner = stored(TestDataFactory.planner(owner).published(false).build());
+        StoredPlanner planner = stored(TestDataFactory.planner(owner).published(false).build());
 
-        commandService.upsertPlanner(owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(),
-                WriteMode.CHECKED);
+        SaveOutcome saved = commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
+                UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED);
 
-        assertThat(planner.getContentJson()).isEqualTo(UNKNOWN_KEYWORD_CONTENT);
+        assertThat(saved.planner().content().json()).isEqualTo(UNKNOWN_KEYWORD_CONTENT);
     }
 }

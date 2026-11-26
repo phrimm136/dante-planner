@@ -1,9 +1,13 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.planner.repository.ContentWrite;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
+import java.time.Instant;
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
@@ -26,7 +30,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.file.Path;
@@ -85,13 +88,13 @@ class PlannerCatalogServiceTest {
 
     @Test
     void onBecameVisible_WhenCalled_AddsTheRowAndSyncsTheFilters() {
-        Planner planner = loadedPlanner();
+        StoredPlanner planner = loadedPlanner();
 
         catalogService.onBecameVisible(planner,
-                        (Publication.Published) planner.publicationState(), planner.listing());
+                        new PlannerPublishValidator().requirePublishable(planner), (Publication.Published) planner.publication());
 
         verify(catalogRepository).insert(any(PlannerCatalog.class));
-        verifySynced(planner.getId());
+        verifySynced(planner.id());
     }
 
     @Test
@@ -154,80 +157,59 @@ class PlannerCatalogServiceTest {
 
     @Test
     void onVisibleEditCommitted_WhenCompositionUnchanged_CopiesScalarsWithoutSyncingFilters() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "title", "Renamed");
-        PlannerCatalog row = PlannerCatalog.builder().plannerId(planner.getId()).build();
-        when(catalogRepository.findById(planner.getId())).thenReturn(Optional.of(row));
+        StoredPlanner before = loadedPlanner();
+        StoredContent stored = before.content();
+        StoredPlanner after = saved(before, "Renamed", stored.category(), stored.keywords(), stored.json());
 
-        catalogService.onVisibleEditCommitted(planner);
+        catalogService.onVisibleEditCommitted(before, after);
 
-        assertThat(row.getTitle()).isEqualTo("Renamed");
-        assertThat(row.getCategory()).isEqualTo(planner.getCategory());
-        assertThat(row.getSelectedKeywords()).isEqualTo(planner.getSelectedKeywords());
+        verify(catalogRepository).copyScalars(before.id(), "Renamed", stored.category(), stored.keywords());
         verifyNotSynced();
         assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
     }
 
     @Test
     void onVisibleEditCommitted_WhenContentChanged_SyncsTheFilters() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "content", "{\"selectedGiftIds\":[\"9099\"]}");
+        StoredPlanner before = loadedPlanner();
+        StoredContent stored = before.content();
 
-        assertFiltersSynced(planner);
+        assertFiltersSynced(before, saved(before, stored.title(), stored.category(), stored.keywords(),
+                "{\"selectedGiftIds\":[\"9099\"]}"));
     }
 
     @Test
     void onVisibleEditCommitted_WhenKeywordsChanged_SyncsTheFilters() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "selectedKeywords", Set.of("Burst"));
+        StoredPlanner before = loadedPlanner();
+        StoredContent stored = before.content();
 
-        assertFiltersSynced(planner);
+        assertFiltersSynced(before, saved(before, stored.title(), stored.category(), Set.of("Burst"), stored.json()));
     }
 
     @Test
     void onVisibleEditCommitted_WhenCategoryChanged_SyncsTheFilters() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "category", "10F");
+        StoredPlanner before = loadedPlanner();
+        StoredContent stored = before.content();
 
-        assertFiltersSynced(planner);
+        assertFiltersSynced(before, saved(before, stored.title(), "10F", stored.keywords(), stored.json()));
     }
 
     @Test
     void onVisibleEditCommitted_WhenContentIsTheSameDocumentReformatted_SyncsNothing() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "content",
-                " " + planner.getContentJson().replace(",", " , ") + " ");
+        StoredPlanner before = loadedPlanner();
+        StoredContent stored = before.content();
 
-        catalogService.onVisibleEditCommitted(planner);
+        catalogService.onVisibleEditCommitted(before, saved(before, stored.title(), stored.category(),
+                stored.keywords(), " " + stored.json().replace(",", " , ") + " "));
 
         verifyNotSynced();
     }
 
     @Test
     void onVisibleEditCommitted_WhenContentIsUnparseable_SyncsTheFilters() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "content", "{not json");
+        StoredPlanner before = loadedPlanner();
+        StoredContent stored = before.content();
 
-        assertFiltersSynced(planner);
-    }
-
-    @Test
-    void onVisibleEditCommitted_WhenKeywordsGoFromAbsentToEmpty_SyncsNothing() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "loadedSelectedKeywords", null);
-        ReflectionTestUtils.setField(planner.getContent(), "selectedKeywords", Set.of());
-
-        catalogService.onVisibleEditCommitted(planner);
-
-        verifyNotSynced();
-    }
-
-    @Test
-    void onVisibleEditCommitted_WhenLoadedContentIsAbsent_SyncsTheFilters() {
-        Planner planner = loadedPlanner();
-        ReflectionTestUtils.setField(planner.getContent(), "loadedContent", null);
-
-        assertFiltersSynced(planner);
+        assertFiltersSynced(before, saved(before, stored.title(), stored.category(), stored.keywords(), "{not json"));
     }
 
     @Test
@@ -309,10 +291,10 @@ class PlannerCatalogServiceTest {
         assertThat(query.value()).endsWith(" FOR UPDATE OF c");
     }
 
-    private void assertFiltersSynced(Planner planner) {
-        catalogService.onVisibleEditCommitted(planner);
+    private void assertFiltersSynced(StoredPlanner before, StoredPlanner after) {
+        catalogService.onVisibleEditCommitted(before, after);
 
-        verifySynced(planner.getId());
+        verifySynced(before.id());
         assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
     }
 
@@ -346,15 +328,21 @@ class PlannerCatalogServiceTest {
         verify(entityFilterRepository, never()).floorScopeOf(any());
     }
 
-    private static Planner loadedPlanner() {
+    private static StoredPlanner loadedPlanner() {
         User owner = TestDataFactory.unsavedUser(OWNER_ID);
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .id(UUID.randomUUID())
                 .category("5F")
                 .selectedKeywords(Set.of("Sinking"))
                 .published(true)
                 .build();
-        ReflectionTestUtils.invokeMethod(planner.getContent(), "onLoad");
         return planner;
+    }
+
+    private static StoredPlanner saved(StoredPlanner before, String title, String category, Set<String> keywords,
+            String json) {
+        StoredContent stored = before.content();
+        return before.saved(new ContentWrite(title, stored.status(), category, keywords, json, stored.schemaVersion(),
+                stored.gameContentVersion(), stored.device(), stored.syncVersion() + 1, Instant.EPOCH));
     }
 }

@@ -1,33 +1,24 @@
 package org.danteplanner.backend.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToOne;
 import org.danteplanner.backend.planner.entity.Listing;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.Publication.Draft;
 import org.danteplanner.backend.planner.entity.Publication.Published;
 import org.danteplanner.backend.planner.entity.Publication.Unpublished;
 import org.danteplanner.backend.planner.entity.PublishOutcome;
+import org.danteplanner.backend.planner.entity.Takedown;
 import org.danteplanner.backend.planner.entity.WithdrawalOutcome;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
-import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
- * Tier-1 unit tests for the states of a {@link Planner} and their transitions.
+ * Tier-1 unit tests for the states of a planner and their transitions.
  */
 class PlannerTransitionTest {
 
@@ -35,44 +26,20 @@ class PlannerTransitionTest {
 
     private static final Instant EARLIER = Instant.parse("2026-01-01T00:00:00Z");
 
-    private static TestDataFactory.PlannerBuilder planner() {
-        return TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL));
+    private static final UUID PLANNER_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
+
+    @Test
+    void publication_WhenParsed_IsTheStateOfItsTwoColumns() {
+        assertThat(Publication.unlisted(null)).isEqualTo(new Draft());
+        assertThat(Publication.listed(PLANNER_ID, EARLIER)).isEqualTo(new Published(EARLIER));
+        assertThat(Publication.unlisted(EARLIER)).isEqualTo(new Unpublished(EARLIER));
     }
 
     @Test
-    void publicationState_WhenParsed_IsTheStateOfItsTwoColumns() {
-        assertThat(planner().build().publicationState()).isEqualTo(new Draft());
-        assertThat(planner().published(true).firstPublishedAt(EARLIER).build().publicationState())
-                .isEqualTo(new Published(EARLIER));
-        assertThat(planner().firstPublishedAt(EARLIER).build().publicationState())
-                .isEqualTo(new Unpublished(EARLIER));
-    }
-
-    @Test
-    void publicationState_WhenPublishedWithoutATime_Throws() {
-        Planner planner = planner().build();
-        planner.attach(planner.getContent(),
-                PlannerPublication.builder().planner(planner).published(true).build(), planner.getModeration());
-
-        assertThatThrownBy(planner::publicationState)
+    void publication_WhenPublishedWithoutATime_Throws() {
+        assertThatThrownBy(() -> Publication.listed(PLANNER_ID, null))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("planner " + planner.getId() + " is listed without a publication time");
-    }
-
-    @Test
-    void requirePublishable_WhenTakenDown_Throws() {
-        Planner planner = planner().takenDownAt(EARLIER).build();
-
-        assertRejected(planner::requirePublishable)
-                .withCode("PLANNER_FORBIDDEN")
-                .satisfies(rejection -> assertThat(rejection.getMessage())
-                        .isEqualTo("User is not authorized to modify planner with id: " + planner.getId()));
-    }
-
-    @Test
-    void requirePublishable_WhenNotTakenDown_HoldsThePublication() {
-        assertThat(planner().firstPublishedAt(EARLIER).build().requirePublishable().publication())
-                .isEqualTo(new Unpublished(EARLIER));
+                .hasMessage("planner " + PLANNER_ID + " is listed without a publication time");
     }
 
     @Test
@@ -121,43 +88,26 @@ class PlannerTransitionTest {
     }
 
     @Test
-    void listing_WhenParsed_IsListedOrHidden() {
-        assertThat(Listing.of(PlannerModeration.builder().build())).isEqualTo(new Listing.Listed());
-        assertThat(Listing.of(hidden().hiddenByModeratorId(42L).hiddenReason("spam").hiddenAt(NOW).build()))
-                .isEqualTo(new Listing.Hidden(42L, "spam", NOW));
-        assertThat(Listing.of(hidden().hiddenReason("spam").hiddenAt(NOW).build()))
+    void listing_WhenHidden_HoldsTheModeratorReasonAndTime() {
+        assertThat(Listing.hidden(PLANNER_ID, 42L, "spam", NOW)).isEqualTo(new Listing.Hidden(42L, "spam", NOW));
+        assertThat(Listing.hidden(PLANNER_ID, null, "spam", NOW))
                 .as("the moderator's account was deleted")
                 .isEqualTo(new Listing.Hidden(null, "spam", NOW));
     }
 
     @Test
     void listing_WhenHiddenWithoutAReasonOrATime_Throws() {
-        for (PlannerModeration row : List.of(hidden().hiddenAt(NOW).build(), hidden().hiddenReason("spam").build())) {
-            assertThatThrownBy(() -> Listing.of(row))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("is hidden without a reason or a time");
-        }
-    }
-
-    private static PlannerModeration.PlannerModerationBuilder hidden() {
-        return PlannerModeration.builder().hiddenFromRecommended(true);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"publication", "moderation"})
-    void satellite_WhenMapped_CascadesOnlyTheInsert(String field) throws NoSuchFieldException {
-        OneToOne mapping = Planner.class.getDeclaredField(field).getAnnotation(OneToOne.class);
-
-        assertThat(mapping.cascade()).containsExactly(CascadeType.PERSIST);
-        assertThat(mapping.orphanRemoval()).isFalse();
+        assertThatThrownBy(() -> Listing.hidden(PLANNER_ID, null, null, NOW))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("is hidden without a reason or a time");
+        assertThatThrownBy(() -> Listing.hidden(PLANNER_ID, null, "spam", null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("is hidden without a reason or a time");
     }
 
     @Test
-    void recordSave_WhenCalled_IncrementsSyncVersion() {
-        Planner planner = planner().syncVersion(5).build();
-
-        planner.recordSave();
-
-        assertThat(planner.getSyncVersion()).isEqualTo(6L);
+    void takedown_WhenParsed_IsClearOrTakenDown() {
+        assertThat(Takedown.of(null)).isEqualTo(new Takedown.Clear());
+        assertThat(Takedown.of(NOW)).isEqualTo(new Takedown.TakenDown(NOW));
     }
 }

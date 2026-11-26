@@ -24,6 +24,7 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
+import org.danteplanner.backend.shared.ratelimit.ChargeKey;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.redis.RedisRole;
@@ -381,7 +382,8 @@ class DegradationIT {
 
     private boolean rateLimiterAnswers() {
         try {
-            rateLimitService.check(RateLimitPolicy.CRUD, TestDataFactory.nextUserId(), "degradation-probe");
+            rateLimitService.charge(RateLimitPolicy.CRUD,
+                    ChargeKey.User.parse(RateLimitPolicy.CRUD, TestDataFactory.nextUserId(), "degradation-probe"));
             return true;
         } catch (RuntimeException e) {
             return false;
@@ -639,7 +641,7 @@ class DegradationIT {
     void viewCount_WhenAuthRedisUnreachable_Returns204AndCountsTheFailure() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-views-" + UUID.randomUUID() + "@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).getId();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).id();
         new ReplicationControl(degradationPrimaryJdbcTemplate, degradationReplicaJdbcTemplate)
                 .awaitCaughtUp();
         double before = viewRecordFailedCount();

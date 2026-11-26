@@ -2,8 +2,6 @@ package org.danteplanner.backend.integration;
 
 import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
@@ -55,7 +53,7 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "detail-owner@example.com");
-        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
+        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
     }
 
     private int detailViewCount() throws Exception {
@@ -71,7 +69,8 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         try {
             Future<?> holder = pool.submit(() -> transactionTemplate.execute(status -> {
-                if (entityManager.find(Planner.class, plannerId, LockModeType.PESSIMISTIC_WRITE) == null) {
+                if (entityManager.createNativeQuery("SELECT id FROM planner WHERE id = UUID_TO_BIN(:id) FOR UPDATE")
+                        .setParameter("id", plannerId.toString()).getResultList().isEmpty()) {
                     throw new IllegalStateException("planner not found for lock");
                 }
                 locked.countDown();

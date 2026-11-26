@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.repository;
 
+import org.danteplanner.backend.planner.entity.Listing;
+
 public final class RecommendedSql {
 
     public static final String LEFT_JOINS =
@@ -39,7 +41,10 @@ public final class RecommendedSql {
     private RecommendedSql() {
     }
 
-    public static boolean isRecommended(int upvotes, boolean hiddenFromRecommended, int threshold) {
-        return upvotes >= threshold && !hiddenFromRecommended;
+    public static boolean isRecommended(int upvotes, Listing listing, int threshold) {
+        return switch (listing) {
+            case Listing.Listed listed -> upvotes >= threshold;
+            case Listing.Hidden hidden -> false;
+        };
     }
 }

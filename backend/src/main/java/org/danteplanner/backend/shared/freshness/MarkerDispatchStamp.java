@@ -1,8 +1,8 @@
 package org.danteplanner.backend.shared.freshness;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class MarkerDispatchStamp implements DispatchStamp {
 

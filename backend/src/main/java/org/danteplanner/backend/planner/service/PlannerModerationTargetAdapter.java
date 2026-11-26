@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.service;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
+import org.danteplanner.backend.moderation.api.VisiblePlanner;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -15,8 +16,8 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
     private final PlannerAccessGuard accessGuard;
 
     @Override
-    public void checkPublished(UUID plannerId) {
-        accessGuard.checkPublished(plannerId);
+    public VisiblePlanner requirePublished(UUID plannerId) {
+        return new VisiblePlanner(accessGuard.checkPublished(plannerId).value());
     }
 
     @Override

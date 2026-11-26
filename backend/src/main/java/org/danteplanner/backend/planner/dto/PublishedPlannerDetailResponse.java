@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.Publication;
+import org.danteplanner.backend.planner.entity.Upvote;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.util.PlannerConstants;
 import org.danteplanner.backend.user.api.UserProfile;
 
@@ -49,49 +53,49 @@ public record PublishedPlannerDetailResponse(
     }
 
     public static PublishedPlannerDetailResponse forAnonymous(
-            Planner planner,
+            StoredPlanner planner,
             UserProfile author,
             long commentCount,
-            boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
-        return fromEntity(planner, author, false, false, false,
-                commentCount, ownerNotificationsEnabled, viewCount, upvotes);
+        return from(planner, author, MemberView.GUEST, commentCount, viewCount, upvotes);
     }
 
-    public static PublishedPlannerDetailResponse fromEntity(
-            Planner planner,
+    public static PublishedPlannerDetailResponse from(
+            StoredPlanner planner,
             UserProfile author,
-            boolean hasUpvoted,
-            boolean isSubscribed,
-            boolean hasReported,
+            MemberView view,
             long commentCount,
-            boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
+        StoredContent content = planner.content();
         return PublishedPlannerDetailResponse.builder()
-                .id(planner.getId())
-                .title(planner.getTitle())
-                .category(planner.getCategory())
-                .plannerType(planner.getPlannerType())
-                .selectedKeywords(planner.getSelectedKeywords())
+                .id(planner.id())
+                .title(content.title())
+                .category(content.category())
+                .plannerType(planner.plannerType())
+                .selectedKeywords(content.keywords())
                 .authorUsernameEpithet(author.getUsernameEpithet())
                 .authorUsernameSuffix(author.getUsernameSuffix())
                 .upvotes(upvotes)
                 .viewCount(viewCount)
-                .createdAt(planner.getCreatedAt())
-                .firstPublishedAt(planner.getFirstPublishedAt())
-                .lastModifiedAt(planner.getLastModifiedAt())
-                .hasUpvoted(hasUpvoted)
-                .content(planner.getContentJson())
-                .schemaVersion(planner.getSchemaVersion())
-                .contentVersion(planner.getContentVersion())
-                .status(planner.getStatus())
-                .syncVersion(planner.getSyncVersion())
-                .isSubscribed(isSubscribed)
-                .hasReported(hasReported)
+                .createdAt(planner.createdAt())
+                .firstPublishedAt(switch (planner.publication()) {
+                    case Publication.Draft draft -> null;
+                    case Publication.Published(Instant firstAt) -> firstAt;
+                    case Publication.Unpublished(Instant firstAt) -> firstAt;
+                })
+                .lastModifiedAt(content.lastModifiedAt())
+                .hasUpvoted(view.upvote() == Upvote.CAST)
+                .content(content.json())
+                .schemaVersion(content.schemaVersion())
+                .contentVersion(content.gameContentVersion())
+                .status(content.status())
+                .syncVersion(content.syncVersion())
+                .isSubscribed(view.subscription() == Subscription.SUBSCRIBED)
+                .hasReported(view.report() == ReportState.REPORTED)
                 .commentCount(commentCount)
-                .ownerNotificationsEnabled(ownerNotificationsEnabled)
+                .ownerNotificationsEnabled(view.ownerNotifications() == NotificationSetting.ON)
                 .build();
     }
 }

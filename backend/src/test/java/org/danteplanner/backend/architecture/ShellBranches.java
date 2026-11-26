@@ -28,8 +28,6 @@ final class ShellBranches {
 
     static final Path STORE = Path.of("config/shell-branches.txt");
 
-    private static final String REGENERATE = "checks be freeze-branches --reason REASON";
-
     private static final Pattern LINE = Pattern.compile("(.+\\)) # ([1-9]\\d*)");
 
     private static final Set<JavaModifier> NOT_ROOTS =
@@ -39,19 +37,13 @@ final class ShellBranches {
     }
 
     public static void main(String[] arguments) {
-        regenerate(STORE, in(ImportedClasses.production(), MAIN_SOURCES, MAIN_PACKAGE), String.join(" ", arguments))
-                .forEach(System.out::println);
+        regenerate(STORE, in(ImportedClasses.production(), MAIN_SOURCES, MAIN_PACKAGE)).forEach(System.out::println);
     }
 
-    static List<String> regenerate(Path store, SortedMap<String, Integer> counted, String reason) {
-        List<String> raised = raised(read(store), counted);
-        if (!raised.isEmpty() && reason.isBlank()) {
-            throw new IllegalStateException("refused: " + store + " only shrinks unless `" + REGENERATE
-                    + "` states why these lines are added or raised:\n" + String.join("\n", raised));
-        }
+    static List<String> regenerate(Path store, SortedMap<String, Integer> counted) {
+        List<String> moved = moved(read(store), counted);
         write(store, counted);
-        return raised.isEmpty() ? List.of()
-                : Stream.concat(Stream.of("raised, because " + reason + ":"), raised.stream()).toList();
+        return moved.isEmpty() ? List.of() : Stream.concat(Stream.of("moved:"), moved.stream()).toList();
     }
 
     static SortedMap<String, Integer> in(JavaClasses classes, Path sourceRoot, String within) {
@@ -88,16 +80,11 @@ final class ShellBranches {
         return branches;
     }
 
-    static List<String> raised(Map<String, Integer> stored, Map<String, Integer> counted) {
-        return counted.keySet().stream()
-                .filter(method -> counted.get(method) > stored.getOrDefault(method, 0))
-                .map(method -> change(method, stored, counted))
-                .toList();
-    }
-
-    static List<String> stale(Map<String, Integer> stored, Map<String, Integer> counted) {
-        return stored.keySet().stream()
-                .filter(method -> counted.getOrDefault(method, 0) < stored.get(method))
+    static List<String> moved(Map<String, Integer> stored, Map<String, Integer> counted) {
+        return Stream.concat(stored.keySet().stream(), counted.keySet().stream())
+                .distinct()
+                .sorted()
+                .filter(method -> !stored.getOrDefault(method, 0).equals(counted.getOrDefault(method, 0)))
                 .map(method -> change(method, stored, counted))
                 .toList();
     }

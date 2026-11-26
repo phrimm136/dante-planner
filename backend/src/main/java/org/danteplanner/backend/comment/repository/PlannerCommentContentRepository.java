@@ -36,13 +36,7 @@ public interface PlannerCommentContentRepository extends JpaRepository<PlannerCo
 
     @Modifying
     @Query("""
-        UPDATE PlannerCommentContent t SET t.authorNotificationsEnabled = TRUE WHERE t.commentId = :commentId
+        UPDATE PlannerCommentContent t SET t.authorNotificationsEnabled = :enabled WHERE t.commentId = :commentId
         """)
-    int enableAuthorNotifications(@Param("commentId") Long commentId);
-
-    @Modifying
-    @Query("""
-        UPDATE PlannerCommentContent t SET t.authorNotificationsEnabled = FALSE WHERE t.commentId = :commentId
-        """)
-    int disableAuthorNotifications(@Param("commentId") Long commentId);
+    int setAuthorNotifications(@Param("commentId") Long commentId, @Param("enabled") boolean enabled);
 }

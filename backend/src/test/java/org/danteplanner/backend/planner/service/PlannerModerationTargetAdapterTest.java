@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
+import org.danteplanner.backend.planner.api.Visibility;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -8,7 +10,8 @@ import java.util.Optional;
 import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.api.PlannerThread;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -39,6 +42,11 @@ class PlannerModerationTargetAdapterTest {
     @Mock
     private PlannerRepository plannerRepository;
 
+
+    @Mock
+
+    private PlannerContentRepository contentRepository;
+
     @Mock
     private PlannerEntityFilterRepository entityFilterRepository;
 
@@ -59,7 +67,7 @@ class PlannerModerationTargetAdapterTest {
 
     private PlannerModerationTargetAdapter adapter;
 
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -70,7 +78,7 @@ class PlannerModerationTargetAdapterTest {
                 keywordFilterRepository, null, objectMapper,
                 10);
         Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
-        PlannerCommandService commandService = new PlannerCommandService(plannerRepository, statsRepository,
+        PlannerCommandService commandService = new PlannerCommandService(plannerRepository, contentRepository, statsRepository,
                 publicationRepository, null, null, catalogService, accessGuard, null, null, null, null, null,
                 objectMapper, clock, 100, 2);
         PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
@@ -90,21 +98,29 @@ class PlannerModerationTargetAdapterTest {
     }
 
     @Test
-    void checkPublished_WhenCalled_DelegatesToTheAccessGuard() {
-        when(plannerRepository.findThread(planner.getId())).thenReturn(Optional.empty());
+    void requirePublished_WhenThePlannerIsAbsent_RefusesAsTheAccessGuardDoes() {
+        when(plannerRepository.findThread(planner.id())).thenReturn(Optional.empty());
 
-        assertRejected(() -> adapter.checkPublished(planner.getId())).withCode("PLANNER_NOT_FOUND");
+        assertRejected(() -> adapter.requirePublished(planner.id())).withCode("PLANNER_NOT_FOUND");
+    }
+
+    @Test
+    void requirePublished_WhenThePlannerIsVisible_ReturnsItsId() {
+        when(plannerRepository.findThread(planner.id())).thenReturn(Optional.of(
+                new PlannerThread(planner.id(), planner.userId(), Visibility.SHOWN)));
+
+        assertThat(adapter.requirePublished(planner.id()).plannerId()).isEqualTo(planner.id());
     }
 
     @Test
     void takeDown_WhenWithdrawn_TakesThePlannerDownAndReturnsIt() {
         withdrawalAppliesTo(planner);
 
-        ModeratedPlanner result = adapter.takeDown(planner.getId());
+        ModeratedPlanner result = adapter.takeDown(planner.id());
 
-        verify(moderationRepository).takeDown(planner.getId(), NOW);
-        verify(publicationRepository).unpublish(planner.getId());
-        assertThat(result.id()).isEqualTo(planner.getId());
+        verify(moderationRepository).takeDown(planner.id(), NOW);
+        verify(publicationRepository).unpublish(planner.id());
+        assertThat(result.id()).isEqualTo(planner.id());
         assertThat(result.title()).isEqualTo("Moderated Planner");
         assertThat(result.published()).isFalse();
     }
@@ -113,25 +129,25 @@ class PlannerModerationTargetAdapterTest {
     void unpublish_WhenWithdrawn_UnpublishesWithoutTakingDownAndReturnsIt() {
         withdrawalAppliesTo(planner);
 
-        ModeratedPlanner result = adapter.unpublish(planner.getId());
+        ModeratedPlanner result = adapter.unpublish(planner.id());
 
         verifyNoInteractions(moderationRepository);
-        verify(publicationRepository).unpublish(planner.getId());
-        assertThat(result.id()).isEqualTo(planner.getId());
+        verify(publicationRepository).unpublish(planner.id());
+        assertThat(result.id()).isEqualTo(planner.id());
         assertThat(result.title()).isEqualTo("Moderated Planner");
         assertThat(result.published()).isFalse();
     }
 
-    private void withdrawalAppliesTo(Planner target) {
-        when(plannerRepository.findAggregate(target.getId())).thenReturn(Optional.of(target));
+    private void withdrawalAppliesTo(StoredPlanner target) {
+        when(plannerRepository.findAggregate(target.id())).thenReturn(Optional.of(target));
     }
 
     @Test
     void hideFromRecommended_WhenListingChanges_HidesWithTheModeratorAndReason() {
-        when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-        when(moderationRepository.hide(planner.getId(), 7L, "spam", NOW)).thenReturn(1);
+        when(plannerRepository.findAggregate(planner.id())).thenReturn(Optional.of(planner));
+        when(moderationRepository.hide(planner.id(), 7L, "spam", NOW)).thenReturn(1);
 
-        ModeratedPlanner result = adapter.hideFromRecommended(planner.getId(), 7L, "spam");
+        ModeratedPlanner result = adapter.hideFromRecommended(planner.id(), 7L, "spam");
 
         assertThat(result.hiddenFromRecommended()).isTrue();
         assertThat(result.hiddenByModeratorId()).isEqualTo(7L);
@@ -141,28 +157,28 @@ class PlannerModerationTargetAdapterTest {
 
     @Test
     void unhideFromRecommended_WhenListingChanges_ClearsTheHiddenState() {
-        when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-        when(moderationRepository.unhide(planner.getId())).thenReturn(1);
+        when(plannerRepository.findAggregate(planner.id())).thenReturn(Optional.of(planner));
+        when(moderationRepository.unhide(planner.id())).thenReturn(1);
 
-        ModeratedPlanner result = adapter.unhideFromRecommended(planner.getId());
+        ModeratedPlanner result = adapter.unhideFromRecommended(planner.id());
 
-        assertThat(result.id()).isEqualTo(planner.getId());
+        assertThat(result.id()).isEqualTo(planner.id());
         assertThat(result.hiddenFromRecommended()).isFalse();
     }
 
     @Test
     void hideFromRecommended_WhenTheRowIsGone_AnswersThePlannerAsAbsent() {
-        when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+        when(plannerRepository.findAggregate(planner.id())).thenReturn(Optional.of(planner));
 
-        assertRejected(() -> adapter.hideFromRecommended(planner.getId(), 7L, "spam")).withCode("PLANNER_NOT_FOUND");
+        assertRejected(() -> adapter.hideFromRecommended(planner.id(), 7L, "spam")).withCode("PLANNER_NOT_FOUND");
 
         verifyNoInteractions(catalogRepository);
     }
 
     @Test
     void upvoteCount_WhenDelegateCounts_ReturnsTheDelegateCount() {
-        when(statsRepository.upvotesOf(planner.getId())).thenReturn(42);
+        when(statsRepository.upvotesOf(planner.id())).thenReturn(42);
 
-        assertThat(adapter.upvoteCount(planner.getId())).isEqualTo(42);
+        assertThat(adapter.upvoteCount(planner.id())).isEqualTo(42);
     }
 }

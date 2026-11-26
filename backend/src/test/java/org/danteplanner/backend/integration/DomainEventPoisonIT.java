@@ -5,7 +5,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.notification.api.NotificationType;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
@@ -53,12 +55,15 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
     private PlannerCommentRepository commentRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
 
-    private Planner planner;
+    private StoredPlanner planner;
     private User commenter;
     private LogCapture alarms;
 
@@ -93,6 +98,29 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
         assertThat(attemptsOf(eventId))
                 .as("a counter that does not climb is a row that is retried forever")
                 .isEqualTo(2);
+    }
+
+    @Test
+    void dispatch_WhenTheArmThrewAndTheNextCompletes_LeavesTheEventUndispatchedThenAppliesTheEffect() {
+        long eventId = undispatchableEvent(0);
+
+        assertThatThrownBy(() -> dispatcher.dispatchDomainEvent(eventId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("domain event " + eventId + " carries no commentId");
+        assertThat(dispatchedRows(eventId)).isZero();
+        assertThat(attemptsOf(eventId)).isEqualTo(1);
+
+        PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "A comment");
+        transaction().executeWithoutResult(status -> jdbcTemplate.update(
+                "UPDATE domain_events SET payload = JSON_OBJECT('commentId', ?) WHERE id = ?",
+                comment.getId(), eventId));
+        dispatcher.dispatchDomainEvent(eventId);
+
+        assertThat(dispatchedRows(eventId)).isEqualTo(1);
+        assertThat(attemptsOf(eventId)).isEqualTo(2);
+        assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                planner.userId(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED)).isPresent();
     }
 
     @Test
@@ -157,17 +185,17 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
      */
     private long dispatchableEvent(int attempts) {
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment");
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "A comment");
         return transaction().execute(status -> {
             jdbcTemplate.update("""
                     INSERT INTO domain_events (event_type, aggregate_id, payload, created_at, attempts)
                     VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?),
                             DATE_SUB(NOW(6), INTERVAL 1 MINUTE), ?)
                     """,
-                    planner.getId().toString(), comment.getId(), attempts);
+                    planner.id().toString(), comment.getId(), attempts);
             return jdbcTemplate.queryForObject(
                     "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                    Long.class, planner.getId().toString());
+                    Long.class, planner.id().toString());
         });
     }
 
@@ -185,10 +213,10 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
                     VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT(),
                             DATE_SUB(NOW(6), INTERVAL 1 MINUTE), ?)
                     """,
-                    planner.getId().toString(), attempts);
+                    planner.id().toString(), attempts);
             return jdbcTemplate.queryForObject(
                     "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                    Long.class, planner.getId().toString());
+                    Long.class, planner.id().toString());
         });
     }
 
@@ -197,6 +225,12 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
         readOnly.setReadOnly(true);
         return readOnly.execute(status -> jdbcTemplate.queryForObject(
                 "SELECT attempts FROM domain_events WHERE id = ?", Integer.class, eventId));
+    }
+
+    private int dispatchedRows(long eventId) {
+        return transaction().execute(status -> jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM domain_events WHERE id = ? AND dispatched_at IS NOT NULL",
+                Integer.class, eventId));
     }
 
     private java.util.List<Long> pendingIds() {

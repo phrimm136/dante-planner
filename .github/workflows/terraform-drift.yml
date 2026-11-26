@@ -4,9 +4,9 @@ name: Terraform drift
 # github.event field reaches a run block. Secrets arrive through env and are dereferenced as
 # shell variables, never interpolated into the script text.
 on:
-  # The nightly schedule is off until the TFVARS_* inputs exist: without them every stack plans
-  # with empty variables and reports its own resources as destroyed, which files a drift issue
-  # each night for a check that cannot pass. workflow_dispatch stays for running it by hand.
+  # The nightly schedule is off until the TFVARS_CLOUDFLARE input exists: without it the cloudflare
+  # stack plans with empty variables and reports its own resources as destroyed, which files a drift
+  # issue each night for a check that cannot pass. workflow_dispatch stays for running it by hand.
   workflow_dispatch:
 
 concurrency:
@@ -40,16 +40,10 @@ jobs:
       # one reports the resource's destruction as drift.
       - name: Materialize stack inputs
         env:
-          TFVARS_OREGON: ${{ secrets.TFVARS_OREGON }}
-          TFVARS_SEOUL: ${{ secrets.TFVARS_SEOUL }}
-          TFVARS_SECRETS: ${{ secrets.TFVARS_SECRETS }}
           TFVARS_CLOUDFLARE: ${{ secrets.TFVARS_CLOUDFLARE }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          printf '%s' "$TFVARS_OREGON"     > terraform/oregon/prod.tfvars
-          printf '%s' "$TFVARS_SEOUL"      > terraform/seoul/prod.tfvars
-          printf '%s' "$TFVARS_SECRETS"    > terraform/secrets/prod.tfvars
           printf '%s' "$TFVARS_CLOUDFLARE" > terraform/cloudflare/prod.tfvars
           printf 'bucket = "danteplanner-tfstate-%s"\n' "$AWS_ACCOUNT_ID" > terraform/backend.prod.hcl
           # A name Terraform auto-loads would apply inputs no step here names. Every file above is

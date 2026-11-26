@@ -16,21 +16,17 @@ public sealed interface FreshnessDeclaration {
         return new Scopes(union);
     }
 
-    FreshnessDeclaration declareNone(String reason);
+    FreshnessDeclaration declareNone(None none);
 
     default Set<FreshnessScope> scopes() {
         return Set.of();
     }
 
-    private static void requireReason(String reason) {
-        Assert.hasText(reason, "a None declaration needs a reason");
-    }
-
     record Undeclared() implements FreshnessDeclaration {
 
         @Override
-        public FreshnessDeclaration declareNone(String reason) {
-            return new None(reason);
+        public FreshnessDeclaration declareNone(None none) {
+            return none;
         }
     }
 
@@ -42,8 +38,7 @@ public sealed interface FreshnessDeclaration {
         }
 
         @Override
-        public FreshnessDeclaration declareNone(String reason) {
-            requireReason(reason);
+        public FreshnessDeclaration declareNone(None none) {
             return this;
         }
     }
@@ -51,12 +46,11 @@ public sealed interface FreshnessDeclaration {
     record None(String reason) implements FreshnessDeclaration {
 
         public None {
-            requireReason(reason);
+            Assert.hasText(reason, "a None declaration needs a reason");
         }
 
         @Override
-        public FreshnessDeclaration declareNone(String reason) {
-            requireReason(reason);
+        public FreshnessDeclaration declareNone(None none) {
             return this;
         }
     }

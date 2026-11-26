@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.moderation.api.PlannerReports;
+import org.danteplanner.backend.moderation.api.VisiblePlanner;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
@@ -32,10 +33,10 @@ public class PlannerReportService implements PlannerReports {
     @Override
     @Transactional
     public void createReport(Long userId, UUID plannerId) {
-        plannerTarget.checkPublished(plannerId);
+        VisiblePlanner planner = plannerTarget.requirePublished(plannerId);
 
         FirstPlannerReport first = reportUniquenessValidator.requireFirstPlannerReport(
-                priorReport(reportRepository.existsByUserIdAndPlannerId(userId, plannerId)), plannerId, userId);
+                priorReport(reportRepository.existsByUserIdAndPlannerId(userId, plannerId)), planner, userId);
 
         PlannerReport report = new PlannerReport(first.reporterId(), first.plannerId());
         reportRepository.insert(report);

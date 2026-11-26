@@ -6,6 +6,7 @@ import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.EncodedGiftId;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.RuleName;
 import org.danteplanner.backend.planner.validation.Violation;
@@ -261,14 +262,14 @@ class FloorRulesCorpusTest {
     void admit_WhenTheMatrixMovesDifficultyInRangeToDraft_ChecksTheDifficultyAtDraftInstead() {
         JsonNode floors = floors(floor("1001", 5), floor("1002", 0), floor("1003", 0), floor("1004", 0),
                 floor("1005", 0));
-        Map<RuleName, Set<String>> moved = new HashMap<>(TABLE.rules());
-        moved.put(RuleName.DIFFICULTY_IN_RANGE, Set.of("draft"));
+        Map<RuleName, Set<Stage>> moved = new HashMap<>(TABLE.rules());
+        moved.put(RuleName.DIFFICULTY_IN_RANGE, Set.of(Stage.DRAFT));
         FloorRules movedRules = new FloorRules(
-                new FloorRuleTable(TABLE.schemaVersion(), TABLE.stages(), TABLE.categories(), moved));
+                new FloorRuleTable(TABLE.schemaVersion(), TABLE.categories(), moved));
         Admission.Rejected outOfRange = new Admission.Rejected(List.of(new Violation(ErrorCode.OUT_OF_RANGE_DIFFICULTY,
                 ContentPath.of("floorSelections").index(0).field("difficulty"), "floorSelections[0].difficulty value 5 is out of range [0-1]")));
 
-        assertThat(TABLE.stagesFor(RuleName.DIFFICULTY_IN_RANGE)).containsExactly("publish");
+        assertThat(TABLE.stagesFor(RuleName.DIFFICULTY_IN_RANGE)).containsExactly(Stage.PUBLISH);
         assertThat(admit(rules, floors, MDCategory.F5, Stage.DRAFT)).isInstanceOf(Admission.Admitted.class);
         assertThat(admit(rules, floors, MDCategory.F5, Stage.PUBLISH)).isEqualTo(outOfRange);
         assertThat(admit(movedRules, floors, MDCategory.F5, Stage.DRAFT)).isEqualTo(outOfRange);
@@ -309,7 +310,7 @@ class FloorRulesCorpusTest {
         Map<MDCategory, CategoryFloors> categories = new EnumMap<>(TABLE.categories());
         categories.put(MDCategory.F5, new CategoryFloors(3, TABLE.layout(MDCategory.F5).difficulties().subList(0, 3)));
         FloorRules shrunk = new FloorRules(
-                new FloorRuleTable(TABLE.schemaVersion(), TABLE.stages(), categories, TABLE.rules()));
+                new FloorRuleTable(TABLE.schemaVersion(), categories, TABLE.rules()));
         JsonNode floors = floors(IntStream.range(0, TABLE.floorCount(MDCategory.F10))
                 .mapToObj(index -> floor(String.valueOf(1001 + index), index == 2 || index == 3 ? 0 : 1))
                 .toArray(JsonNode[]::new));
@@ -324,20 +325,9 @@ class FloorRulesCorpusTest {
     }
 
     @Test
-    void stages_WhenReadFromTheTable_MapOntoEveryStage() {
-        assertThat(TABLE.stages().stream().map(Stage::fromTableName)).containsExactlyInAnyOrder(Stage.values());
+    void fromTableName_WhenTheNameIsUnknown_ThrowsNamingEveryStage() {
         assertThatThrownBy(() -> Stage.fromTableName("import")).isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("unknown floor rule stage 'import'; expected one of [draft, publish, index]");
-    }
-
-    @Test
-    void floorRules_WhenTheTableStagesDifferFromTheStageAxis_FailToConstruct() {
-        FloorRuleTable twoStages = new FloorRuleTable(TABLE.schemaVersion(), List.of("draft", "publish"),
-                TABLE.categories(), TABLE.rules());
-
-        assertThatThrownBy(() -> new FloorRules(twoStages))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("[draft, publish]");
     }
 
     private static Stream<JsonNode> allCases() {

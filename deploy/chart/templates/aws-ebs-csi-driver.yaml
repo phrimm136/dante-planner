@@ -1,0 +1,99 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-ebs-csi-driver
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+    chart: aws-ebs-csi-driver
+    targetRevision: 2.68.1
+    helm:
+      releaseName: aws-ebs-csi-driver
+      valuesObject:
+        helmTester:
+          enabled: false
+        awsAccessSecret: null
+        sidecars:
+          provisioner:
+            securityContext:
+              capabilities:
+                drop: [ALL]
+          attacher:
+            securityContext:
+              capabilities:
+                drop: [ALL]
+          resizer:
+            securityContext:
+              capabilities:
+                drop: [ALL]
+          livenessProbe:
+            securityContext:
+              capabilities:
+                drop: [ALL]
+        controller:
+          replicaCount: 1
+          nodeSelector:
+            role: data
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containerSecurityContext:
+            capabilities:
+              drop: [ALL]
+          deploymentAnnotations:
+            checkov.io/skip1: CKV_K8S_8=the upstream chart gives the CSI sidecars no liveness probe
+            checkov.io/skip2: CKV_K8S_9=the upstream chart gives the CSI sidecars no readiness probe
+            checkov.io/skip3: CKV_K8S_11=no workload in the fleet sets a CPU limit
+            checkov.io/skip4: CKV_K8S_15=the chart pins every image by tag, pulled IfNotPresent like every workload in the fleet
+            checkov.io/skip5: CKV_K8S_38=the controller and its sidecars call the Kubernetes API
+            checkov.io/skip6: CKV_K8S_40=the upstream images run as UID 1000
+            checkov.io/skip7: CKV_K8S_43=the chart pins its images by tag, raised with the chart version
+            checkov.io/skip8: CKV2_K8S_6=the fleet runs no NetworkPolicy
+          resources:
+            requests:
+              cpu: 5m
+              memory: 24Mi
+            limits:
+              memory: 128Mi
+        node:
+          enableWindows: false
+          nodeSelector:
+            role: data
+          daemonSetAnnotations:
+            checkov.io/skip1: CKV_K8S_8=the upstream chart gives the liveness-probe sidecar no liveness probe
+            checkov.io/skip2: CKV_K8S_9=the upstream chart gives the CSI sidecars no readiness probe
+            checkov.io/skip3: CKV_K8S_11=no workload in the fleet sets a CPU limit
+            checkov.io/skip4: CKV_K8S_15=the chart pins every image by tag, pulled IfNotPresent like every workload in the fleet
+            checkov.io/skip5: CKV_K8S_16=the node plugin formats and mounts block devices on the host, which needs a privileged container
+            checkov.io/skip6: CKV_K8S_20=a privileged container already holds every privilege
+            checkov.io/skip7: CKV_K8S_23=the node plugin runs as root to bind the kubelet registration and driver sockets
+            checkov.io/skip8: CKV_K8S_28=a privileged container holds every capability
+            checkov.io/skip9: CKV_K8S_31=a privileged container runs without a seccomp profile
+            checkov.io/skip10: CKV_K8S_37=a privileged container holds every capability
+            checkov.io/skip11: CKV_K8S_38=the node plugin reads its Node and removes the agent-not-ready taint through the Kubernetes API
+            checkov.io/skip12: CKV_K8S_40=the node plugin runs as root
+            checkov.io/skip13: CKV_K8S_43=the chart pins its images by tag, raised with the chart version
+            checkov.io/skip14: CKV2_K8S_6=the fleet runs no NetworkPolicy
+          resources:
+            requests:
+              cpu: 5m
+              memory: 24Mi
+            limits:
+              memory: 128Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

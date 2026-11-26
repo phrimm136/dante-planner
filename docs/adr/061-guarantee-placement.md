@@ -9,7 +9,7 @@
   (2) Request input is validated by Jakarta annotations on the DTO — the `@Valid`
   pipeline is the only place an annotation executes; the response boundary is the
   consumer's schema, and the database boundary is the schema plus `@PostLoad` guards
-  plus the drift audit. (3) Business rules live in validator components. (4) Residual
+  plus the drift audit. (3) Business rules live in validator components: a service builds a domain exception only in an `orElseThrow` supplier, except a write that matched no row under the lock it holds (`PlannerConcurrentWriteException`), which refuses no business rule and is the tripwire for a writer that skipped the lock (`GuaranteePlacementTest`). (4) Residual
   invariants types cannot carry are `Assert` one-liners into the
   IllegalArgumentException bug lane. (5) Enforced by lint where lintable: no
   method-validation AOP, no `jakarta.validation` annotations outside dto packages

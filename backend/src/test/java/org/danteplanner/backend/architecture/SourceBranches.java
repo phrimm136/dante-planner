@@ -31,9 +31,14 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.ConditionalExpressionTree;
 import com.sun.source.tree.ConstantCaseLabelTree;
+import com.sun.source.tree.CaseLabelTree;
+import com.sun.source.tree.DefaultCaseLabelTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.IfTree;
+import com.sun.source.tree.ThrowTree;
+import com.sun.source.tree.StatementTree;
+import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.ParameterizedTypeTree;
@@ -130,6 +135,7 @@ final class SourceBranches {
         private final Deque<String> classes = new ArrayDeque<>();
         private final Deque<Map<String, List<? extends Tree>>> typeVariables = new ArrayDeque<>();
         private int branches = OUTSIDE_ANY_MEMBER;
+        private int guardConditions;
 
         BranchScanner(CompilationUnitTree unit, Map<String, List<Integer>> counts) {
             this.counts = counts;
@@ -181,8 +187,28 @@ final class SourceBranches {
 
         @Override
         public Void visitIf(IfTree tree, Void unused) {
-            branch();
-            return super.visitIf(tree, unused);
+            if (!isGuard(tree)) {
+                branch();
+                return super.visitIf(tree, unused);
+            }
+            guardConditions++;
+            scan(tree.getCondition(), unused);
+            guardConditions--;
+            return scan(tree.getThenStatement(), unused);
+        }
+
+        private static boolean isGuard(IfTree tree) {
+            if (tree.getElseStatement() != null) {
+                return false;
+            }
+            StatementTree body = tree.getThenStatement();
+            if (body instanceof BlockTree block) {
+                if (block.getStatements().size() != 1) {
+                    return false;
+                }
+                body = block.getStatements().getFirst();
+            }
+            return body instanceof ThrowTree;
         }
 
         @Override
@@ -193,7 +219,8 @@ final class SourceBranches {
 
         @Override
         public Void visitBinary(BinaryTree tree, Void unused) {
-            if (tree.getKind() == Tree.Kind.CONDITIONAL_AND || tree.getKind() == Tree.Kind.CONDITIONAL_OR) {
+            if (guardConditions == 0
+                    && (tree.getKind() == Tree.Kind.CONDITIONAL_AND || tree.getKind() == Tree.Kind.CONDITIONAL_OR)) {
                 branch();
             }
             return super.visitBinary(tree, unused);
@@ -225,9 +252,17 @@ final class SourceBranches {
                     .filter(ConstantCaseLabelTree.class::isInstance)
                     .map(label -> ((ConstantCaseLabelTree) label).getConstantExpression())
                     .anyMatch(BranchScanner::isStringOrNumber);
-            if (literal) {
+            boolean open = cases.stream()
+                    .flatMap(one -> one.getLabels().stream())
+                    .anyMatch(label -> label instanceof DefaultCaseLabelTree || isNullLabel(label));
+            if (literal || open) {
                 branch();
             }
+        }
+
+        private static boolean isNullLabel(CaseLabelTree label) {
+            return label instanceof ConstantCaseLabelTree constant
+                    && constant.getConstantExpression().getKind() == Tree.Kind.NULL_LITERAL;
         }
 
         private static boolean isStringOrNumber(ExpressionTree label) {
