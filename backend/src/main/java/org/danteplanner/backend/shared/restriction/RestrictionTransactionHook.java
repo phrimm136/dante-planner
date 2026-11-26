@@ -1,28 +1,23 @@
 package org.danteplanner.backend.shared.restriction;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.ConfigurableTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionExecutionListener;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
 import org.jspecify.annotations.Nullable;
 
 @Component
@@ -30,7 +25,6 @@ import org.jspecify.annotations.Nullable;
 public class RestrictionTransactionHook implements TransactionExecutionListener, SmartInitializingSingleton {
 
     static final String UNDECIDED_COUNTER = "restriction.undecided";
-    private static final String STATE_ATTRIBUTE = RestrictionTransactionHook.class.getName() + ".state";
 
     private final ObjectProvider<RestrictionCheckHandler> checkHandler;
     private final ObjectProvider<PlatformTransactionManager> transactionManager;
@@ -49,7 +43,12 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
     }
 
     public static void recordDecision() {
-        withState(state -> state.decided = true);
+        switch (duty()) {
+            case RestrictionDuty.DecisionDue due -> SpringContextAdapter.storeRequestValue(
+                    RestrictionDuty.DUTY_ATTRIBUTE, new RestrictionDuty.Discharged());
+            case RestrictionDuty.CheckDue due -> { }
+            case RestrictionDuty.Discharged discharged -> { }
+        }
     }
 
     @Override
@@ -66,22 +65,14 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void afterBegin(TransactionExecution transaction, @Nullable Throwable beginFailure) {
-        if (beginFailure != null || transaction.isReadOnly()) {
-            return;
+        switch (BeginDecision.of(beginFailure, transaction.isReadOnly(), duty())) {
+            case BeginDecision.CheckUser check -> check(check.userId(), transaction);
+            case BeginDecision.Skip skip -> { }
         }
-        withState(state -> {
-            if (state.declaration != Declaration.RESTRICTED || state.checked) {
-                return;
-            }
-            switch (state.principal) {
-                case Principal.Authenticated authenticated -> check(state, authenticated.userId(), transaction);
-                case Principal.Anonymous anonymous -> { }
-            }
-        });
     }
 
-    private void check(RequestState state, Long userId, TransactionExecution transaction) {
-        state.checked = true;
+    private void check(Long userId, TransactionExecution transaction) {
+        SpringContextAdapter.storeRequestValue(RestrictionDuty.DUTY_ATTRIBUTE, new RestrictionDuty.Discharged());
         try {
             checkHandler.getObject().requireUnrestricted(userId);
         } catch (RuntimeException refusal) {
@@ -93,116 +84,60 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void beforeCommit(TransactionExecution transaction) {
-        if (transaction.isReadOnly()) {
-            return;
+        switch (CommitDecision.of(transaction.isReadOnly(), duty())) {
+            case CommitDecision.Report report -> reportUndecided(report.handler());
+            case CommitDecision.Pass pass -> { }
         }
-        withState(state -> {
-            if (state.declaration != Declaration.BY_STATE || state.decided) {
-                return;
-            }
-            switch (onUndecided) {
-                case FAIL -> throw new IllegalStateException(undecidedMessage(state));
-                case COUNT -> {
-                    undecidedCounter.increment();
-                    log.warn(undecidedMessage(state));
-                }
-            }
-        });
     }
 
-    private static String undecidedMessage(RequestState state) {
-        return state.handlerName + " is @RestrictedByState but committed a write without calling "
+    private void reportUndecided(HandlerMethod handler) {
+        switch (onUndecided) {
+            case FAIL -> throw new IllegalStateException(undecidedMessage(handler));
+            case COUNT -> {
+                undecidedCounter.increment();
+                log.warn(undecidedMessage(handler));
+            }
+        }
+    }
+
+    private static String undecidedMessage(HandlerMethod handler) {
+        return handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName()
+                + " is @RestrictedByState but committed a write without calling "
                 + "RestrictionCheck.requireUnrestricted or RestrictionCheck.recordPrivate";
     }
 
-    private static void withState(Consumer<RequestState> action) {
-        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-        if (attributes == null) {
-            return;
+    private static RestrictionDuty duty() {
+        return SpringContextAdapter.requestValue(RestrictionDuty.DUTY_ATTRIBUTE, RestrictionDuty.class,
+                new RestrictionDuty.Discharged());
+    }
+
+    private sealed interface BeginDecision {
+
+        record CheckUser(Long userId) implements BeginDecision {
         }
-        Object stored = attributes.getAttribute(STATE_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-        Object matched = attributes.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE,
-                RequestAttributes.SCOPE_REQUEST);
-        switch (Dispatch.of(stored, matched)) {
-            case Dispatch.Tracked tracked -> action.accept(tracked.state());
-            case Dispatch.Handled handled -> {
-                RequestState created = track(handled.handler(), attributes);
-                action.accept(created);
-            }
-            case Dispatch.Unhandled unhandled -> { }
+
+        record Skip() implements BeginDecision {
+        }
+
+        private static BeginDecision of(@Nullable Throwable beginFailure, boolean readOnly, RestrictionDuty duty) {
+            return beginFailure == null && !readOnly && duty instanceof RestrictionDuty.CheckDue due
+                    ? new CheckUser(due.userId())
+                    : new Skip();
         }
     }
 
-    private static RequestState track(HandlerMethod handler, RequestAttributes attributes) {
-        Principal principal = Principal.of(SecurityContextHolder.getContext().getAuthentication());
-        String handlerName = handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName();
-        RequestState state = new RequestState(declarationOf(handler), handlerName, principal);
-        attributes.setAttribute(STATE_ATTRIBUTE, state, RequestAttributes.SCOPE_REQUEST);
-        return state;
-    }
+    private sealed interface CommitDecision {
 
-    private static Declaration declarationOf(HandlerMethod handler) {
-        if (handler.hasMethodAnnotation(Restricted.class)) {
-            return Declaration.RESTRICTED;
-        }
-        if (handler.hasMethodAnnotation(RestrictedByState.class)) {
-            return Declaration.BY_STATE;
-        }
-        return Declaration.NONE;
-    }
-
-    private sealed interface Dispatch {
-
-        record Tracked(RequestState state) implements Dispatch {
+        record Report(HandlerMethod handler) implements CommitDecision {
         }
 
-        record Handled(HandlerMethod handler) implements Dispatch {
+        record Pass() implements CommitDecision {
         }
 
-        record Unhandled() implements Dispatch {
-        }
-
-        static Dispatch of(@Nullable Object stored, @Nullable Object bestMatchingHandler) {
-            if (stored instanceof RequestState state) {
-                return new Tracked(state);
-            }
-            return bestMatchingHandler instanceof HandlerMethod handler ? new Handled(handler) : new Unhandled();
-        }
-    }
-
-    private sealed interface Principal {
-
-        record Authenticated(Long userId) implements Principal {
-        }
-
-        record Anonymous() implements Principal {
-        }
-
-        static Principal of(@Nullable Authentication authentication) {
-            return authentication != null && authentication.getPrincipal() instanceof Long userId
-                    ? new Authenticated(userId)
-                    : new Anonymous();
-        }
-    }
-
-    private enum Declaration {
-        RESTRICTED,
-        BY_STATE,
-        NONE
-    }
-
-    private static final class RequestState {
-
-        private final Declaration declaration;
-        private final String handlerName;
-        private final Principal principal;
-        private boolean checked;
-        private boolean decided;
-
-        private RequestState(Declaration declaration, String handlerName, Principal principal) {
-            this.declaration = declaration;
-            this.handlerName = handlerName;
-            this.principal = principal;
+        private static CommitDecision of(boolean readOnly, RestrictionDuty duty) {
+            return !readOnly && duty instanceof RestrictionDuty.DecisionDue due
+                    ? new Report(due.handler())
+                    : new Pass();
         }
     }
 }

@@ -3,8 +3,6 @@ package org.danteplanner.backend.auth.security;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
-import org.springframework.security.core.Authentication;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.AccessClaims;
 import org.danteplanner.backend.auth.token.RevocationOutcome;
@@ -12,11 +10,12 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.LogValues;
 import org.danteplanner.backend.shared.util.RequestHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +37,7 @@ public class AccessTokenAuthenticator {
             return refuseInvalid(invalid.getReason(), request);
         }
 
-        AccessDecision decision = AccessDecision.of(claims, revocationOf(token, claims), currentLogin());
+        AccessDecision decision = AccessDecision.of(claims, revocationOf(token, claims), SpringContextAdapter.viewer());
         perform(decision, claims, request);
         return decision.outcome;
     }
@@ -49,10 +48,6 @@ public class AccessTokenAuthenticator {
             case CLEAR, SKIPPED ->
                     tokenBlacklistService.invalidationCheck(claims.userId(), claims.issuedAt().getTime());
         };
-    }
-
-    private static @Nullable Authentication currentLogin() {
-        return SecurityContextHolder.getContext().getAuthentication();
     }
 
     private void perform(AccessDecision decision, AccessClaims claims, HttpServletRequest request) {
@@ -82,7 +77,7 @@ public class AccessTokenAuthenticator {
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(userId, null, authorities);
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+        SpringContextAdapter.signIn(authToken);
     }
 
     private void logSecurityEvent(String event, HttpServletRequest request) {
@@ -106,9 +101,9 @@ public class AccessTokenAuthenticator {
         }
 
         static AccessDecision of(
-                AccessClaims claims, RevocationOutcome revocation, @Nullable Authentication current) {
+                AccessClaims claims, RevocationOutcome revocation, Viewer current) {
             return revocation == RevocationOutcome.REVOKED ? REFUSE_REVOKED
-                    : current != null ? KEEP_SIGNED_IN
+                    : current instanceof Viewer.Member ? KEEP_SIGNED_IN
                     : claims.isSentinel() ? REFUSE_SENTINEL
                     : SIGN_IN;
         }

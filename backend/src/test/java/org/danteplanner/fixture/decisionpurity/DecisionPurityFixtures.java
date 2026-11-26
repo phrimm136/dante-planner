@@ -37,9 +37,9 @@ final class DecisionPurityFixtures {
 
     static final class Decider {
 
-        Choice decide() throws InterruptedException {
-            new CountDownLatch(1).await();
-            return new Choice.Left();
+        Choice decide(int count) throws InterruptedException {
+            new CountDownLatch(count).await();
+            return count > 0 ? new Choice.Left() : new Choice.Right();
         }
     }
 
@@ -60,6 +60,23 @@ final class DecisionPurityFixtures {
                 case Boolean open when open -> new Choice.Left();
                 default -> new Choice.Right();
             };
+        }
+    }
+
+    static final class BranchFreeReader {
+
+        private final Port port;
+
+        BranchFreeReader(Port port) {
+            this.port = port;
+        }
+
+        Choice decide() {
+            return of(port.isOpen());
+        }
+
+        private static Choice of(boolean open) {
+            return open ? new Choice.Left() : new Choice.Right();
         }
     }
 
@@ -236,7 +253,7 @@ final class DecisionPurityFixtures {
 
         static Choice decide(Authentication authentication) {
             authentication.setAuthenticated(false);
-            return new Choice.Right();
+            return authentication.isAuthenticated() ? new Choice.Left() : new Choice.Right();
         }
     }
 

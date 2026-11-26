@@ -7,6 +7,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
+import org.danteplanner.backend.shared.restriction.RestrictionDutyInterceptor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -21,6 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final DeviceIdArgumentResolver deviceIdArgumentResolver;
     private final ViewerArgumentResolver viewerArgumentResolver;
+    private final RestrictionDutyInterceptor restrictionDutyInterceptor;
     private final RateLimitInterceptor rateLimitInterceptor;
 
     @Override
@@ -31,6 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(restrictionDutyInterceptor);
         registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**");
     }
 }

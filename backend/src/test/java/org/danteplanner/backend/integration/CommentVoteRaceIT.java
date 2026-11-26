@@ -352,7 +352,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     private CommentTreeNode shown(UUID comment, User viewer) {
-        return queryService.getCommentTree(planner.getId(), Viewer.of(viewer.getId())).value().stream()
+        return queryService.getCommentTree(planner.getId(), new Viewer.Member(viewer.getId())).value().stream()
                 .filter(node -> node.id().equals(comment))
                 .findFirst()
                 .orElseThrow();

@@ -101,6 +101,11 @@ class DecisionPurityTest {
     }
 
     @Test
+    void branchFreeReader_WhenTheRuleRunsOverTheFixture_IsNotNamed() {
+        assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE)).doesNotContainKey("BranchFreeReader.decide");
+    }
+
+    @Test
     void threadLocalAccessor_WhenTheRuleRunsOverTheFixture_IsAllowedButABranchingReadIsNamed() {
         Map<String, Set<String>> offenders = offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE);
 
@@ -212,7 +217,7 @@ class DecisionPurityTest {
         Map<String, Set<String>> offenders = new TreeMap<>();
         for (JavaClass clazz : classes) {
             for (JavaMethod method : clazz.getMethods()) {
-                if (!isDecision(method, within) || isAccessor(method)) {
+                if (!isDecision(method, within) || !branchesInItsBodyOrLambdas(method)) {
                     continue;
                 }
                 Map<String, List<String>> effects =
@@ -277,21 +282,44 @@ class DecisionPurityTest {
                 .orElse(false);
     }
 
-    private record BytecodeShape(List<String> calls, List<String> staticReads, boolean branches) {
+    private record BytecodeShape(List<String> calls, List<String> staticReads, boolean branches, List<Handle> lambdas) {
+    }
+
+    private static boolean branchesInItsBodyOrLambdas(JavaMethod method) {
+        String owner = method.getOwner().getName().replace('.', '/');
+        Set<String> seen = new TreeSet<>();
+        List<BytecodeShape> pending = new ArrayList<>(List.of(shapeOf(method)));
+        while (!pending.isEmpty()) {
+            BytecodeShape shape = pending.removeLast();
+            if (shape.branches()) {
+                return true;
+            }
+            shape.lambdas().stream()
+                    .filter(lambda -> lambda.getOwner().equals(owner) && lambda.getName().startsWith("lambda$"))
+                    .filter(lambda -> seen.add(lambda.getName() + lambda.getDesc()))
+                    .map(lambda -> shapeOf(owner, lambda.getName(), lambda.getDesc()))
+                    .forEach(pending::add);
+        }
+        return false;
     }
 
     private static BytecodeShape shapeOf(JavaMethod method) {
-        String descriptor = Type.getMethodDescriptor(method.reflect());
+        return shapeOf(method.getOwner().getName().replace('.', '/'), method.getName(),
+                Type.getMethodDescriptor(method.reflect()));
+    }
+
+    private static BytecodeShape shapeOf(String owner, String methodName, String descriptor) {
         List<String> calls = new ArrayList<>();
         List<String> staticReads = new ArrayList<>();
+        List<Handle> lambdas = new ArrayList<>();
         boolean[] branches = {false};
-        String resource = "/" + method.getOwner().getName().replace('.', '/') + ".class";
+        String resource = "/" + owner + ".class";
         try (InputStream bytes = DecisionPurityTest.class.getResourceAsStream(resource)) {
             new ClassReader(bytes).accept(new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public MethodVisitor visitMethod(int access, String name, String desc, String signature,
                         String[] exceptions) {
-                    if (!name.equals(method.getName()) || !desc.equals(descriptor)) {
+                    if (!name.equals(methodName) || !desc.equals(descriptor)) {
                         return null;
                     }
                     return new MethodVisitor(Opcodes.ASM9) {
@@ -305,6 +333,11 @@ class DecisionPurityTest {
                         public void visitInvokeDynamicInsn(String callee, String calleeDesc, Handle bootstrap,
                                 Object... arguments) {
                             calls.add("indy." + callee);
+                            for (Object argument : arguments) {
+                                if (argument instanceof Handle handle) {
+                                    lambdas.add(handle);
+                                }
+                            }
                         }
 
                         @Override
@@ -336,6 +369,6 @@ class DecisionPurityTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        return new BytecodeShape(List.copyOf(calls), List.copyOf(staticReads), branches[0]);
+        return new BytecodeShape(List.copyOf(calls), List.copyOf(staticReads), branches[0], List.copyOf(lambdas));
     }
 }

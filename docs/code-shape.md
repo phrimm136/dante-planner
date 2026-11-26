@@ -35,9 +35,14 @@ decision, not a guard: a run of them is a decision table inside an effect method
 - **T6** Does a null or an `Optional` live inside the code instead of at a boundary? A boundary
   is a framework or library return (`RequestContextHolder.getRequestAttributes()`,
   `getAuthentication()`, a repository `findBy...`), an entity column, a DTO field. The line that
-  receives it turns it into a named type (`Unguarded`, `Anonymous`) or ends it with an invariant;
-  methods, parameters, returns and fields past that line carry no `@Nullable` and no `Optional`.
-  Evidence: a `@Nullable` or `Optional` on a member that is not the receiving line.
+  receives it turns it into a named type (`Viewer.Guest`, `RestrictionDuty.Discharged`) or ends it
+  with an invariant; methods, parameters, returns and fields past that line carry no `@Nullable`
+  and no `Optional`. Our own state, columns and returns get their type where they are born (a
+  sealed state, not flags beside an enum). A framework boolean or null that one decision reads goes
+  into that pure decision as a parameter; one that two or more classes read gets its type in
+  `SpringContextAdapter` or the adapter that owns the framework. Evidence: a `@Nullable` or
+  `Optional` on a member that is not the receiving line, or a one-use type for a framework
+  boolean.
 
 ## Calls and names
 - **C1** Does an argument hold more than a name or one short call?

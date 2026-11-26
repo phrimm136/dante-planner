@@ -7,6 +7,7 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -15,7 +16,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 import org.springframework.boot.convert.ApplicationConversionService;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -33,6 +34,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.fixture.restriction.DeclaredHandlersFixture;
@@ -228,8 +230,8 @@ class RestrictionTransactionHookTest {
         hook.beforeCommit(transaction(true));
 
         assertThat(RequestContextHolder.currentRequestAttributes()
-                .getAttributeNames(RequestAttributes.SCOPE_REQUEST))
-                .containsExactly(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
+                .getAttribute(RestrictionDuty.DUTY_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST))
+                .isEqualTo(new RestrictionDuty.CheckDue(PRINCIPAL));
     }
 
     @Test
@@ -237,6 +239,24 @@ class RestrictionTransactionHookTest {
         bindRequest("restricted", PRINCIPAL);
 
         assertThatCode(() -> hook(OnUndeclared.FAIL).beforeCommit(writeTransaction())).doesNotThrowAnyException();
+    }
+
+    @Test
+    void duty_WhenTheHandlerCarriesNeitherDeclaration_IsDischarged() {
+        assertThat(RestrictionDuty.of(handler("read"), new Viewer.Member(PRINCIPAL)))
+                .isEqualTo(new RestrictionDuty.Discharged());
+    }
+
+    @Test
+    void duty_WhenTheHandlerIsNotAHandlerMethod_IsDischarged() {
+        assertThat(RestrictionDuty.of(new ResourceHttpRequestHandler(), new Viewer.Member(PRINCIPAL)))
+                .isEqualTo(new RestrictionDuty.Discharged());
+    }
+
+    @Test
+    void duty_WhenAGuestReachesARestrictedHandler_IsDischarged() {
+        assertThat(RestrictionDuty.of(handler("restricted"), new Viewer.Guest()))
+                .isEqualTo(new RestrictionDuty.Discharged());
     }
 
     @Test
@@ -317,16 +337,19 @@ class RestrictionTransactionHookTest {
 
     private static void bindRequest(String handlerMethod, Long principal) {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        try {
-            request.setAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, new HandlerMethod(
-                    new DeclaredHandlersFixture(), DeclaredHandlersFixture.class.getMethod(handlerMethod)));
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         if (principal != null) {
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken(principal, null, List.of()));
+        }
+        new RestrictionDutyInterceptor().preHandle(request, new MockHttpServletResponse(), handler(handlerMethod));
+    }
+
+    private static HandlerMethod handler(String handlerMethod) {
+        try {
+            return new HandlerMethod(new DeclaredHandlersFixture(), DeclaredHandlersFixture.class.getMethod(handlerMethod));
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
         }
     }
 }

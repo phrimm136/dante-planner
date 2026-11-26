@@ -106,7 +106,7 @@ class CommentThreadNotFoundContractTest {
 
     @Test
     void getCommentTree_WhenStrangerReadsUnpublishedThread_MissesAsHiddenWithTheOwnersUserScope() {
-        assertThatThrownBy(() -> queryService.getCommentTree(plannerId, Viewer.of(STRANGER_ID)))
+        assertThatThrownBy(() -> queryService.getCommentTree(plannerId, new Viewer.Member(STRANGER_ID)))
                 .isInstanceOfSatisfying(PlannerNotFoundException.class, miss -> {
                     assertThat(miss.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
                     assertThat(miss.scopes()).containsExactlyInAnyOrder(
@@ -118,7 +118,7 @@ class CommentThreadNotFoundContractTest {
     void getCommentTree_WhenThePlannerRowIsAbsent_MissesAsAbsentWithThePlannerScopeOnly() {
         when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> queryService.getCommentTree(plannerId, Viewer.of(STRANGER_ID)))
+        assertThatThrownBy(() -> queryService.getCommentTree(plannerId, new Viewer.Member(STRANGER_ID)))
                 .isInstanceOfSatisfying(PlannerNotFoundException.class, miss -> {
                     assertThat(miss.miss()).isEqualTo(new PlannerMiss.Absent(plannerId));
                     assertThat(miss.scopes()).containsExactly(new FreshnessScope.Planner(plannerId));
@@ -129,7 +129,7 @@ class CommentThreadNotFoundContractTest {
     void getCommentTree_WhenOwnerReadsOwnThread_DeclaresThePlannerAndOwnerScopes() {
         when(commentRepository.findByPlannerId(plannerId)).thenReturn(List.of());
 
-        assertThat(queryService.getCommentTree(plannerId, Viewer.of(OWNER_ID)).scopes()).containsExactlyInAnyOrder(
+        assertThat(queryService.getCommentTree(plannerId, new Viewer.Member(OWNER_ID)).scopes()).containsExactlyInAnyOrder(
                 new FreshnessScope.Planner(plannerId), new FreshnessScope.User(OWNER_ID));
     }
 

@@ -19,5 +19,5 @@ org.danteplanner.backend.shared.ratelimit.RateLimitService.check(org.danteplanne
 org.danteplanner.backend.shared.ratelimit.RateLimitService.check(org.danteplanner.backend.shared.ratelimit.RateLimitPolicy, java.lang.String)
 org.danteplanner.backend.shared.ratelimit.RateLimitService.check(org.danteplanner.backend.shared.ratelimit.RateLimitPolicy, java.util.UUID)
 org.danteplanner.backend.shared.restriction.RestrictionCheckHandler.requireUnrestricted(java.lang.Long)
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.check(org.danteplanner.backend.shared.restriction.RestrictionTransactionHook$RequestState, java.lang.Long, org.springframework.transaction.TransactionExecution)
+org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.check(java.lang.Long, org.springframework.transaction.TransactionExecution)
 org.danteplanner.backend.user.validation.RoleChangeValidator.requireAnotherActiveAdministrator()

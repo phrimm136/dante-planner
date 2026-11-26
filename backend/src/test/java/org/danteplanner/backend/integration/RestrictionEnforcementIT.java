@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +35,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import tools.jackson.databind.ObjectMapper;
@@ -47,6 +47,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.shared.restriction.RestrictionDutyInterceptor;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
@@ -101,6 +102,9 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping handlerMapping;
+
+    @Autowired
+    private RestrictionDutyInterceptor restrictionDutyInterceptor;
 
     private User author;
     private Planner publishedPlanner;
@@ -486,7 +490,6 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
                 .findFirst()
                 .orElseThrow();
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
         RequestAttributes previousRequest = RequestContextHolder.getRequestAttributes();
         SecurityContext previousSecurity = SecurityContextHolder.getContext();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
@@ -494,6 +497,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         context.setAuthentication(new UsernamePasswordAuthenticationToken(principal.getId(), null, List.of()));
         SecurityContextHolder.setContext(context);
         try {
+            restrictionDutyInterceptor.preHandle(request, new MockHttpServletResponse(), handler);
             body.run();
             return null;
         } catch (RuntimeException failure) {
