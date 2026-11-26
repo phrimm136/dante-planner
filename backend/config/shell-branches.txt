@@ -1,6 +1,5 @@
-org.danteplanner.backend.auth.controller.AuthController.googleCallback(java.lang.String, java.lang.String, java.lang.String, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 2
+org.danteplanner.backend.auth.controller.AuthController.googleCallback(java.lang.String, java.lang.String, java.lang.String, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.auth.oauth.GoogleIdTokenVerifier.<init>(org.danteplanner.backend.shared.config.OAuthProperties, org.springframework.web.client.RestOperations) # 1
-org.danteplanner.backend.auth.oauth.OAuthStateService.open(java.lang.String) # 3
 org.danteplanner.backend.auth.security.JwtAuthenticationFilter.shouldNotFilter(jakarta.servlet.http.HttpServletRequest) # 1
 org.danteplanner.backend.auth.token.JwtTokenService.generateRefreshToken(java.lang.Long, java.lang.String, java.lang.String) # 1
 org.danteplanner.backend.auth.token.TokenBlacklistService.blacklistToken(java.lang.String, java.util.Date) # 1
@@ -116,7 +115,6 @@ org.danteplanner.backend.shared.util.CookieUtils.getCookieValue(jakarta.servlet.
 org.danteplanner.backend.shared.util.HtmlSanitizer.sanitize(java.lang.String) # 2
 org.danteplanner.backend.user.scheduler.UserCleanupScheduler.cleanupExpiredUsers() # 2
 org.danteplanner.backend.user.security.PrivilegedRouteRules.liveActorAtLeast(org.danteplanner.backend.user.api.UserRole) # 1
-org.danteplanner.backend.user.security.PrivilegedRouteRules.refusal(java.util.Optional, org.danteplanner.backend.user.api.UserRole, java.time.Clock) # 2
 org.danteplanner.backend.user.service.RandomUsernameGenerator.selectWeightedEpithet() # 1
 org.danteplanner.backend.user.service.UserAccountLifecycleService.performHardDelete(java.lang.Long, java.time.Instant) # 1
 org.danteplanner.backend.user.service.UserAccountLifecycleService.reactivateAccount(java.lang.Long) # 1

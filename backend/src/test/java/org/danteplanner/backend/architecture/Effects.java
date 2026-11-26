@@ -65,6 +65,16 @@ final class Effects {
             "org.springframework.security.core.Authentication.getCredentials",
             "org.springframework.security.core.Authentication.isAuthenticated");
 
+    private static final Set<String> PURE_DECRYPTION = Set.of(
+            "javax.crypto.Cipher.getInstance", "javax.crypto.Cipher.doFinal",
+            "javax.crypto.spec.GCMParameterSpec.<init>", "javax.crypto.spec.SecretKeySpec.<init>",
+            "javax.crypto.AEADBadTagException.<init>");
+
+    private static final String CIPHER_INIT = "javax.crypto.Cipher.init";
+
+    private static final List<String> CIPHER_INIT_WITH_GIVEN_PARAMETERS =
+            List.of("int", "java.security.Key", "java.security.spec.AlgorithmParameterSpec");
+
     private static final Set<String> EFFECTFUL_JDK = Set.of(
             "java.lang.Object.wait", "java.lang.Object.notify", "java.lang.Object.notifyAll",
             "java.lang.ThreadLocal.set", "java.lang.ThreadLocal.remove", "java.lang.ThreadLocal.get",
@@ -102,6 +112,11 @@ final class Effects {
     }
 
     static Map<String, List<String>> reachableFrom(JavaCodeUnit root, String within, Predicate<JavaCodeUnit> opaque) {
+        return reachableFrom(root, within, opaque, call -> false);
+    }
+
+    static Map<String, List<String>> reachableFrom(JavaCodeUnit root, String within, Predicate<JavaCodeUnit> opaque,
+            Predicate<JavaAccess<?>> permitted) {
         Map<String, List<String>> effects = new LinkedHashMap<>();
         Map<String, List<String>> chainTo = new HashMap<>();
         Deque<JavaCodeUnit> pending = new ArrayDeque<>();
@@ -114,6 +129,9 @@ final class Effects {
             collectFieldEffects(unit, within, chain, effects);
 
             for (JavaAccess<?> call : callsFrom(unit)) {
+                if (permitted.test(call)) {
+                    continue;
+                }
                 String owner = call.getTargetOwner().getFullName();
                 if (owner.startsWith(within)) {
                     if (isLocalFunction(call)) {
@@ -138,12 +156,20 @@ final class Effects {
                     effects.putIfAbsent("jdk " + target, chain);
                 } else if (owner.startsWith("org.slf4j.")) {
                     effects.putIfAbsent("log", chain);
-                } else if (!isPureOwner(owner) && !PURE_METHODS.contains(target)) {
+                } else if (!isPureOwner(owner) && !PURE_METHODS.contains(target) && !isDecryption(call, target)) {
                     effects.putIfAbsent("external " + target, chain);
                 }
             }
         }
         return effects;
+    }
+
+    private static boolean isDecryption(JavaAccess<?> call, String target) {
+        return PURE_DECRYPTION.contains(target)
+                || target.equals(CIPHER_INIT)
+                        && call.getTarget() instanceof AccessTarget.CodeUnitAccessTarget init
+                        && init.getRawParameterTypes().stream().map(JavaClass::getName).toList()
+                                .equals(CIPHER_INIT_WITH_GIVEN_PARAMETERS);
     }
 
     private static boolean isPureOwner(String owner) {

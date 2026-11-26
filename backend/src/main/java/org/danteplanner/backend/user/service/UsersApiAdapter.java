@@ -1,6 +1,7 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserRole;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class UsersApiAdapter implements Users {
     }
 
     @Override
-    public Optional<UserSummary> findActiveById(Long userId) {
+    public Option<UserSummary> findActiveById(Long userId) {
         return userService.findActiveById(userId).value().map(UsersApiAdapter::toSummary);
     }
 
@@ -50,12 +50,12 @@ public class UsersApiAdapter implements Users {
     }
 
     @Override
-    public Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
+    public Option<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
         return userService.findByProvider(providerType, providerId).value().map(UsersApiAdapter::toSummary);
     }
 
     @Override
-    public Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
+    public Option<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
         return userService.findActiveByProvider(providerType, providerId).value().map(UsersApiAdapter::toSummary);
     }
 
@@ -67,11 +67,6 @@ public class UsersApiAdapter implements Users {
     @Override
     public UserResponse describeById(Long id) {
         return userService.describe(id).value();
-    }
-
-    @Override
-    public Optional<UserSummary> findActiveBySuffix(String usernameSuffix) {
-        return userService.findActiveBySuffix(usernameSuffix).map(UsersApiAdapter::toSummary);
     }
 
     @Override
@@ -95,7 +90,7 @@ public class UsersApiAdapter implements Users {
     }
 
     @Override
-    public Optional<UserSummary> findOptionalById(Long id) {
+    public Option<UserSummary> findOptionalById(Long id) {
         return userService.findOptionalById(id).map(UsersApiAdapter::toSummary);
     }
 

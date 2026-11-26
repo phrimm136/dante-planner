@@ -7,7 +7,6 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.token.AesGcmCipher;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * <p>The scratchpad is <b>encrypt-then-sign</b>: the {@code {state, codeVerifier}} JSON is
@@ -31,7 +29,6 @@ import java.util.Optional;
  * {@link #open} fails closed on any signature, expiry, or decryption error.</p>
  */
 @Service
-@Slf4j
 public class OAuthStateService {
 
     public static final int OAUTH_TX_EXPIRY_SECONDS = 90;
@@ -56,6 +53,18 @@ public class OAuthStateService {
     private final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
 
     public record OAuthTransaction(String state, String codeVerifier, String returnTo) {
+    }
+
+    public sealed interface OAuthStateCheck {
+
+        record Opened(OAuthTransaction transaction) implements OAuthStateCheck {
+        }
+
+        record Missing() implements OAuthStateCheck {
+        }
+
+        record Rejected(String failure, String detail) implements OAuthStateCheck {
+        }
     }
 
     public OAuthStateService(
@@ -108,22 +117,21 @@ public class OAuthStateService {
         }
     }
 
-    public Optional<OAuthTransaction> open(String tokenValue) {
+    public OAuthStateCheck open(String tokenValue) {
         if (tokenValue == null || tokenValue.isBlank()) {
-            return Optional.empty();
+            return new OAuthStateCheck.Missing();
         }
         try {
             Claims claims = jwtParser.parseSignedClaims(tokenValue).getPayload();
             String txClaim = claims.get(CLAIM_TX, String.class);
             if (txClaim == null) {
-                return Optional.empty();
+                return new OAuthStateCheck.Missing();
             }
             byte[] encrypted = urlDecoder.decode(txClaim);
             byte[] json = aesGcmCipher.decrypt(encryptionKey, encrypted);
-            return Optional.of(objectMapper.readValue(json, OAuthTransaction.class));
+            return new OAuthStateCheck.Opened(objectMapper.readValue(json, OAuthTransaction.class));
         } catch (JwtException | GeneralSecurityException | JacksonException | IllegalArgumentException e) {
-            log.warn("oauth_tx open rejected [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
-            return Optional.empty();
+            return new OAuthStateCheck.Rejected(e.getClass().getSimpleName(), String.valueOf(e.getMessage()));
         }
     }
 

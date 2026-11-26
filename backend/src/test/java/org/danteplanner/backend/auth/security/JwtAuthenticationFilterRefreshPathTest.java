@@ -4,13 +4,13 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.servlet.http.Cookie;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RevocationOutcome;
@@ -78,7 +78,7 @@ class JwtAuthenticationFilterRefreshPathTest {
 
     private final FakeUsers users = new FakeUsers() {
         @Override
-        public Optional<UserSummary> findActiveById(Long userId) {
+        public Option<UserSummary> findActiveById(Long userId) {
             fetches.add("user");
             return super.findActiveById(userId);
         }

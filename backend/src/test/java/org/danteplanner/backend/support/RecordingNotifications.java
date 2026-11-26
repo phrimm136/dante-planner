@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.notification.api.NotificationEventPayload;
 import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.NotificationType;
@@ -101,7 +103,7 @@ public class RecordingNotifications implements Notifications {
     private NotificationOutcome raise(Notification notification) {
         DedupKey key = new DedupKey(notification.getUserId(), notification.getContentId(),
                 notification.getNotificationType());
-        if (users.findActiveById(key.userId()).isEmpty() || !raised.add(key)) {
+        if (users.findActiveById(key.userId()) instanceof Option.None<UserSummary> || !raised.add(key)) {
             return new NotificationOutcome.Suppressed(key.userId(), key.contentId(), key.type());
         }
         return new NotificationOutcome.Delivered(notification.getUserId(), new NotificationEventPayload(

@@ -3,15 +3,24 @@ package org.danteplanner.backend.architecture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
 
+import com.tngtech.archunit.core.domain.AccessTarget;
+import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
@@ -27,6 +36,7 @@ import com.tngtech.archunit.thirdparty.org.objectweb.asm.MethodVisitor;
 import com.tngtech.archunit.thirdparty.org.objectweb.asm.Opcodes;
 import com.tngtech.archunit.thirdparty.org.objectweb.asm.Type;
 
+import org.danteplanner.backend.shared.failure.ReadResult;
 import org.danteplanner.backend.shared.security.SpringContextAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +54,27 @@ class DecisionPurityTest {
     private static final String OUTCOME_SUFFIX = "Outcome";
 
     private static final Set<String> CONTEXT_READS = Set.of("viewer", "requestValue", "transactionScope");
+
+    private static final Pattern DERIVED_READ = Pattern.compile("(find|read|get|query|search|stream|count|exists)([A-Z].*)?");
+
+    private static final Pattern LOCKING_SQL =
+            Pattern.compile("(?i)\\bFOR\\s+(UPDATE|SHARE)\\b|\\bLOCK\\s+IN\\s+SHARE\\s+MODE\\b");
+
+    private static final Pattern RESULT_SET_READ = Pattern.compile("get.*|next|wasNull");
+
+    private static final Set<String> JDBC_TEMPLATES = Set.of(
+            "org.springframework.jdbc.core.JdbcTemplate",
+            "org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate");
+
+    private static final String READ_RESULT_FIXTURE_PACKAGE = "org.danteplanner.fixture.readresult";
+
+    private static final JavaClasses READ_RESULT_FIXTURE_CLASSES =
+            new ClassFileImporter().importPackages(READ_RESULT_FIXTURE_PACKAGE);
+
+    private static final String DECRYPTION_FIXTURE_PACKAGE = "org.danteplanner.fixture.decryption";
+
+    private static final JavaClasses DECRYPTION_FIXTURE_CLASSES =
+            new ClassFileImporter().importPackages(DECRYPTION_FIXTURE_PACKAGE);
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
@@ -212,6 +243,65 @@ class DecisionPurityTest {
     }
 
     @Test
+    void readResultLookup_WhenItOnlyReadsARepositoryOrJdbc_IsAllowed() {
+        assertThat(offendersIn(READ_RESULT_FIXTURE_CLASSES, READ_RESULT_FIXTURE_PACKAGE))
+                .doesNotContainKeys("MarkedReader.lookup", "MarkedJdbcReader.lookup");
+    }
+
+    @Test
+    void readResultLookup_WhenItAlsoWritesOrLogs_IsNamedWithTheEffect() {
+        assertThat(offendersIn(READ_RESULT_FIXTURE_CLASSES, READ_RESULT_FIXTURE_PACKAGE))
+                .containsEntry("MarkedWriter.lookup", Set.of("port ReadResultRepository.save"))
+                .containsEntry("MarkedLogger.lookup", Set.of("log"))
+                .containsEntry("MarkedModifier.lookup", Set.of("port ReadResultRepository.findAndTouch"))
+                .containsEntry("MarkedJdbcWriter.lookup",
+                        Set.of("external org.springframework.jdbc.core.JdbcTemplate.update"));
+    }
+
+    @Test
+    void optionLookup_WhenItOnlyReadsARepository_IsAllowedButAWriteOrALogIsNamed() {
+        assertThat(offendersIn(READ_RESULT_FIXTURE_CLASSES, PROJECT))
+                .doesNotContainKey("OptionReader.lookup")
+                .containsEntry("OptionWriter.lookup", Set.of("port ReadResultRepository.save"))
+                .containsEntry("OptionLogger.lookup", Set.of("log"));
+    }
+
+    @Test
+    void repositoryCall_WhenItIsAPlainQuery_IsARead() {
+        assertThat(offendersIn(READ_RESULT_FIXTURE_CLASSES, PROJECT)).doesNotContainKey("QueryReader.lookup");
+    }
+
+    @Test
+    void repositoryCall_WhenAFindNamedDefaultFragmentOrQueryWritesLocksOrDeletes_IsNamed() {
+        assertThat(offendersIn(READ_RESULT_FIXTURE_CLASSES, PROJECT))
+                .containsEntry("DefaultMethodWriter.lookup", Set.of("port ReadResultRepository.save"))
+                .containsEntry("ForUpdateReader.lookup", Set.of("port ReadResultRepository.findLockedByName"))
+                .containsEntry("LockAnnotatedReader.lookup", Set.of("port ReadResultRepository.findWithLockByName"))
+                .containsEntry("DerivedDeleter.lookup", Set.of("port ReadResultRepository.deleteByName"))
+                .containsEntry("FragmentWriter.lookup", Set.of("port ReadResultRepository.save"));
+    }
+
+    @Test
+    void unmarkedSealedLookup_WhenItReadsARepository_IsStillNamed() {
+        assertThat(offendersIn(READ_RESULT_FIXTURE_CLASSES, READ_RESULT_FIXTURE_PACKAGE))
+                .containsEntry("UnmarkedReader.lookup", Set.of("port ReadResultRepository.findByName"));
+    }
+
+    @Test
+    void decryption_WhenADecisionOnlyDecryptsWithAGivenIv_IsPure() {
+        assertThat(offendersIn(DECRYPTION_FIXTURE_CLASSES, DECRYPTION_FIXTURE_PACKAGE))
+                .doesNotContainKey("Decrypter.decide");
+    }
+
+    @Test
+    void randomness_WhenADecisionDrawsAnIvOrLetsTheCipherDrawIt_IsNamed() {
+        assertThat(offendersIn(DECRYPTION_FIXTURE_CLASSES, DECRYPTION_FIXTURE_PACKAGE))
+                .containsEntry("RandomDrawer.decide",
+                        Set.of("external java.security.SecureRandom.<init>", "external java.security.SecureRandom.nextBytes"))
+                .containsEntry("IvDrawingEncrypter.decide", Set.of("external javax.crypto.Cipher.init"));
+    }
+
+    @Test
     void unpairedOutcome_WhenTheRuleRunsOverTheFixture_IsNamedEitherWay() {
         assertThat(unpairedIn(FIXTURE_CLASSES, FIXTURE_PACKAGE))
                 .containsExactly("BarOutcome", "Baz");
@@ -225,7 +315,7 @@ class DecisionPurityTest {
                     continue;
                 }
                 Map<String, List<String>> effects = Effects.reachableFrom(method, within,
-                        unit -> isAccessor(unit) || isContextRead(unit));
+                        unit -> isAccessor(unit) || isContextRead(unit), permittedFor(method));
                 if (!effects.isEmpty()) {
                     offenders.computeIfAbsent(clazz.getSimpleName() + "." + method.getName(), key -> new TreeSet<>())
                             .addAll(effects.keySet());
@@ -245,6 +335,35 @@ class DecisionPurityTest {
         return returned.getPackageName().startsWith(within)
                 && (returned.isEnum() || returned.reflect().isSealed())
                 && !isCommandOutcome(returned);
+    }
+
+    private static Predicate<JavaAccess<?>> permittedFor(JavaMethod method) {
+        return method.getRawReturnType().isAnnotatedWith(ReadResult.class)
+                ? DecisionPurityTest::isRead
+                : call -> false;
+    }
+
+    private static boolean isRead(JavaAccess<?> call) {
+        JavaClass owner = call.getTargetOwner();
+        if (JDBC_TEMPLATES.contains(owner.getFullName())) {
+            return call.getName().startsWith("query");
+        }
+        if (owner.isAssignableTo(ResultSet.class)) {
+            return RESULT_SET_READ.matcher(call.getName()).matches();
+        }
+        return owner.isAssignableTo(Repository.class)
+                && call.getTarget() instanceof AccessTarget.CodeUnitAccessTarget target
+                && target.resolveMember().filter(DecisionPurityTest::isQueryRead).isPresent();
+    }
+
+    private static boolean isQueryRead(JavaCodeUnit method) {
+        if (!method.getModifiers().contains(JavaModifier.ABSTRACT) || !method.getOwner().isAssignableTo(Repository.class)
+                || method.isAnnotatedWith(Modifying.class) || method.isAnnotatedWith(Lock.class)) {
+            return false;
+        }
+        return method.tryGetAnnotationOfType(Query.class)
+                .map(query -> !LOCKING_SQL.matcher(query.value()).find())
+                .orElseGet(() -> DERIVED_READ.matcher(method.getName()).matches());
     }
 
     private static boolean isCommandOutcome(JavaClass type) {

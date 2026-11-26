@@ -11,9 +11,8 @@ import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
 import org.danteplanner.backend.auth.token.TokenGenerator;
+import org.danteplanner.backend.shared.failure.Option;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * Opening a session against an OAuth provider, and reading the user it belongs to.
@@ -53,12 +52,12 @@ public class AuthenticationService {
         record Create() implements AccountCheck {
         }
 
-        static AccountCheck ofActive(Optional<UserSummary> active) {
-            return active.<AccountCheck>map(SignIn::new).orElseGet(NeedAnyAccount::new);
+        static AccountCheck ofActive(Option<UserSummary> active) {
+            return active.fold(SignIn::new, NeedAnyAccount::new);
         }
 
-        static AccountCheck ofAny(Optional<UserSummary> any) {
-            return any.map(AccountCheck::ofExisting).orElseGet(Create::new);
+        static AccountCheck ofAny(Option<UserSummary> any) {
+            return any.fold(AccountCheck::ofExisting, Create::new);
         }
 
         private static AccountCheck ofExisting(UserSummary user) {
