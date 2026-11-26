@@ -2,7 +2,7 @@
 epic: none · pr: none · supersedes: 011 @edge @traefik
 
 ## Decisions
-- @edge @gateway @backend — The backend HTTPRoute removes the `Accept-Language` request header before it reaches Spring, because the backend reads no request locale and Tomcat 11 rejects a request whose header lists more than ten locales: Spring's `RequestContextFilter` parses the locale on every request, so such a client failed every API call, with 500 when signed in and 401 from the secured error path when not. Re-check: `rg -n 'getLocale|LocaleContextHolder|LocaleResolver|MessageSource|Accept-Language' backend/src/main` finds nothing.
+- @edge @gateway @backend — The backend HTTPRoute removes the `Accept-Language` request header before it reaches Spring, because the backend reads no request locale and Tomcat 11 rejects a request whose header lists more than ten locales: Spring's `RequestContextFilter` parses the locale on every request, so such a client failed every API call, with 500 when signed in and 401 from the secured error path when not. Re-check [absent]: `rg -n 'getLocale|LocaleContextHolder|LocaleResolver|MessageSource|Accept-Language' backend/src/main` finds nothing.
   REJECTED: raising the connector's `maxLocaleCount` — it keeps parsing an input nothing reads, and widens a limit Tomcat added against denial of service.
   REJECTED: truncating the header in a servlet filter — code to trim a value nothing reads, and it must run before `RequestContextFilter`; Gateway API can set or remove a header but not trim it.
   INVARIANT: no request through the backend route carries `Accept-Language` to the backend — the route's RequestHeaderModifier filter, enforced by the PR Gate edge behavior test that serves the rendered routes through Traefik to a header-echo backend.

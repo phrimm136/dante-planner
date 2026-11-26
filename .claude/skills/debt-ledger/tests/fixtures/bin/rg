@@ -1,0 +1,5 @@
+#!/bin/sh
+case "$*" in
+  *fixture-token-match*) exit 0 ;;
+  *) exit 1 ;;
+esac

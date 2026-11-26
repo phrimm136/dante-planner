@@ -42,6 +42,9 @@ epic: <id> · pr: <id> · supersedes: NNN @tag @tag
 `INVARIANT:` and `NON-GOAL:` lines are the decision's consequences; write every invariant and
 non-goal the decision settles, in the bullet it follows from.
 
+A `Re-check` line carries its kind: `Re-check [assert|absent|gh|prod-read|manual|prose]:`. The
+pre-commit hook refuses a line without a known kind or whose command is not allowed.
+
 `(taste)` is the only qualifier — it marks judgment without measurement. `REJECTED:` is required
 unless the bullet is forced (no alternative existed), a corollary of a sibling, or a summary of the
 file's other decisions.

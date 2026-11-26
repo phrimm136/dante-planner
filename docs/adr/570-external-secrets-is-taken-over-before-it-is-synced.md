@@ -2,7 +2,7 @@
 epic: none · pr: none
 
 ## Decisions
-- @deploy @eso @adoption — External Secrets is taken over by an Application with the chart version, release name, namespace and values the boot script installed, plus the scrape annotations the converger already writes. It enters without automated sync and without a finalizer, and gets both in a later change, after each region was synced by a person. The live objects already carry the label ArgoCD tracks by, so an Application with the finalizer owns them before any sync, and a revert of the first change would delete the operator. Re-check: `rg -n 'app.kubernetes.io/instance' deploy/README.md`.
+- @deploy @eso @adoption — External Secrets is taken over by an Application with the chart version, release name, namespace and values the boot script installed, plus the scrape annotations the converger already writes. It enters without automated sync and without a finalizer, and gets both in a later change, after each region was synced by a person. The live objects already carry the label ArgoCD tracks by, so an Application with the finalizer owns them before any sync, and a revert of the first change would delete the operator. Re-check [manual]: `rg -n 'app.kubernetes.io/instance' deploy/README.md`.
   REJECTED: automated sync from the start — the first apply would run in both regions at once and before anybody read the difference.
   REJECTED: deleting the operator and installing it again — every ExternalSecret stops refreshing meanwhile, and a Pod that starts then may find no Secret.
   REJECTED: raising the version in the same change — upstream supports one minor at a time, and a fault would have two possible causes.

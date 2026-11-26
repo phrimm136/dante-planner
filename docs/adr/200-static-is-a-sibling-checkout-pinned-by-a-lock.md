@@ -7,7 +7,7 @@ epic: none · pr: none · supersedes: none
   an untracked symlink at `<repo>/static`. The gitlink and `.gitmodules` are gone. With the
   submodule, every new worktree cloned the data afresh, the clone failed unless
   `protocol.file.allow=always` was passed, and a worktree whose gitlink moved was left on a stale
-  checkout (`git -C <worktree> submodule status` showed `-`/`+` prefixes). Re-check:
+  checkout (`git -C <worktree> submodule status` showed `-`/`+` prefixes). Re-check [manual]:
   `git ls-files -s static | wc -l` prints 0 and `test -L static` succeeds in any checkout.
   REJECTED: keeping the submodule and sharing its object store (`--reference`) — still one
   checkout per worktree and still the file-protocol clone.
@@ -22,7 +22,7 @@ epic: none · pr: none · supersedes: none
   sha with a version and the checkout with a fetched directory at the same seam.
 - @static @lock — The commit the code expects is one line in `static.lock` (a 40-hex sha of the
   data repository's `main`). A lock bump is a code commit, reviewed and gated like any other; CI
-  checks that sha out as a real directory at `./static` with the existing deploy key. Re-check:
+  checks that sha out as a real directory at `./static` with the existing deploy key. Re-check [manual]:
   `git -C ~/github/LimbusPlanner-static rev-parse HEAD` equals `cat static.lock` after
   `static sync`.
   REJECTED: tracking the data repository's `main` head in CI — a data push would change what a
@@ -31,7 +31,7 @@ epic: none · pr: none · supersedes: none
   lock as a backend, frontend and e2e path.
 - @static @image — The backend image takes its data from a named build context `static`
   (`COPY --from=static data /app/data`); a local build passes the symlink's target, CI passes the
-  checked-out directory. Re-check: `docker build` without `--build-context static=…` fails at
+  checked-out directory. Re-check [manual]: `docker build` without `--build-context static=…` fails at
   `COPY --from=static` trying to pull `docker.io/library/static`, so the build cannot silently
   ship an empty data directory.
   REJECTED: copying `static/data` from the main context — Docker does not follow a symlink
@@ -46,7 +46,7 @@ epic: none · pr: none · supersedes: none
   `frontend/scripts/fetch-static.sh`, which turns `static.lock` into a real directory at
   `<repo>/static` with a read-only token from the Pages environment, before the frontend build.
   Pages builds from its own git integration, so it has no data checkout, and without one the
-  build stops at the lock check. Re-check: in a checkout without `static`, `static check` exits 2
+  build stops at the lock check. Re-check [manual]: in a checkout without `static`, `static check` exits 2
   with `no data checkout at …/static`, and `vite build` fails with that line.
   REJECTED: a public data repository — the data repository stays private.
   REJECTED: moving the frontend deploy into the fleet deploy workflow now — that move belongs to

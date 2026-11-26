@@ -27,10 +27,11 @@ run_hook() {  # run_hook <config path>; sets rc
 }
 
 git init -q -b main "$R"
-mkdir -p "$TMP/home"
+mkdir -p "$TMP/home" "$R/.claude/skills/debt-ledger/bin"
+cp "$(dirname "$HOOK")/../.claude/skills/debt-ledger/bin/debt" "$R/.claude/skills/debt-ledger/bin/debt"
 printf '[profile prod]\nsso_session = s\nsso_account_id = %s\n' "$FAKE_ID" > "$CONFIG"
 printf 'first\n' > "$R/notes.txt"
-g add notes.txt
+g add notes.txt .claude
 g commit -q -m 'chore: root' --no-verify
 
 printf 'owner %s\n' "$FAKE_ID" >> "$R/notes.txt"
