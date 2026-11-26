@@ -18,10 +18,9 @@ class PlannerAggregateInsertsImpl implements PlannerAggregateInserts {
     }
 
     @Override
-    public void insertSatellites(PlannerContent content, PlannerPublication publication,
-            PlannerModeration moderation) {
+    public void insertSatellites(PlannerContent content) {
         contentRepository.insert(content);
-        publicationRepository.insert(publication);
-        moderationRepository.insert(moderation);
+        publicationRepository.insert(PlannerPublication.draft(content.getPlannerId()));
+        moderationRepository.insert(PlannerModeration.clear(content.getPlannerId()));
     }
 }

@@ -43,6 +43,7 @@ import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.SaveOutcome;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.shared.config.JpaAuditingConfig;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -105,6 +106,9 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private PlannerPublicationRepository publicationRepository;
 
     @Autowired
@@ -135,7 +139,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     void setUp() {
         clock.set(T);
         owner = TestDataFactory.createTestUser(userRepository, "audited@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
     }
 
     @Test

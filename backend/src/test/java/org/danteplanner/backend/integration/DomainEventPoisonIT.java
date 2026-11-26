@@ -2,13 +2,13 @@ package org.danteplanner.backend.integration;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.support.LogCapture;
@@ -49,7 +49,7 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -71,7 +71,7 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "poison-owner@example.com");
         commenter = TestDataFactory.createTestUser(userRepository, "poison-commenter@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
 
         alarms = LogCapture.onThisThread(DomainEventDispatcher.class);
     }

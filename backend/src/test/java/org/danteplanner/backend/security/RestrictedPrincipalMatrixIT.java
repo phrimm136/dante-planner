@@ -9,8 +9,8 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -117,7 +117,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
     private RequestMappingHandlerMapping handlerMapping;
 
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private JwtTokenService jwtTokenService;
 
     /**
@@ -174,7 +174,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
 
     private UUID publishedPlannerId() {
         User owner = TestDataFactory.createTestUser(userRepository, "matrix-owner@example.com");
-        return TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
+        return TestDataFactory.createTestPlanner(plannerSeeds, owner, true).id();
     }
 
     private MockHttpServletRequestBuilder request(Endpoint endpoint, String path, String body, Cookie principal) {

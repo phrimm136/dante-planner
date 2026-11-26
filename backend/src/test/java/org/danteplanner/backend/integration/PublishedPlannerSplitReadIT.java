@@ -18,7 +18,6 @@ import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.repository.ViewFlushBatchRepository;
@@ -27,6 +26,7 @@ import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.RedisViewRecorder;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -92,7 +92,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
 
     @Autowired
@@ -137,7 +137,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     void setUp() {
         owner = TestDataFactory.createTestUser(userRepository, "split-read-owner@example.com");
         viewer = TestDataFactory.createTestUser(userRepository, "split-read-viewer@example.com");
-        published = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        published = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
     }
 
     private Cookie authOf(User user) {
@@ -318,7 +318,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void splitEndpoints_WhenPlannerUnpublished_AnswerTheDetailReadNotFound() throws Exception {
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).id();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerSeeds, owner, false).id();
         String detail = "Planner not found with id: " + plannerId;
 
         mockMvc.perform(get("/api/planner/md/published/{id}", plannerId))

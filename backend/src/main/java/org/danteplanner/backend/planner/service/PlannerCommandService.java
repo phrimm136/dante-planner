@@ -16,8 +16,6 @@ import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.Publication;
@@ -367,9 +365,7 @@ public class PlannerCommandService {
                 clock.instant());
         plannerRepository.insertAggregate(
                 Planner.created(id, room.userId(), version.plannerType(), write.savedAt()),
-                PlannerContent.created(id, write),
-                PlannerPublication.draft(id),
-                PlannerModeration.clear(id));
+                PlannerContent.created(id, write));
         statsRepository.insert(PlannerStats.builder().plannerId(id).build());
         FreshnessDeclarations.declare(new FreshnessScope.Planner(id), new FreshnessScope.User(room.userId()));
         log.info("Created planner {} for user {}", id, room.userId());

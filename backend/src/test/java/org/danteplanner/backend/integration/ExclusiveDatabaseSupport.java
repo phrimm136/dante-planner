@@ -14,12 +14,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.support.PlannerSeeds;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import(TestConfig.class)
+@Import({TestConfig.class, PlannerSeeds.Config.class})
 @ResourceLock(ExclusiveDatabaseSupport.EXCLUSIVE_DATABASE)
 public abstract class ExclusiveDatabaseSupport {
 

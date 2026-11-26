@@ -32,11 +32,11 @@ import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -53,7 +53,7 @@ class CompositeIdIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerVoteRepository voteRepository;
@@ -82,7 +82,7 @@ class CompositeIdIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         User user = TestDataFactory.createTestUser(userRepository, "composite-id@example.com");
-        StoredPlanner planner = TestDataFactory.planner(user).published(true).save(plannerRepository);
+        StoredPlanner planner = TestDataFactory.planner(user).published(true).save(plannerSeeds);
         userId = user.getId();
         plannerId = planner.id();
     }

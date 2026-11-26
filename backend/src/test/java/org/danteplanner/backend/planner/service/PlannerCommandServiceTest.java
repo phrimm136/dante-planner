@@ -163,7 +163,7 @@ class PlannerCommandServiceTest {
 
     private PlannerContent insertedContent() {
         ArgumentCaptor<PlannerContent> content = ArgumentCaptor.forClass(PlannerContent.class);
-        verify(plannerRepository).insertAggregate(any(), content.capture(), any(), any());
+        verify(plannerRepository).insertAggregate(any(), content.capture());
         return content.getValue();
     }
 
@@ -229,7 +229,7 @@ class PlannerCommandServiceTest {
                     .withCode("PLANNER_LIMIT_EXCEEDED")
                     .satisfies(rejection -> assertThat(rejection.getMessage())
                             .contains(String.valueOf(MAX_PLANNERS_PER_USER)));
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
 
         @Test
@@ -246,7 +246,7 @@ class PlannerCommandServiceTest {
                                     .isEqualTo("User not found with id: " + nonExistentUserId);
                         assertThat(exception.getMessage()).contains(nonExistentUserId.toString());
                     });
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
 
         @Test
@@ -271,7 +271,7 @@ class PlannerCommandServiceTest {
             // Act & Assert
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, unknownIdentity))
                     .withViolation("UNKNOWN_IDENTITY");
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
 
         @Test
@@ -305,7 +305,7 @@ class PlannerCommandServiceTest {
                     .withViolation("INVALID_CONTENT_VERSION")
                     .isInstanceOfSatisfying(PlannerValidationException.class,
                             exception -> assertThat(exception.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
     }
 
@@ -481,7 +481,7 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.deletePlanner(testUser.getId(), plannerId))
                     .withCode("PLANNER_NOT_FOUND");
 
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
 
         @Test
@@ -551,7 +551,7 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
                     .withCode("PLANNER_LIMIT_EXCEEDED");
 
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
 
         @Test
@@ -565,7 +565,7 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
                     .withCode("PLANNER_LIMIT_EXCEEDED")
                     .satisfies(rejection -> assertThat(rejection.getMessage()).contains(String.valueOf(activeCount)));
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
     }
 
@@ -697,7 +697,7 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED))
                     .withCode("PLANNER_NOT_FOUND");
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
             verify(plannerRepository, never()).countActiveByUserId(any());
         }
 
@@ -711,7 +711,7 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, WriteMode.CHECKED))
                     .withCode("PLANNER_FORBIDDEN");
-            verify(plannerRepository, never()).insertAggregate(any(), any(), any(), any());
+            verify(plannerRepository, never()).insertAggregate(any(), any());
         }
 
         @Test

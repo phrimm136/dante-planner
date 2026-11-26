@@ -1,9 +1,9 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.entity.User;
@@ -48,7 +48,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerStatsRepository statsRepository;
@@ -161,7 +161,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         StoredPlanner published = TestDataFactory.planner(owner)
                 .title("Sweep Published")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder()
                 .plannerId(published.id()).viewCount(3).upvotes(1).build());
         TestDataFactory.addToCatalog(catalogService, published);
@@ -181,7 +181,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         // Draft planner with only aggregate rows
         StoredPlanner draft = TestDataFactory.planner(owner)
                 .title("Sweep Draft")
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(draft.id()).build());
 
         purgeOwner(owner.getId());
@@ -210,7 +210,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Vote Collision")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         Long collided = insertComment(thirdPartyPlanner.id(), other.getId());
         Long lone = insertComment(thirdPartyPlanner.id(), other.getId());
         insertCommentVote(UserAccountLifecycleService.SENTINEL_USER_ID, collided);
@@ -231,7 +231,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Voted")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         insertPlannerVote(owner.getId(), thirdPartyPlanner.id());
 
         purgeOwner(owner.getId());
@@ -250,7 +250,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Comment Content")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         Long ownComment = insertComment(thirdPartyPlanner.id(), owner.getId());
         Long thirdPartyComment = insertComment(thirdPartyPlanner.id(), other.getId());
 
@@ -274,7 +274,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Both Vote Tables")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         Long comment = insertComment(thirdPartyPlanner.id(), other.getId());
         insertPlannerVote(owner.getId(), thirdPartyPlanner.id());
         insertPlannerVote(other.getId(), thirdPartyPlanner.id());

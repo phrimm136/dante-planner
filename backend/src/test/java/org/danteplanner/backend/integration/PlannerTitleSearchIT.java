@@ -3,12 +3,12 @@ package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCatalogRepository catalogRepository;
@@ -88,7 +88,7 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
@@ -158,7 +158,7 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
                     .title("Recency " + i)
                     .published(true)
                     .firstPublishedAt(now.minus(3 - i, ChronoUnit.HOURS))
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
             statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
             TestDataFactory.addToCatalog(catalogService, planner);
         }

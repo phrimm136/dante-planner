@@ -30,6 +30,7 @@ import org.danteplanner.backend.support.PlannerContentRows;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,6 +89,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerContentRepository contentRepository;
@@ -152,7 +156,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         return TestDataFactory.planner(user)
                 .status(PlannerStatus.DRAFT)
                 .content(TestDataFactory.VALID_CONTENT)
-                .save(plannerRepository);
+                .save(plannerSeeds);
     }
 
     private StoredPlanner createPublishedPlanner(User user, String title, String category, int upvotes) {
@@ -162,7 +166,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 .status(PlannerStatus.SAVED)
                 .content(TestDataFactory.VALID_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder()
                 .plannerId(planner.id())
                 .upvotes(upvotes)
@@ -521,7 +525,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             StoredPlanner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.DRAFT)
                     .content(UNKNOWN_GIFT_CONTENT)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("10F").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.id()).with(withCsrf())
@@ -650,7 +654,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
                                     + "{\"themePackId\":\"1006\",\"difficulty\":1,\"giftIds\":[]},5"))
                     .published(true)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
             statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
             TestDataFactory.addToCatalog(catalogService, planner);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("15F").build();
@@ -946,7 +950,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .title("   ")
                     .status(PlannerStatus.DRAFT)
                     .content(TestDataFactory.VALID_CONTENT)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
 
             mockMvc.perform(post("/api/planner/md/{id}/publish", planner.id()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1263,7 +1267,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .status(PlannerStatus.SAVED)
                     .content(TestDataFactory.VALID_CONTENT)
                     .published(true)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
             statsRepository.save(PlannerStats.builder()
                     .plannerId(planner.id())
                     .viewCount(viewCount)

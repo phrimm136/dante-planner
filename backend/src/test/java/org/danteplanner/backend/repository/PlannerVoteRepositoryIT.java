@@ -2,7 +2,6 @@ package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
 import org.danteplanner.backend.config.TestConfig;
@@ -11,6 +10,7 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     private PlannerVoteRepository plannerVoteRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private UserRepository userRepository;
@@ -53,7 +53,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         testPlanner = TestDataFactory.planner(testUser)
                 .status(PlannerStatus.DRAFT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
     }
 
     @Test
@@ -116,7 +116,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
                 .category("10F")
                 .status(PlannerStatus.DRAFT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         // Act - User upvotes both planners
         PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP);

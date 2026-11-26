@@ -14,8 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -53,7 +53,7 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     private UUID publishedPlannerId;
 
@@ -62,7 +62,7 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
         User owner = TestDataFactory.createTestUser(userRepository, "sse-owner@example.com");
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         publishedPlannerId = planner.id();
     }
 

@@ -10,6 +10,7 @@ import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.TransactionSpans;
 import org.danteplanner.backend.support.TransactionSpans.Span;
@@ -64,6 +65,9 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private JwtTokenService jwtTokenService;
 
     @Autowired
@@ -83,7 +87,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     void setUp() {
         owner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
     }
 
 

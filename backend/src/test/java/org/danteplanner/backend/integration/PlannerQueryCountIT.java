@@ -2,6 +2,7 @@ package org.danteplanner.backend.integration;
 
 import javax.sql.DataSource;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.CatalogQuery.Shelf;
@@ -17,7 +18,6 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -86,7 +86,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
     private static final long THREAD_STATEMENTS = 4;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerVoteRepository plannerVoteRepository;
@@ -197,7 +197,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
     @Test
     void commentThread_WhenTheNumberOfCommentsVaries_IssuesFixedStatementCount() {
         User author = TestDataFactory.createTestUser(userRepository, "thread-author@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         comment(planner, author);
         long unusedWarmUp = measureThread(planner);
 
@@ -277,7 +277,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
             StoredPlanner planner = TestDataFactory.planner(author)
                     .title(SEARCH_MARKER + " planner")
                     .published(true)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
             TestDataFactory.addToCatalog(plannerCatalogService, planner);
             seededIds.add(planner.id());
 

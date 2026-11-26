@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -9,7 +10,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.scheduler.DomainEventRelay;
 import org.danteplanner.backend.support.SseTopicRecorder;
@@ -72,7 +72,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -96,7 +96,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
         recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "effect-owner@example.com");
         commenter = TestDataFactory.createTestUser(userRepository, "effect-commenter@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
     }
 
     @AfterEach

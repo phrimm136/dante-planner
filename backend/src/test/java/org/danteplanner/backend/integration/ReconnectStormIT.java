@@ -63,7 +63,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.PoolLedger;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.TimeoutHierarchy;
@@ -71,6 +70,7 @@ import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.RealClockBounds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -82,7 +82,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import(TestConfig.class)
+@Import({TestConfig.class, PlannerSeeds.Config.class})
 class ReconnectStormIT {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
@@ -152,7 +152,7 @@ class ReconnectStormIT {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -291,7 +291,7 @@ class ReconnectStormIT {
     private UUID seedCommentedPlanner() {
         User author = TestDataFactory.createTestUser(
                 userRepository, "storm-author-" + UUID.randomUUID() + "@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).id();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerSeeds, author, true).id();
         for (int i = 0; i < SEEDED_COMMENTS; i++) {
             StoredComments.save(commentRepository, PRIMARY_ADMIN,
                     new PlannerComment(plannerId, author.getId(), null, 0), "storm comment " + i);

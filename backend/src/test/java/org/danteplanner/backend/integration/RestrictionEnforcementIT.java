@@ -39,13 +39,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import tools.jackson.databind.ObjectMapper;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.shared.restriction.RestrictionDutyInterceptor;
 import org.danteplanner.backend.support.AuthCookies;
@@ -82,7 +82,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -113,7 +113,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         author = TestDataFactory.createTestUser(userRepository, "restriction-author@example.com");
-        publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        publishedPlanner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         comment = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                 publishedPlanner.id(), author.getId(), null, 0), "a comment to engage with");
     }
@@ -265,7 +265,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void joinRequests_WhenThePlannerIsMissingOrUnpublished_AnswerAsTheToggleDoes() throws Exception {
         User reader = reader();
-        UUID unpublished = TestDataFactory.createTestPlanner(plannerRepository, author, false).id();
+        UUID unpublished = TestDataFactory.createTestPlanner(plannerSeeds, author, false).id();
 
         for (UUID id : List.of(UUID.randomUUID(), unpublished)) {
             for (MockHttpServletRequestBuilder request : List.of(post("/api/planner/md/{id}/subscribe", id),
@@ -351,7 +351,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void deleteOwnPlanner_WhenBanned_Succeeds() throws Exception {
         User owner = reader();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         banned(owner);
 
         perform(delete("/api/planner/md/{id}", planner.id()), owner)
@@ -372,7 +372,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void unpublishOwnPlanner_WhenBanned_Succeeds() throws Exception {
         User owner = reader();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         banned(owner);
 
         perform(post("/api/planner/md/{id}/unpublish", planner.id()), owner)
@@ -415,7 +415,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void upsertPublishedPlanner_WhenBannedWithAStaleSyncVersion_Returns403NotTheConflict() throws Exception {
         User owner = reader();
-        StoredPlanner planner = TestDataFactory.planner(owner).published(true).syncVersion(3L).save(plannerRepository);
+        StoredPlanner planner = TestDataFactory.planner(owner).published(true).syncVersion(3L).save(plannerSeeds);
         String stale = json(UpsertRequests.resending(planner).title("Renamed").syncVersion(1L).build());
 
         perform(put("/api/planner/md/{id}", planner.id()).content(stale), owner)
@@ -430,7 +430,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void upsertPrivatePlanner_WhenBanned_Saves() throws Exception {
         User owner = reader();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         banned(owner);
 
         perform(put("/api/planner/md/{id}", planner.id())
@@ -457,7 +457,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void restrictedRequest_WhenItRunsTwoWriteTransactions_ChecksOnlyTheFirst() {
         User reader = reader();
-        StoredPlanner second = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner second = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         TransactionTemplate writes = new TransactionTemplate(transactionManager);
 
         Throwable failure = withinRequest("createComment", reader, () -> {

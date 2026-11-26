@@ -7,7 +7,9 @@ import java.sql.Statement;
 import java.util.Map;
 
 import org.danteplanner.backend.support.GoogleStub;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.mysql.MySQLContainer;
@@ -29,6 +31,7 @@ import org.testcontainers.mysql.MySQLContainer;
  * test JVM ends, making durability worthless.</p>
  */
 @AutoConfigureMockMvc
+@Import(PlannerSeeds.Config.class)
 public abstract class SharedMySqlContainerSupport {
 
     static final String MYSQL_IMAGE = "mysql:8.4.11";

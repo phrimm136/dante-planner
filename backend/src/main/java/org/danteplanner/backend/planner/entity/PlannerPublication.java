@@ -37,16 +37,13 @@ public class PlannerPublication implements Persistable<UUID> {
     @Column(name = "owner_notifications_enabled", nullable = false)
     private boolean ownerNotificationsEnabled;
 
-    public PlannerPublication(UUID plannerId, boolean published, @Nullable Instant firstPublishedAt,
-            boolean ownerNotificationsEnabled) {
+    private PlannerPublication(UUID plannerId) {
         this.plannerId = plannerId;
-        this.published = published;
-        this.firstPublishedAt = firstPublishedAt;
-        this.ownerNotificationsEnabled = ownerNotificationsEnabled;
+        this.ownerNotificationsEnabled = true;
     }
 
     public static PlannerPublication draft(UUID plannerId) {
-        return new PlannerPublication(plannerId, false, null, true);
+        return new PlannerPublication(plannerId);
     }
 
     @Transient

@@ -13,6 +13,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,9 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private ModerationActionRepository moderationActionRepository;
@@ -110,7 +114,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void publish_WhenOwnerBanned_Returns403() throws Exception {
         // Arrange - create planner first (before ban)
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, false);
         UUID plannerId = planner.id();
 
         // Ban the user
@@ -131,7 +135,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void createComment_WhenAuthorBanned_Returns403() throws Exception {
         // Arrange - create published planner
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, true);
 
         // Ban the user
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Spam");
@@ -276,7 +280,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     void publish_WhenOwnerBannedAndTimedOut_IsRefusedByTheBanUntilItIsLifted() throws Exception {
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, false);
         userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
 

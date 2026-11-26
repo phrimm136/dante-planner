@@ -17,6 +17,7 @@ import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerStatsRepository statsRepository;
@@ -94,7 +95,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     @BeforeEach
     void setUp() {
         owner = TestDataFactory.createTestUser(userRepository, "deactivated-owner@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
     }
@@ -212,7 +213,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     @Test
     void lockContentOwnedBy_WhenExplained_ReadsTheOwnersPlannersThroughTheUserIndex() throws Exception {
-        TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         String sql = PlannerRepository.class.getMethod("lockContentOwnedBy", Long.class)
                 .getAnnotation(Query.class).value()
                 .replace(":userId", String.valueOf(owner.getId()));
@@ -240,7 +241,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     }
 
     private void assertRaceNeverLeavesAPublishedPlannerVisible(String holderLock, Object holderKey) throws Exception {
-        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         new TransactionTemplate(transactionManager).executeWithoutResult(status ->
                 subscriptionRepository.insertIfAbsent(owner.getId(), draft.id(), Instant.now()));
         CompletableFuture<Void> deactivation;
@@ -299,7 +300,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     @Test
     void publish_WhenOwnerDeactivated_IsRejected() {
-        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         lifecycleService.deleteAccount(owner.getId());
 
         assertRejected(() -> publishingService.publish(owner.getId(), draft.id()))

@@ -6,8 +6,6 @@ import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -105,10 +103,9 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID>, Planner
     @Query("SELECT p.id FROM Planner p WHERE p.userId = :userId")
     List<UUID> findIdsByUserId(@Param("userId") Long userId);
 
-    default void insertAggregate(Planner planner, PlannerContent content, PlannerPublication publication,
-            PlannerModeration moderation) {
+    default void insertAggregate(Planner planner, PlannerContent content) {
         save(planner);
-        insertSatellites(content, publication, moderation);
+        insertSatellites(content);
     }
 
     @Query(value = "SELECT COUNT(*) FROM planner_content WHERE planner_id = :plannerId FOR UPDATE",

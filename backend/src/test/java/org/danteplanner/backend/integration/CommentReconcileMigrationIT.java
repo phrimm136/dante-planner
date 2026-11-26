@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -53,7 +53,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private CommentCommandService commandService;
     @Autowired private DataSource dataSource;
 
@@ -66,7 +66,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
         jdbc = new JdbcTemplate(dataSource);
         emptyPlannerTables(jdbc);
         author = TestDataFactory.createTestUser(userRepository, "reconcile-author@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
     }
 
     @AfterEach
@@ -170,11 +170,11 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Test
     void migration_WhenCommentCountsDrifted_RecountsThemAndWritesNoCorrectRow() {
-        StoredPlanner high = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        StoredPlanner empty = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        StoredPlanner correct = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        StoredPlanner correctlyZero = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        StoredPlanner withoutStats = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner high = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
+        StoredPlanner empty = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
+        StoredPlanner correct = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
+        StoredPlanner correctlyZero = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
+        StoredPlanner withoutStats = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         splitRow(author.getId(), "low");
         commentOn(high);
         Long deleted = commentOn(high);
@@ -200,7 +200,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Test
     void migration_WhenACommentArrivesBetweenTheReadAndTheCorrection_SkipsThatPlannerAndCorrectsTheOthers() {
-        StoredPlanner other = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner other = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         splitRow(author.getId(), "text");
         commentOn(other);
         storeCount(planner, 5);
@@ -258,7 +258,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
     void migration_WhenASessionHoldsRowsItHasNoReasonToChange_FinishesWithoutWaiting() {
         Long held = splitRow(author.getId(), "live");
         Long erased = splitRow(SENTINEL_USER_ID, "erased");
-        StoredPlanner drifted = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner drifted = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         storeCount(planner, 2);
         storeCount(drifted, 4);
 
@@ -277,7 +277,7 @@ class CommentReconcileMigrationIT extends ExclusiveDatabaseSupport {
 
     @Test
     void migration_WhenALaterRowIsHeld_HasCommittedTheEarlierOnesAndTheNextRunFinishes() {
-        StoredPlanner other = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner other = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         storeCount(planner, 5);
         storeCount(other, 5);
         List<UUID> inMigrationOrder = jdbc.queryForList("SELECT BIN_TO_UUID(planner_id) FROM planner_stats "

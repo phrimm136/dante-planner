@@ -8,13 +8,13 @@ import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCatalogRepository catalogRepository;
@@ -88,7 +88,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     }
 
     private StoredPlanner draft() {
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         return planner;
     }

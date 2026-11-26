@@ -8,8 +8,8 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.util.PlannerConstants;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -59,7 +59,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
 
     @Autowired
@@ -81,11 +81,11 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
         User stranger = TestDataFactory.createTestUser(userRepository, "batch-stranger@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
 
-        owned = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        ownedToo = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        deleted = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        owned = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
+        ownedToo = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
+        deleted = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         PlannerContentRows.markDeleted(jdbcTemplate, deleted.id());
-        foreign = TestDataFactory.createTestPlanner(plannerRepository, stranger, false);
+        foreign = TestDataFactory.createTestPlanner(plannerSeeds, stranger, false);
     }
 
     private ResultActions pull(List<UUID> ids) throws Exception {

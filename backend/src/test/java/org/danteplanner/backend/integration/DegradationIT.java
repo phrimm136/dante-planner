@@ -21,7 +21,6 @@ import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.ratelimit.ChargeKey;
@@ -31,6 +30,7 @@ import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -108,7 +108,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, DegradationIT.HarnessDataSourceConfig.class})
+@Import({TestConfig.class, PlannerSeeds.Config.class, DegradationIT.HarnessDataSourceConfig.class})
 class DegradationIT {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
@@ -253,7 +253,7 @@ class DegradationIT {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -641,7 +641,7 @@ class DegradationIT {
     void viewCount_WhenAuthRedisUnreachable_Returns204AndCountsTheFailure() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-views-" + UUID.randomUUID() + "@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).id();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerSeeds, author, true).id();
         new ReplicationControl(degradationPrimaryJdbcTemplate, degradationReplicaJdbcTemplate)
                 .awaitCaughtUp();
         double before = viewRecordFailedCount();

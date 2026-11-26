@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -31,7 +32,6 @@ import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
@@ -68,7 +68,7 @@ class ModerationAuditMatrixIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -112,7 +112,7 @@ class ModerationAuditMatrixIT extends SharedMySqlContainerSupport {
         User actor = TestDataFactory.createAdmin(userRepository, "audit-matrix-admin@example.com");
         User moderator = TestDataFactory.createModerator(userRepository, "audit-matrix-mod@example.com");
         User member = TestDataFactory.createTestUser(userRepository, "audit-matrix-member@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, member, true).id();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerSeeds, member, true).id();
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate, new PlannerComment(plannerId, member.getId(), null, 0), "text");
         return new Scene(actor, moderator, member, plannerId, comment.getId());
     }

@@ -31,15 +31,15 @@ final class FixtureConstructionRule {
                     .that().resideOutsideOfPackage(SUPPORT)
                     .should(constructNoFixtureByHand())
                     .as("no test outside " + SUPPORT + " calls User.builder(), Planner.created(),"
-                            + " PlannerContent.created() or a constructor of User, StoredPlanner, PlannerPublication,"
-                            + " PlannerModeration or UpsertPlannerRequest; fixtures come from TestDataFactory,"
-                            + " PlannerRows and UpsertRequests");
+                            + " PlannerContent.created(), PlannerPublication.draft(), PlannerModeration.clear()"
+                            + " or a constructor of User, StoredPlanner or UpsertPlannerRequest; fixtures come from"
+                            + " TestDataFactory, PlannerRows and UpsertRequests");
 
     private static final Map<String, String> FACTORY_CALLS =
             Map.of(User.class.getName(), "builder", Planner.class.getName(), "created",
-                    PlannerContent.class.getName(), "created");
+                    PlannerContent.class.getName(), "created", PlannerPublication.class.getName(), "draft",
+                    PlannerModeration.class.getName(), "clear");
     private static final Set<String> CONSTRUCTED_TYPES = Set.of(User.class.getName(), StoredPlanner.class.getName(),
-            PlannerPublication.class.getName(), PlannerModeration.class.getName(),
             UpsertPlannerRequest.class.getName());
 
     private FixtureConstructionRule() {

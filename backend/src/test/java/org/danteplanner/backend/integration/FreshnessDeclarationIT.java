@@ -36,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -45,7 +46,6 @@ import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
@@ -129,7 +129,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     private DispatchStamp dispatchStamp;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -655,7 +655,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     void dispatch_WhenACommentOnAnotherUsersPlannerIsDispatchedInAWindow_RaisesTheOwnerAndThePlannerToTheDispatchCommit() {
         Session owner = session("freshness-dispatch-owner");
         Session commenter = session("freshness-dispatch-commenter");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner.user(), true);
         PlannerComment comment = insertComment(planner.id(), commenter.id());
         long eventId = recordEvent("COMMENT_RECEIVED", planner.id(), "commentId", comment.getId());
         FreshnessScope ownerScope = new FreshnessScope.User(owner.id());
@@ -689,7 +689,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     @Test
     void dispatch_WhenTheOwnerCommentsOnTheirOwnPlanner_RaisesOnlyThePlanner() {
         Session owner = session("freshness-self-comment-owner");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner.user(), true);
         PlannerComment comment = insertComment(planner.id(), owner.id());
         long eventId = recordEvent("COMMENT_RECEIVED", planner.id(), "commentId", comment.getId());
         FreshnessScope plannerScope = new FreshnessScope.Planner(planner.id());
@@ -707,7 +707,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         primaryJdbcTemplate.update(
                 "INSERT INTO user_settings (user_id, notify_new_publications) VALUES (?, true)", follower.id());
         try {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author.user(), true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author.user(), true);
             long eventId = recordEvent("PLANNER_PUBLISHED", planner.id(), "authorId", author.id());
 
             dispatchInAWindow(eventId, Set.of(new FreshnessScope.Planner(planner.id()),
@@ -726,7 +726,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     @Test
     void dispatch_WhenAPublishFanOutWritesNoRow_StillRaisesOnlyGlobal() {
         Session author = session("freshness-dispatch-lone-author");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author.user(), true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author.user(), true);
         long firstEventId = recordEvent("PLANNER_PUBLISHED", planner.id(), "authorId", author.id());
         dispatchStamp.around(() -> dispatcher.dispatchDomainEvent(firstEventId));
         int fannedOut = publishedFanoutRows(planner.id());
@@ -745,7 +745,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     void dispatch_WhenTheEventWasAlreadyDispatched_RaisesNoMarker() {
         Session owner = session("freshness-redispatch-owner");
         Session commenter = session("freshness-redispatch-commenter");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner.user(), true);
         PlannerComment comment = insertComment(planner.id(), commenter.id());
         long eventId = recordEvent("COMMENT_RECEIVED", planner.id(), "commentId", comment.getId());
         Set<FreshnessScope> candidates = Set.of(new FreshnessScope.Planner(planner.id()),
@@ -759,7 +759,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     @Test
     void dispatch_WhenTheCommentIsGoneBeforeItIsAnnounced_PassesTheGateAndRaisesNoMarker() {
         Session owner = session("freshness-gone-comment-owner");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner.user(), true);
         long eventId = recordEvent("COMMENT_RECEIVED", planner.id(), "commentId", Long.MAX_VALUE);
 
         dispatchInAWindow(eventId, Set.of(new FreshnessScope.Planner(planner.id()),
@@ -770,7 +770,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     void dispatch_WhenTheNotificationInsertWritesNoRow_RaisesOnlyThePlannerForTheThreadPush() {
         Session owner = session("freshness-duplicate-owner");
         Session commenter = session("freshness-duplicate-commenter");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner.user(), true);
         PlannerComment comment = insertComment(planner.id(), commenter.id());
         notificationRepository.save(new Notification(
                 owner.id(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED));

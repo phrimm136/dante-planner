@@ -3,6 +3,7 @@ package org.danteplanner.backend.controller;
 import javax.sql.DataSource;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
@@ -12,7 +13,6 @@ import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -68,7 +68,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository plannerCommentRepository;
@@ -91,7 +91,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");
         moderatorUser = TestDataFactory.createModerator(userRepository, "mod@example.com");
 
-        testPlanner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+        testPlanner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, true);
 
         regularUserToken = TestDataFactory.generateAccessToken(jwtTokenService, regularUser);
         adminToken = TestDataFactory.generateAccessToken(jwtTokenService, adminUser);

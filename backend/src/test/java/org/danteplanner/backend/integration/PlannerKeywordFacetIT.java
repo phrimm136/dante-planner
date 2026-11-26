@@ -7,7 +7,6 @@ import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
@@ -16,6 +15,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
@@ -53,7 +53,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerStatsRepository statsRepository;
@@ -110,7 +110,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
@@ -127,7 +127,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .content("{\"equipment\":{},\"selectedGiftIds\":[],\"observationGiftIds\":[],"
                         + "\"comprehensiveGiftIds\":[],\"floorSelections\":[]}")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(empty.id()).build());
         TestDataFactory.addToCatalog(catalogService, empty);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, empty.id());
@@ -239,7 +239,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     void upsert_WhenTopLevelKeywordsDisagreeWithContent_StoresTheContentKeywordsAndCountsAMismatch() {
         StoredPlanner planner = TestDataFactory.planner(owner).title("Top-Level Copy")
                 .selectedKeywords(Set.of("Sinking"))
-                .save(plannerRepository);
+                .save(plannerSeeds);
         double mismatchesBefore = topLevelCount("mismatch");
 
         commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
@@ -257,7 +257,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     void upsert_WhenTopLevelKeywordsAreAbsentOrMatch_CountsEachOutcome() {
         StoredPlanner planner = TestDataFactory.planner(owner).title("Top-Level Outcomes")
                 .selectedKeywords(Set.of("Sinking"))
-                .save(plannerRepository);
+                .save(plannerSeeds);
         double absentBefore = topLevelCount("absent");
         double matchesBefore = topLevelCount("match");
 
@@ -276,7 +276,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
 
     @Test
     void upsert_WhenADraftCarriesARenamedAndAnUnknownKeyword_StoresTheCurrentIdAndKeepsTheBlob() {
-        StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Rename").save(plannerRepository);
+        StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Rename").save(plannerSeeds);
 
         commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), draft.id(),
                 UpsertRequests.resending(draft)
@@ -295,7 +295,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     void upsert_WhenTheTopLevelCopyIsAbsent_DerivesTheColumnFromTheNewContent() {
         StoredPlanner planner = TestDataFactory.planner(owner).title("Absent Copy")
                 .selectedKeywords(Set.of("Sinking"))
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         commandService.upsertPlanner(owner.getId(), UUID.randomUUID(), planner.id(),
                 UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), WriteMode.CHECKED);
@@ -348,7 +348,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .title(title)
                 .content(TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT, contentKeywords))
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         clearColumns(planner.id());
@@ -391,7 +391,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .title("Backfill Draft")
                 .content(TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT,
                         List.of("AccelBullet", "NotAKeyword")))
-                .save(plannerRepository);
+                .save(plannerSeeds);
         clearColumns(draft.id());
 
         runBackfill();

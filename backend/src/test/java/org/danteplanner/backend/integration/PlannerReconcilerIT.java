@@ -4,6 +4,7 @@ import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -54,6 +55,9 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private PlannerCatalogRepository catalogRepository;
 
     @Autowired
@@ -100,7 +104,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         FilterRowsSync.readCommitted(transactionManager)
                 .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
@@ -391,7 +395,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .selectedKeywords(Set.of("Sinking"))
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         FilterRowsSync.readCommitted(transactionManager)
                 .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
@@ -408,7 +412,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .category("RR_PLACEHOLDER")
                 .selectedKeywords(Set.of("Sinking"))
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         FilterRowsSync.readCommitted(transactionManager)
                 .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
@@ -441,7 +445,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
     void reconcile_WhenADraftKeywordColumnDisagreesWithItsContent_ReportsContentKeywordDrift() {
         StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Keyword Drift")
                 .selectedKeywords(Set.of("Sinking"))
-                .save(plannerRepository);
+                .save(plannerSeeds);
         jdbc.update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
                 draft.id().toString());
 

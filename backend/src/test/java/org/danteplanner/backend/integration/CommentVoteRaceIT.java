@@ -37,7 +37,6 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.security.Viewer;
@@ -45,6 +44,7 @@ import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LogCapture;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -66,7 +66,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private CommentCommandService commandService;
     @Autowired private CommentEngagementService engagementService;
     @Autowired private CommentQueryService queryService;
@@ -93,7 +93,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
         first = TestDataFactory.createTestUser(userRepository, "vote-race-first@example.com");
         second = TestDataFactory.createTestUser(userRepository, "vote-race-second@example.com");
         moderator = TestDataFactory.createModerator(userRepository, "vote-race-moderator@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
     }
 
     @AfterEach

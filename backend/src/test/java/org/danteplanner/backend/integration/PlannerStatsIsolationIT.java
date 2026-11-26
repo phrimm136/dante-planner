@@ -2,6 +2,7 @@ package org.danteplanner.backend.integration;
 
 import javax.sql.DataSource;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentCommandService;
@@ -10,7 +11,6 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.entity.User;
@@ -46,7 +46,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerStatsRepository statsRepository;
@@ -75,7 +75,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
         owner = TestDataFactory.createTestUser(userRepository, "stats-owner@example.com");
         commenter = TestDataFactory.createTestUser(userRepository, "stats-commenter@example.com");
         admin = TestDataFactory.createAdmin(userRepository, "stats-admin@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         TestDataFactory.addToCatalog(catalogService, planner);
     }
 
