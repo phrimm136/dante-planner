@@ -80,10 +80,12 @@ class ShellBranchTest {
                 Map.entry(SHELLS + ".drainSkippingAfterA(boolean)", 1),
                 Map.entry(SHELLS + ".drainWhenAllowed(boolean)", 1),
                 Map.entry(SHELLS + ".f(boolean, boolean)", 1),
+                Map.entry(SHELLS + ".guardedByAReturn(boolean, boolean)", 2),
                 Map.entry(SHELLS + ".guardReturningACall(boolean)", 1),
                 Map.entry(SHELLS + ".guardReturningAConstant(boolean)", 1),
                 Map.entry(SHELLS + ".ternaryInAGuard(boolean, boolean)", 1),
                 Map.entry(SHELLS + ".route(java.lang.String)", 1),
+                Map.entry(SHELLS + ".sendEachUnlessEmpty()", 1),
                 Map.entry(SHELLS + ".switchOnNull(java.lang.String)", 1),
                 Map.entry(SHELLS + ".switchOnAPattern(java.lang.Object)", 1),
                 Map.entry(SAVE, 1)));

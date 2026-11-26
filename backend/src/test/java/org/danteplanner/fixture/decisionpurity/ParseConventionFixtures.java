@@ -153,6 +153,14 @@ final class ParseConventionFixtures {
         @Modifying
         @Query("UPDATE Row r SET r.enabled = :enabled WHERE r.id = :id")
         int assignEnabled(long id, boolean enabled);
+
+        @Modifying
+        @Query("UPDATE Row r SET r.count = r.count + 1 WHERE r.id = :id AND r.hidden = :hidden")
+        int incrementVisible(long id, boolean hidden);
+
+        @Modifying
+        @Query("UPDATE Row r SET r.state = CASE WHEN :chosen = TRUE THEN 'A' ELSE 'B' END WHERE r.id = :id")
+        int assignChosen(long id, boolean chosen);
     }
 
     interface Flagged {

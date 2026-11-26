@@ -116,7 +116,16 @@ class DecisionPurityTest {
                         "Ledger.counted", "PublicPortReader.decide", "ClockReader.decide", "FutureReader.decide",
                         "Minter.decide", "Cache.decide", "Tally.decide", "Seen.decide", "Slots.decide",
                         "Pool.decide", "Broken.decide", "MonitorWaiter.decide", "BaseCaller.decide",
-                        "AskerCaller.decide");
+                        "AskerCaller.decide", "Unsigner.decide");
+    }
+
+    @Test
+    void authentication_WhenTheRuleRunsOverTheFixture_IsPureToReadAndAnEffectToChange() {
+        Map<String, Set<String>> offenders = offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE);
+
+        assertThat(offenders).doesNotContainKey("Signer.decide");
+        assertThat(offenders).containsEntry("Unsigner.decide",
+                Set.of("external org.springframework.security.core.Authentication.setAuthenticated"));
     }
 
     @Test

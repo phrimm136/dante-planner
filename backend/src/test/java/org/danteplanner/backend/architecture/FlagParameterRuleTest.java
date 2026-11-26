@@ -1,8 +1,12 @@
 package org.danteplanner.backend.architecture;
 
+import java.lang.reflect.Parameter;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaMethod;
@@ -11,6 +15,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import static com.tngtech.archunit.base.DescribedPredicate.describe;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -21,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class FlagParameterRuleTest {
 
     private static final String FIXTURE = "org.danteplanner.fixture.decisionpurity.ParseConventionFixtures";
+    private static final Pattern SET_CLAUSE = Pattern.compile("(?is)\\bSET\\b(.*?)(?:\\bWHERE\\b|$)");
     private static final List<String> LISTED = ShellBranches.lines(Path.of("config/flag-parameters.txt"));
     private static final DescribedPredicate<JavaMethod> FLAG_METHODS = describe("take a flag", method ->
             method.getModifiers().contains(JavaModifier.PUBLIC)
@@ -53,7 +59,10 @@ class FlagParameterRuleTest {
                 .hasMessageContaining("unlisted " + FIXTURE + "$PublicFlags.settle(boolean)")
                 .hasMessageContaining(
                         "unlisted " + FIXTURE + "$LibraryConsumer.accept(java.lang.Integer, java.lang.Boolean)")
-                .hasMessageContaining("(7 times)");
+                .hasMessageContaining("unlisted " + FIXTURE + "$StoredFlags.incrementVisible(long, boolean)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$StoredFlags.assignChosen(long, boolean)")
+                .hasMessageNotContaining("assignEnabled")
+                .hasMessageContaining("(9 times)");
     }
 
     @Test
@@ -71,7 +80,7 @@ class FlagParameterRuleTest {
                 .allowEmptyShould(true)
                 .as("a public method takes an enum, or is two methods, instead of a boolean; the flag parameters left"
                         + " are exactly the lines of backend/config/flag-parameters.txt, which only shrinks (a"
-                        + " modifying query that stores the boolean is outside the rule):"
+                        + " modifying query whose SET clause assigns the boolean is outside the rule):"
                         + " an unlisted one becomes an enum or two methods, not a line");
     }
 
@@ -81,7 +90,24 @@ class FlagParameterRuleTest {
     }
 
     private static boolean isStoringQuery(JavaMethod method) {
-        return method.isAnnotatedWith(Modifying.class) && method.isAnnotatedWith(Query.class);
+        if (!method.isAnnotatedWith(Modifying.class) || !method.isAnnotatedWith(Query.class)) {
+            return false;
+        }
+        Matcher set = SET_CLAUSE.matcher(method.getAnnotationOfType(Query.class).value());
+        return set.find() && Arrays.stream(method.reflect().getParameters())
+                .filter(parameter -> parameter.getType() == boolean.class || parameter.getType() == Boolean.class)
+                .allMatch(parameter -> assigns(set.group(1).trim(), nameOf(parameter)));
+    }
+
+    private static boolean assigns(String assignments, String parameter) {
+        return Pattern.compile("(?:^|,)\\s*[\\w.]+\\s*=\\s*:" + Pattern.quote(parameter) + "\\s*(?:,|$)")
+                .matcher(assignments)
+                .find();
+    }
+
+    private static String nameOf(Parameter parameter) {
+        Param param = parameter.getAnnotation(Param.class);
+        return param != null ? param.value() : parameter.getName();
     }
 
     private static boolean isSetter(JavaMethod method) {

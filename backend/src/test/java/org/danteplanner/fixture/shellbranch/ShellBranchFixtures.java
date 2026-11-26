@@ -38,6 +38,15 @@ public class ShellBranchFixtures {
         }
     }
 
+    public void sendEachUnlessEmpty() {
+        for (String item : items) {
+            if (item.isEmpty()) {
+                continue;
+            }
+            port.send();
+        }
+    }
+
     public void drainWhenAllowed(boolean allowed) {
         while (queue.poll() != null) {
             if (allowed) {
@@ -109,15 +118,15 @@ public class ShellBranchFixtures {
         return a > b ? a : b;
     }
 
-    public void guarded(boolean x, boolean y) {
+    public void guardedByAReturn(boolean x, boolean y) {
         if (x || y) {
             return;
         }
         port.save();
     }
 
-    public void guardedByAThrow(boolean x) {
-        if (x) {
+    public void guardedByAThrow(boolean x, boolean y) {
+        if (x || y) {
             throw new IllegalStateException("refused");
         }
         port.save();
@@ -141,7 +150,7 @@ public class ShellBranchFixtures {
 
     public void ternaryInAGuard(boolean x, boolean y) {
         if (x ? y : !y) {
-            return;
+            throw new IllegalStateException("refused");
         }
         port.save();
     }

@@ -47,6 +47,18 @@ valid:
         };
       }
     }
+  - |
+    class A {
+      FooOutcome run(boolean x, boolean y) {
+        if (y) {
+          throw new IllegalStateException();
+        }
+        return switch (choose(x)) {
+          case LEFT -> FooOutcome.LEFT;
+          case RIGHT -> FooOutcome.RIGHT;
+        };
+      }
+    }
 invalid:
   - |
     class A {
@@ -116,5 +128,27 @@ invalid:
         } else {
           return FooOutcome.RIGHT;
         }
+      }
+    }
+  - |
+    class A {
+      FooOutcome run(boolean y) {
+        if (y) {
+          log();
+          throw new IllegalStateException();
+        }
+        return FooOutcome.DONE;
+      }
+    }
+  - |
+    class A {
+      FooOutcome run(List<String> items) {
+        for (String item : items) {
+          if (item.isEmpty()) {
+            continue;
+          }
+          save(item);
+        }
+        return FooOutcome.DONE;
       }
     }

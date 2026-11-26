@@ -4,8 +4,8 @@ Questions a reviewer asks of every method and type a change touches. Each came f
 code with the owner. A question is failed only by lines that can be quoted; "it reads badly" fails
 none. Line count is reported, never a reason.
 
-A guard below is an `if` without `else` whose body is one bare `return;`, one `throw` or one
-`continue`; the `&&`/`||` terms of its condition are part of it. An early `return` of a value is a
+A guard below is an `if` without `else` whose body is one `throw`; the `&&`/`||` terms of its
+condition are part of it. An early `return` of a value is a
 decision, not a guard: a run of them is a decision table inside an effect method.
 
 ## Values and effects
@@ -29,7 +29,9 @@ decision, not a guard: a run of them is a decision table inside an effect method
 - **T5** Does a wrapper, a case or a recursion exist only so that a rule or a count passes? The
   finding is then against the rule too, and its fix names the ADR to change. Forms met so far: a
   boolean wrapped in an enum to switch on; `switch (x) { case null -> ... }` for `if (x == null)`;
-  a lookup named `...Outcome`; a run of early value returns presented as guards.
+  a lookup named `...Outcome`; a run of early value returns presented as guards; two guards with
+  opposite conditions in two helpers or two loops; an `Optional` or stream combinator standing in
+  for an `if`.
 - **T6** Does a null or an `Optional` live inside the code instead of at a boundary? A boundary
   is a framework or library return (`RequestContextHolder.getRequestAttributes()`,
   `getAuthentication()`, a repository `findBy...`), an entity column, a DTO field. The line that
