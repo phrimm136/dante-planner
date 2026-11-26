@@ -1,6 +1,6 @@
 ---
 name: debt-ledger
-description: Ask every entry of docs/debt.md whether its debt still holds, and check that every entry carries a re-check line. Use when adding, editing or pruning a debt entry, when the pre-commit hook or the weekly Debt Check workflow reports GONE or BROKEN entries, or before a defrag or design session reads the ledger.
+description: Ask every entry of docs/debt.md whether its debt still holds, and check that every entry carries a re-check line; run the asserting Re-check lines of the ADRs. Use when adding or editing an ADR's Re-check line, when adding, editing or pruning a debt entry, when the pre-commit hook or the weekly Debt Check workflow reports GONE or BROKEN entries, or before a defrag or design session reads the ledger.
 ---
 
 # debt-ledger
@@ -24,11 +24,13 @@ Run `.claude/skills/debt-ledger/bin/debt` from inside the code checkout.
 |----------|-----|
 | `doctor` | First, before any run: entry count, entries without a re-check line, duplicate titles, re-check lines with a clause that breaks the rules above (`malformed`, the first one found per line); exit 1 when any list is not empty |
 | `check`  | Run every re-check line: `HOLDS`, `GONE` or `BROKEN` per entry; exit 1 with a count line when an entry is gone or a command is broken. `--only <substring>` runs the entries whose title contains it |
+| `adr doctor` | Count the `Re-check [<kind>]:` lines in the ADRs' `## Decisions` sections by kind (`assert`, `absent`, `gh`, `prod-read`, `manual`, `prose`), name each `Re-check:` without a kind (`unmarked`) and each unknown kind or asserting command that breaks the rules above or is not the whole check, such as a second backticked command in the same sentence (`malformed`); exit 1 when either list is not empty. `--dir <path>` reads another ADR directory |
+| `adr check` | Run the backticked command right after the marker of every `assert` line (exit 0 passes) and `absent` line (one rg clause, exit 1 passes): `PASS`, `FAIL` or `BROKEN` per `<adr>:<line>`, an unmarked or malformed line as `BROKEN`, then `not run <kind>:` with the other lines; exit 1 with a count line when a line fails or is broken |
 | `absent` | `absent <path> <rg arguments>`, inside a re-check line: exit 0 when the path exists and rg finds nothing, 1 when rg finds a match, 2 when the path is missing or rg fails |
 | `python` | `python '<body>'`, inside a re-check line: compiles and runs the body; `sys.exit(0)` or `sys.exit(1)` passes through, a compile error, any other exception or any other exit code exits 2 with `<Type>: <message>` |
 
 A `GONE` entry is deleted. A `BROKEN` command is fixed in the entry. The pre-commit hook runs
-both commands whenever `docs/debt.md` is staged, and the weekly Debt Check workflow runs `check`
-on `main`.
+both commands whenever `docs/debt.md` is staged and `adr doctor` over the staged copies of every staged ADR, and the weekly Debt Check workflow runs `check`
+and `adr check` on `main`.
 
 Flags and messages: `debt help`.

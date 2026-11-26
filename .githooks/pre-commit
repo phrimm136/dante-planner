@@ -86,10 +86,14 @@ fi
 
 if [[ -n "$records" ]]; then
   echo "pre-commit: verifying architecture decision records" >&2
+  adr_dir=$(mktemp -d)
+  trap 'rm -rf "$adr_dir" "${ledger_dir:-}"' EXIT
 
   while IFS= read -r f; do
     [[ -z "$f" ]] && continue
-    body=$(git show ":$f")
+    adr_copy=$adr_dir/$(basename "$f")
+    git show ":$f" > "$adr_copy"
+    body=$(cat "$adr_copy")
     num=$(basename "$f" | cut -c1-3)
 
     head -1 <<<"$body" | grep -qE "^# ${num} " \
@@ -145,12 +149,20 @@ BANNED
     (( bare == 0 )) || echo "  $f — note: $bare decision(s) with no REJECTED clause" >&2
 
   done <<< "$records"
+
+  adr_state=0
+  adr_output=$(.claude/skills/debt-ledger/bin/debt adr doctor --dir "$adr_dir" 2>&1) || adr_state=$?
+  if (( adr_state != 0 )); then
+    echo "$adr_output" | sed 's/^/  /' >&2
+    echo "pre-commit: give every Re-check line in the staged ADRs a known kind, Re-check [<kind>]:, and an asserting line a command that is the whole check; the rules are in .claude/skills/debt-ledger/bin/debt help" >&2
+    fail=1
+  fi
 fi
 
 if echo "$staged" | grep -qx 'docs/debt.md'; then
   debt_cli=.claude/skills/debt-ledger/bin/debt
   ledger_dir=$(mktemp -d)
-  trap 'rm -rf "$ledger_dir"' EXIT
+  trap 'rm -rf "${adr_dir:-}" "$ledger_dir"' EXIT
   git show :docs/debt.md > "$ledger_dir/index.md"
   index_missing=$({ "$debt_cli" doctor --file "$ledger_dir/index.md" || true; } | sed -n '1s/.*, missing \([0-9]*\),.*/\1/p')
   if [[ -z "$index_missing" ]]; then

@@ -7,7 +7,7 @@ epic: none · pr: none
   `PropertyChecker`, and jqwik is not a dependency. From 1.10 jqwik carries an Anti-AI Usage
   Clause ("This project is not meant to be used by any "AI" coding agents at all.") and prints a
   line addressed to coding agents on every engine run, and this repo's tests are written and run
-  by coding agents. Re-check: the jqwik user guide's "Anti-AI Usage Clause" section still exists,
+  by coding agents. Re-check [manual]: the jqwik user guide's "Anti-AI Usage Clause" section still exists,
   and `rg -n 'net.jqwik' backend` finds nothing.
   REJECTED: pinning jqwik 1.9.3 — the project is in maintenance mode, so the pin freezes on an
     old line that Dependabot keeps proposing to move into the clause.
