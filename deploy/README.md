@@ -32,6 +32,8 @@ deploy/
     alloy-logs.yaml        ArgoCD Application `alloy` (namespace argocd) that installs the Alloy chart on role=data, and the config and Loki credentials it reads; its config reloader applies a changed config without a restart
     external-secrets.yaml  ArgoCD Application (namespace argocd) that installs the External Secrets chart in namespace external-secrets on role=app
     privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + ArgoCD Application of the node-exporter chart, a DaemonSet on every node
+    aws-ebs-csi-driver.yaml  ArgoCD Application of the aws-ebs-csi-driver chart in kube-system, controller and node plugin on role=data
+    storageclass-ebs.yaml  StorageClass ebs-gp3-retain: encrypted gp3 EBS volumes, kept on PVC deletion (Retain); not the default class
   chart/values.yaml        values common to both regions
   chart/values-oregon.yaml region-specific values (image tag, endpoints)
   chart/values-seoul.yaml  the same for Seoul
@@ -124,9 +126,23 @@ scrapes can come before the custom-resource series appear.
 | Workload | placement | set by |
 |----------|-----------|--------|
 | Spring DaemonSet | `nodeSelector: role=app` | app ASG user-data `--node-label role=app` |
-| Redis + Prometheus + kube-state-metrics + Alloy | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
+| Redis + Prometheus + kube-state-metrics + Alloy + EBS CSI driver | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
 | Traefik Gateway | ingress node (`role=ingress`) | ingress user-data `--node-label role=ingress` |
 | ArgoCD core | CP node, tolerates `node-role.kubernetes.io/control-plane=true:NoSchedule` | CP user-data `--node-taint` |
+
+## EBS volumes
+
+`aws-ebs-csi-driver.yaml` installs the AWS EBS CSI driver, which creates an EBS volume for a
+PersistentVolumeClaim of class `ebs-gp3-retain` and attaches it to the node the pod runs on. Its
+controller and its node plugin run only on the data node, the one node with stateful workloads,
+and call the EC2 API with the data node's instance profile. Both take the region from the
+instance metadata service, so the Application is identical in both regions. The driver tags
+every volume it creates `ebs.csi.aws.com/cluster=true`. `local-path` stays the
+default StorageClass, so only a claim that names `ebs-gp3-retain` gets an EBS volume. The node
+plugin is privileged: kube-system carries no Pod Security label and the k3s API server has no
+admission config, so it is admitted. The chart adds its snapshotter only where the
+`snapshot.storage.k8s.io` CRDs exist, and nothing in this repository installs them. The chart's
+Checkov findings are recorded as `checkov.io/skip<n>` annotations on its Deployment and DaemonSet.
 
 ## Image tag flow (CI arm64 → ECR → tag bump)
 
