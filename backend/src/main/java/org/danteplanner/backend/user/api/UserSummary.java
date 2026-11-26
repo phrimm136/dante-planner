@@ -3,6 +3,7 @@ package org.danteplanner.backend.user.api;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.danteplanner.backend.shared.restriction.Restriction;
 import org.jspecify.annotations.Nullable;
 
 public record UserSummary(

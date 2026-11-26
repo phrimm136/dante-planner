@@ -98,7 +98,6 @@ class GameDataLoaderTest {
         FloorRuleTable table = loader.loadFloorRules(file);
 
         assertThat(table.schemaVersion()).isEqualTo(1);
-        assertThat(table.stages()).isEqualTo(List.of("draft", "publish", "index"));
         assertThat(table.floorCount(MDCategory.F5)).isEqualTo(5);
         assertThat(table.floorCount(MDCategory.F10)).isEqualTo(10);
         assertThat(table.floorCount(MDCategory.F15)).isEqualTo(15);
@@ -106,8 +105,8 @@ class GameDataLoaderTest {
         assertThat(table.layout(MDCategory.F10).difficulties().get(9)).isEqualTo(Set.of(1));
         assertThat(table.layout(MDCategory.F15).difficulties().get(9)).isEqualTo(Set.of(1));
         assertThat(table.layout(MDCategory.F15).difficulties().get(10)).isEqualTo(Set.of(3));
-        assertThat(table.stagesFor(FloorRuleTable.RuleName.NOT_REPEATED)).isEqualTo(Set.of("draft", "publish"));
-        assertThat(table.stagesFor(FloorRuleTable.RuleName.NO_NORMAL_AFTER_HARD)).isEqualTo(Set.of("publish"));
+        assertThat(table.stagesFor(FloorRuleTable.RuleName.NOT_REPEATED)).isEqualTo(Set.of(Stage.DRAFT, Stage.PUBLISH));
+        assertThat(table.stagesFor(FloorRuleTable.RuleName.NO_NORMAL_AFTER_HARD)).isEqualTo(Set.of(Stage.PUBLISH));
     }
 
     static Stream<String> floorRulesBreakingTheShape() {
@@ -124,7 +123,9 @@ class GameDataLoaderTest {
                 FLOOR_RULES.replace("," + FIFTEEN_FLOORS, ""),
                 FLOOR_RULES.replace(FIVE_FLOORS, "\"5F\":{\"floorCount\":0,\"difficulties\":[]}"),
                 FLOOR_RULES.replace("\"sequence\":", "\"order\":"),
-                FLOOR_RULES.replace("\"stages\":[\"draft\",\"publish\",\"index\"]", "\"stages\":[]"));
+                FLOOR_RULES.replace("\"stages\":[\"draft\",\"publish\",\"index\"]", "\"stages\":[]"),
+                FLOOR_RULES.replace("\"stages\":[\"draft\",\"publish\",\"index\"]", "\"stages\":[\"draft\",\"publish\"]"),
+                FLOOR_RULES.replace("\"stages\":[\"draft\",\"publish\",\"index\"],", ""));
     }
 
     @ParameterizedTest

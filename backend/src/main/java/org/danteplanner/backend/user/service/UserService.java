@@ -7,7 +7,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
-import org.danteplanner.backend.user.api.Restriction;
+import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;

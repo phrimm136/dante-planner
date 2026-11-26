@@ -7,12 +7,11 @@ import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 class RestrictionCheckServiceTest {
@@ -21,12 +20,12 @@ class RestrictionCheckServiceTest {
 
     private final FakeUsers users = new FakeUsers();
     private final RestrictionCheckService check = new RestrictionCheckService(
-            users, new AccountStandingValidator(), Clock.fixed(NOW, ZoneOffset.UTC));
+            users, Clock.fixed(NOW, ZoneOffset.UTC));
     private final User user = users.add(TestDataFactory.unsavedUser(1L));
 
     @Test
     void requireUnrestricted_WhenTheUserIsUnrestricted_Passes() {
-        assertThatCode(() -> check.requireUnrestricted(user.getId())).doesNotThrowAnyException();
+        assertThat(check.requireUnrestricted(user.getId()).userId()).isEqualTo(user.getId());
     }
 
     @Test
@@ -47,7 +46,7 @@ class RestrictionCheckServiceTest {
     void requireUnrestricted_WhenTheTimeoutHasEnded_Passes() {
         TestDataFactory.timeOut(user, NOW);
 
-        assertThatCode(() -> check.requireUnrestricted(user.getId())).doesNotThrowAnyException();
+        assertThat(check.requireUnrestricted(user.getId()).userId()).isEqualTo(user.getId());
     }
 
     @Test

@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -90,10 +91,18 @@ class PlannerModerationTargetAdapterTest {
     }
 
     @Test
-    void checkPublished_WhenCalled_DelegatesToTheAccessGuard() {
+    void requirePublished_WhenThePlannerIsAbsent_RefusesAsTheAccessGuardDoes() {
         when(plannerRepository.findThread(planner.getId())).thenReturn(Optional.empty());
 
-        assertRejected(() -> adapter.checkPublished(planner.getId())).withCode("PLANNER_NOT_FOUND");
+        assertRejected(() -> adapter.requirePublished(planner.getId())).withCode("PLANNER_NOT_FOUND");
+    }
+
+    @Test
+    void requirePublished_WhenThePlannerIsVisible_ReturnsItsId() {
+        when(plannerRepository.findThread(planner.getId())).thenReturn(Optional.of(
+                new PlannerThread(planner.getId(), planner.getUserId(), true, false)));
+
+        assertThat(adapter.requirePublished(planner.getId()).plannerId()).isEqualTo(planner.getId());
     }
 
     @Test

@@ -150,6 +150,45 @@ class RestrictionTransactionHookTest {
     }
 
     @Test
+    void afterBegin_WhenTheCheckRefusedAnEarlierWriteTransaction_ChecksTheNextOneAgain() {
+        bindRequest("restricted", PRINCIPAL);
+        refusal = new UserBannedException(PRINCIPAL, null);
+        RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
+
+        assertThatThrownBy(() -> hook.afterBegin(writeTransaction(), null)).isSameAs(refusal);
+        assertThatThrownBy(() -> hook.afterBegin(writeTransaction(), null)).isSameAs(refusal);
+
+        assertThat(checkedUsers).containsExactly(PRINCIPAL, PRINCIPAL);
+    }
+
+    @Test
+    void afterBegin_WhenTheCheckPasses_StoresTheClearedMember() {
+        bindRequest("restricted", PRINCIPAL);
+
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
+
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.Cleared(member(PRINCIPAL)));
+    }
+
+    @Test
+    void record_WhenARestrictedByStateRequestRecordsAClearance_StoresIt() {
+        bindRequest("byState", PRINCIPAL);
+
+        RestrictionTransactionHook.record(new PrivateWrite());
+
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.Cleared(new PrivateWrite()));
+    }
+
+    @Test
+    void record_WhenTheRequestIsRestricted_LeavesTheCheckDue() {
+        bindRequest("restricted", PRINCIPAL);
+
+        RestrictionTransactionHook.record(new PrivateWrite());
+
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.CheckDue(PRINCIPAL));
+    }
+
+    @Test
     void beforeCommit_WhenARestrictedByStateRequestCommitsWithoutADecision_ThrowsUnderFailFast() {
         bindRequest("byState", PRINCIPAL);
 
@@ -172,7 +211,7 @@ class RestrictionTransactionHookTest {
         bindRequest("byState", PRINCIPAL);
         RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
 
-        RestrictionTransactionHook.recordDecision();
+        RestrictionTransactionHook.record(new PrivateWrite());
 
         assertThatCode(() -> hook.beforeCommit(writeTransaction())).doesNotThrowAnyException();
     }
@@ -192,13 +231,13 @@ class RestrictionTransactionHookTest {
                 RestrictionTransactionHook.class))
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .containsExactly("DeclaredHandlersFixture.byState is @RestrictedByState but committed a write without "
-                        + "calling RestrictionCheck.requireUnrestricted or RestrictionCheck.recordPrivate");
+                        + "calling RestrictionCheck.record");
     }
 
     @Test
     void hook_WhenNoRequestIsBound_DoesNothing() {
         assertThatCode(() -> {
-            RestrictionTransactionHook.recordDecision();
+            RestrictionTransactionHook.record(new PrivateWrite());
             hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
             hook(OnUndeclared.FAIL).beforeCommit(writeTransaction());
         }).doesNotThrowAnyException();
@@ -212,7 +251,7 @@ class RestrictionTransactionHookTest {
         RequestContextHolder.setRequestAttributes(attributes);
 
         assertThatCode(() -> {
-            RestrictionTransactionHook.recordDecision();
+            RestrictionTransactionHook.record(new PrivateWrite());
             hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
             hook(OnUndeclared.FAIL).beforeCommit(writeTransaction());
         }).doesNotThrowAnyException();
@@ -229,9 +268,7 @@ class RestrictionTransactionHookTest {
         hook.afterBegin(transaction(true), null);
         hook.beforeCommit(transaction(true));
 
-        assertThat(RequestContextHolder.currentRequestAttributes()
-                .getAttribute(RestrictionDuty.DUTY_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST))
-                .isEqualTo(new RestrictionDuty.CheckDue(PRINCIPAL));
+        assertThat(storedDuty()).isEqualTo(new RestrictionDuty.CheckDue(PRINCIPAL));
     }
 
     @Test
@@ -320,11 +357,22 @@ class RestrictionTransactionHookTest {
             if (refusal != null) {
                 throw refusal;
             }
+            return member(userId);
         };
         beans.addBean("restrictionCheckHandler", handler);
         beans.addBean("transactionManager", manager);
         return new RestrictionTransactionHook(beans.getBeanProvider(RestrictionCheckHandler.class),
                 beans.getBeanProvider(PlatformTransactionManager.class), meterRegistry, onUndecided);
+    }
+
+    private static UnrestrictedMember member(Long userId) {
+        return UnrestrictedMember.parse(userId, new Restriction.Active())
+                .orElseThrow(imposed -> new IllegalStateException("an active restriction refused: " + imposed));
+    }
+
+    private static Object storedDuty() {
+        return RequestContextHolder.currentRequestAttributes()
+                .getAttribute(RestrictionDuty.DUTY_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
     }
 
     private static DefaultTransactionStatus writeTransaction() {

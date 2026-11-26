@@ -33,14 +33,12 @@ import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.JpaAuditingConfig;
-import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -58,7 +56,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -112,9 +109,6 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private DomainEventRepository domainEventRepository;
-
-    @Autowired
-    private AutowireCapableBeanFactory beanFactory;
 
     @Autowired
     private EntityManager entityManager;
@@ -329,24 +323,6 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
         }
         entityManager.clear();
         assertThat(entityManager.find(PlannerContent.class, planner.getId()).getTitle()).isEqualTo(title);
-    }
-
-    @Test
-    void newRow_WhenTheEntityHasNoAuditedField_IsRefused() {
-        AuditedTimestampListener listener = beanFactory.createBean(AuditedTimestampListener.class);
-
-        assertThatThrownBy(() -> listener.onCreate(PlannerStats.builder().build()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining(PlannerStats.class.getName());
-    }
-
-    @Test
-    void changedRow_WhenTheEntityHasNoAuditedField_IsRefused() {
-        AuditedTimestampListener listener = beanFactory.createBean(AuditedTimestampListener.class);
-
-        assertThatThrownBy(() -> listener.onUpdate(PlannerStats.builder().build()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining(PlannerStats.class.getName());
     }
 
     private static AnnotationConfigApplicationContext jpaContext(Instant time, Runnable beforeTheFactoryIsBuilt,

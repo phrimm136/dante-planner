@@ -1,4 +1,4 @@
-package org.danteplanner.backend.user.api;
+package org.danteplanner.backend.shared.restriction;
 
 import java.time.Instant;
 
@@ -9,10 +9,13 @@ public sealed interface Restriction {
     record Active() implements Restriction {
     }
 
-    record Banned(Instant at) implements Restriction {
+    sealed interface Imposed extends Restriction permits Banned, TimedOut {
     }
 
-    record TimedOut(Instant until) implements Restriction {
+    record Banned(Instant at) implements Imposed {
+    }
+
+    record TimedOut(Instant until) implements Imposed {
     }
 
     static Restriction of(@Nullable Instant bannedAt, @Nullable Instant timeoutUntil, Instant now) {

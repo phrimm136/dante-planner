@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface PlannerModerationTarget {
 
-    void checkPublished(UUID plannerId);
+    VisiblePlanner requirePublished(UUID plannerId);
 
     ModeratedPlanner takeDown(UUID plannerId);
 

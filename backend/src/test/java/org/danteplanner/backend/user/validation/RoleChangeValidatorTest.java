@@ -113,17 +113,27 @@ class RoleChangeValidatorTest {
     }
 
     @Test
-    void requireAnotherActiveAdministrator_WhenOneActiveAdminRemains_ThrowsLastAdministrator() {
+    void requireDeletable_WhenTheLastActiveAdminWithdraws_ThrowsLastAdministrator() {
+        User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
         when(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN)).thenReturn(1L);
 
-        assertRejected(() -> validator.requireAnotherActiveAdministrator())
+        assertRejected(() -> validator.requireDeletable(admin))
                 .withCode("LAST_ADMINISTRATOR");
     }
 
     @Test
-    void requireAnotherActiveAdministrator_WhenTwoActiveAdminsRemain_Allows() {
+    void requireDeletable_WhenAnotherActiveAdminRemains_ReturnsTheAdmin() {
+        User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
         when(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN)).thenReturn(2L);
 
-        assertThatCode(() -> validator.requireAnotherActiveAdministrator()).doesNotThrowAnyException();
+        assertThat(validator.requireDeletable(admin).getUserId()).isEqualTo(admin.getId());
+    }
+
+    @Test
+    void requireDeletable_WhenTheUserIsNotAnAdmin_ReturnsTheUserWithoutCounting() {
+        User member = TestDataFactory.unsavedUser(UserRole.NORMAL);
+
+        assertThat(validator.requireDeletable(member).getUserId()).isEqualTo(member.getId());
+        verifyNoInteractions(userRepository);
     }
 }

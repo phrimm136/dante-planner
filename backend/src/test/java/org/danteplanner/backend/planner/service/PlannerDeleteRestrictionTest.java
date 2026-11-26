@@ -3,7 +3,6 @@ package org.danteplanner.backend.planner.service;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
-import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -74,7 +73,7 @@ class PlannerDeleteRestrictionTest {
                 null,
                 catalogService,
                 accessGuard,
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()),
+                new RestrictionCheckService(users, Clock.systemUTC()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),

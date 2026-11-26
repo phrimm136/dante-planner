@@ -1,5 +1,6 @@
 package org.danteplanner.backend.moderation.validation;
 
+import org.danteplanner.backend.moderation.api.VisiblePlanner;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.shared.failure.Parsed;
@@ -41,7 +42,7 @@ public class ReportUniquenessValidator {
         return FirstCommentReport.of(prior, commentId, reporterId);
     }
 
-    public FirstPlannerReport requireFirstPlannerReport(PriorReport prior, UUID plannerId, Long reporterId) {
-        return FirstPlannerReport.of(prior, plannerId, reporterId);
+    public FirstPlannerReport requireFirstPlannerReport(PriorReport prior, VisiblePlanner planner, Long reporterId) {
+        return FirstPlannerReport.of(prior, planner.plannerId(), reporterId);
     }
 }

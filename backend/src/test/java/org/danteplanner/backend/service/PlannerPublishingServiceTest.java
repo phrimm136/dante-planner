@@ -9,7 +9,6 @@ import org.danteplanner.backend.planner.service.ModeratorAction;
 import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
-import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -167,7 +166,7 @@ class PlannerPublishingServiceTest {
     private PlannerPublishingService publishingServiceWith(PlannerContentValidator contentValidator) {
         ObjectMapper objectMapper = new ObjectMapper();
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
-        RestrictionCheckService restrictionCheck = new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC());
+        RestrictionCheckService restrictionCheck = new RestrictionCheckService(users, Clock.systemUTC());
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 plannerStatsRepository, entityFilterRepository,
                 keywordFilterRepository, null,

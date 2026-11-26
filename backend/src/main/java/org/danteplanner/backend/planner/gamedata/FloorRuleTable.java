@@ -2,10 +2,14 @@ package org.danteplanner.backend.planner.gamedata;
 
 import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.shared.failure.Parsed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +18,8 @@ import java.util.stream.Collectors;
 
 public record FloorRuleTable(
         int schemaVersion,
-        List<String> stages,
         Map<MDCategory, CategoryFloors> categories,
-        Map<RuleName, Set<String>> rules) {
+        Map<RuleName, Set<Stage>> rules) {
 
     public record CategoryFloors(int floorCount, List<Set<Integer>> difficulties) {}
 
@@ -53,7 +56,6 @@ public record FloorRuleTable(
     private static final Set<String> CATEGORY_KEYS = Set.of(FLOOR_COUNT, DIFFICULTIES);
 
     public FloorRuleTable {
-        stages = List.copyOf(stages);
         categories = Map.copyOf(categories);
         rules = Map.copyOf(rules);
     }
@@ -74,8 +76,8 @@ public record FloorRuleTable(
         return categories.values().stream().mapToInt(CategoryFloors::floorCount).min().orElseThrow();
     }
 
-    public Set<String> stagesFor(RuleName rule) {
-        Set<String> ruleStages = rules.get(rule);
+    public Set<Stage> stagesFor(RuleName rule) {
+        Set<Stage> ruleStages = rules.get(rule);
         if (ruleStages == null) {
             throw new IllegalStateException("the floor rule table lacks rule " + rule);
         }
@@ -83,51 +85,47 @@ public record FloorRuleTable(
     }
 
     public static FloorRuleTable parse(JsonNode root) {
-        requireObjectWithKeys("root", root, KEYS);
-        JsonNode schemaVersion = root.path(SCHEMA_VERSION);
+        ExactFields fields = ExactFields.of("root", root, KEYS);
+        JsonNode schemaVersion = fields.get(SCHEMA_VERSION);
         if (!schemaVersion.isInt() || schemaVersion.asInt() <= 0) {
             throw new IllegalArgumentException("'" + SCHEMA_VERSION + "' must be a positive integer");
         }
-        List<String> stages = parseStages(root.path(STAGES));
+        Set<Stage> stages = parseStages(fields.get(STAGES));
         return new FloorRuleTable(
                 schemaVersion.asInt(),
-                stages,
-                parseCategories(root.path(CATEGORIES)),
-                parseRules(root.path(RULES), Set.copyOf(stages)));
+                parseCategories(fields.get(CATEGORIES)),
+                parseRules(fields.get(RULES), stages));
     }
 
-    private static List<String> parseStages(JsonNode node) {
-        List<String> stages = new ArrayList<>(uniqueStrings(STAGES, node));
-        if (stages.isEmpty()) {
-            throw new IllegalArgumentException("'" + STAGES + "' must not be empty");
+    private static Set<Stage> parseStages(JsonNode node) {
+        Set<Stage> stages = uniqueStrings(STAGES, node).stream().map(Stage::fromTableName)
+                .collect(Collectors.toCollection(() -> EnumSet.noneOf(Stage.class)));
+        if (!stages.equals(EnumSet.allOf(Stage.class))) {
+            throw new IllegalArgumentException("'" + STAGES + "' must name exactly " + Stage.tableNames());
         }
-        return stages;
+        return Collections.unmodifiableSet(stages);
     }
 
     private static Map<MDCategory, CategoryFloors> parseCategories(JsonNode node) {
         Set<String> expected = Arrays.stream(MDCategory.values())
                 .map(MDCategory::getValue)
                 .collect(Collectors.toSet());
-        requireObjectWithKeys(CATEGORIES, node, expected);
+        ExactFields fields = ExactFields.of(CATEGORIES, node, expected);
         Map<MDCategory, CategoryFloors> categories = new EnumMap<>(MDCategory.class);
         for (MDCategory category : MDCategory.values()) {
-            JsonNode categoryNode = node.path(category.getValue());
-            if (categoryNode.isMissingNode()) {
-                throw new IllegalArgumentException("'" + CATEGORIES + "' lacks category '" + category.getValue()
-                        + "'; expected exactly " + expected);
-            }
-            categories.put(category, parseCategory(CATEGORIES + "." + category.getValue(), categoryNode));
+            categories.put(category, parseCategory(CATEGORIES + "." + category.getValue(),
+                    fields.get(category.getValue())));
         }
         return categories;
     }
 
     private static CategoryFloors parseCategory(String path, JsonNode node) {
-        requireObjectWithKeys(path, node, CATEGORY_KEYS);
-        JsonNode floorCount = node.path(FLOOR_COUNT);
+        ExactFields fields = ExactFields.of(path, node, CATEGORY_KEYS);
+        JsonNode floorCount = fields.get(FLOOR_COUNT);
         if (!floorCount.isInt() || floorCount.asInt() <= 0) {
             throw new IllegalArgumentException("'" + path + "." + FLOOR_COUNT + "' must be a positive integer");
         }
-        JsonNode difficulties = node.path(DIFFICULTIES);
+        JsonNode difficulties = fields.get(DIFFICULTIES);
         if (!difficulties.isArray() || difficulties.size() != floorCount.asInt()) {
             throw new IllegalArgumentException("'" + path + "." + DIFFICULTIES + "' must be an array of "
                     + floorCount.asInt() + " difficulty sets, one per floor");
@@ -156,28 +154,27 @@ public record FloorRuleTable(
         return Set.copyOf(difficulties);
     }
 
-    private static Map<RuleName, Set<String>> parseRules(JsonNode node, Set<String> stages) {
+    private static Map<RuleName, Set<Stage>> parseRules(JsonNode node, Set<Stage> stages) {
         Set<String> ruleNames = Arrays.stream(RuleName.values())
                 .map(RuleName::tableName)
                 .collect(Collectors.toSet());
-        requireObjectWithKeys(RULES, node, ruleNames);
-        Map<RuleName, Set<String>> rules = new EnumMap<>(RuleName.class);
+        ExactFields fields = ExactFields.of(RULES, node, ruleNames);
+        Map<RuleName, Set<Stage>> rules = new EnumMap<>(RuleName.class);
         for (RuleName rule : RuleName.values()) {
-            JsonNode ruleNode = node.path(rule.tableName());
-            if (ruleNode.isMissingNode()) {
-                throw new IllegalArgumentException("'" + RULES + "' lacks rule '" + rule.tableName()
-                        + "'; expected exactly " + ruleNames);
-            }
-            Set<String> ruleStages = uniqueStrings(RULES + "." + rule.tableName(), ruleNode);
-            for (String stage : ruleStages) {
-                if (!stages.contains(stage)) {
-                    throw new IllegalArgumentException("'" + RULES + "." + rule.tableName() + "' names unknown stage '"
-                            + stage + "'; expected one of " + stages);
-                }
-            }
-            rules.put(rule, Set.copyOf(ruleStages));
+            String path = RULES + "." + rule.tableName();
+            rules.put(rule, uniqueStrings(path, fields.get(rule.tableName())).stream()
+                    .map(name -> declaredStage(path, name, stages))
+                    .collect(Collectors.toUnmodifiableSet()));
         }
         return rules;
+    }
+
+    private static Stage declaredStage(String path, String name, Set<Stage> stages) {
+        return stages.stream()
+                .filter(stage -> stage.tableName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("'" + path + "' names unknown stage '" + name
+                        + "'; expected one of " + Stage.tableNames()));
     }
 
     private static Set<String> uniqueStrings(String path, JsonNode node) {
@@ -196,15 +193,29 @@ public record FloorRuleTable(
         return values;
     }
 
-    private static void requireObjectWithKeys(String path, JsonNode node, Set<String> keys) {
-        if (!node.isObject()) {
-            throw new IllegalArgumentException("'" + path + "' must be an object");
-        }
-        for (Map.Entry<String, JsonNode> field : node.properties()) {
-            if (!keys.contains(field.getKey())) {
-                throw new IllegalArgumentException("'" + path + "' has unknown key '" + field.getKey()
-                        + "'; expected " + keys);
+    @Parsed
+    private record ExactFields(JsonNode node) {
+
+        private static ExactFields of(String path, JsonNode node, Set<String> keys) {
+            if (!node.isObject()) {
+                throw new IllegalArgumentException("'" + path + "' must be an object");
             }
+            Set<String> present = new HashSet<>();
+            for (Map.Entry<String, JsonNode> field : node.properties()) {
+                if (!keys.contains(field.getKey())) {
+                    throw new IllegalArgumentException("'" + path + "' has unknown key '" + field.getKey()
+                            + "'; expected " + keys);
+                }
+                present.add(field.getKey());
+            }
+            if (!present.equals(keys)) {
+                throw new IllegalArgumentException("'" + path + "' lacks a key; expected exactly " + keys);
+            }
+            return new ExactFields(node);
+        }
+
+        private JsonNode get(String key) {
+            return node.path(key);
         }
     }
 }

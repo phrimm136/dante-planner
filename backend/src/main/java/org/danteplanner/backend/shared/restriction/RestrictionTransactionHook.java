@@ -42,12 +42,13 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         this.onUndecided = Objects.requireNonNull(onUndecided, "restriction.on-undecided");
     }
 
-    public static void recordDecision() {
+    public static void record(Clearance clearance) {
         switch (duty()) {
             case RestrictionDuty.DecisionDue due -> SpringContextAdapter.storeRequestValue(
-                    RestrictionDuty.DUTY_ATTRIBUTE, new RestrictionDuty.Discharged());
+                    RestrictionDuty.DUTY_ATTRIBUTE, new RestrictionDuty.Cleared(clearance));
             case RestrictionDuty.CheckDue due -> { }
             case RestrictionDuty.Discharged discharged -> { }
+            case RestrictionDuty.Cleared cleared -> { }
         }
     }
 
@@ -68,15 +69,16 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         Begin begin = Begin.of(beginFailure);
         TransactionMode mode = TransactionMode.of(transaction.isReadOnly());
         switch (BeginDecision.of(begin, mode, duty())) {
-            case BeginDecision.CheckUser check -> check(check.userId(), transaction);
+            case BeginDecision.CheckUser check ->
+                    SpringContextAdapter.storeRequestValue(RestrictionDuty.DUTY_ATTRIBUTE,
+                            clearance(check.userId(), transaction));
             case BeginDecision.Skip skip -> { }
         }
     }
 
-    private void check(Long userId, TransactionExecution transaction) {
-        SpringContextAdapter.storeRequestValue(RestrictionDuty.DUTY_ATTRIBUTE, new RestrictionDuty.Discharged());
+    private RestrictionDuty.Cleared clearance(Long userId, TransactionExecution transaction) {
         try {
-            checkHandler.getObject().requireUnrestricted(userId);
+            return new RestrictionDuty.Cleared(checkHandler.getObject().requireUnrestricted(userId));
         } catch (RuntimeException refusal) {
             // spring-tx does not catch an exception thrown from afterBegin, so the begun transaction would stay bound.
             transactionManager.getObject().rollback((TransactionStatus) transaction);
@@ -106,7 +108,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
     private static String undecidedMessage(HandlerMethod handler) {
         return handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName()
                 + " is @RestrictedByState but committed a write without calling "
-                + "RestrictionCheck.requireUnrestricted or RestrictionCheck.recordPrivate";
+                + "RestrictionCheck.record";
     }
 
     private static RestrictionDuty duty() {

@@ -5,6 +5,7 @@ import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.RuleName;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.validation.EncodedGiftId;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.GiftId;
@@ -84,7 +85,6 @@ public class FloorRules {
     }
 
     FloorRules(FloorRuleTable table) {
-        Stage.requireTableStages(table.stages());
         this.table = table;
         this.requiredRules = Arrays.stream(Stage.values()).collect(Collectors.toMap(Function.identity(),
                 stage -> requiredAt(table, stage), (first, later) -> first, () -> new EnumMap<>(Stage.class)));
@@ -123,7 +123,7 @@ public class FloorRules {
 
     private static List<Rule> requiredAt(FloorRuleTable table, Stage stage) {
         return Arrays.stream(RuleName.values())
-                .filter(name -> table.stagesFor(name).contains(stage.tableName()))
+                .filter(name -> table.stagesFor(name).contains(stage))
                 .map(name -> rule(name, table.entryFloorCount()))
                 .toList();
     }

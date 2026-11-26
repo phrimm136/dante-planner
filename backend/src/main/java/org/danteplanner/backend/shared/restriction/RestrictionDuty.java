@@ -17,6 +17,9 @@ public sealed interface RestrictionDuty {
     record Discharged() implements RestrictionDuty {
     }
 
+    record Cleared(Clearance clearance) implements RestrictionDuty {
+    }
+
     static RestrictionDuty of(Object handler, Viewer viewer) {
         if (!(handler instanceof HandlerMethod method)) {
             return new Discharged();

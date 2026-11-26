@@ -3,6 +3,7 @@ import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.RecordingRestrictionCheck;
 import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
+import org.danteplanner.backend.shared.restriction.UnrestrictedMember;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
 import org.danteplanner.backend.user.entity.User;
@@ -86,6 +87,8 @@ class PlannerSubscriptionServiceTest {
             assertThat(subscriptionService.toggleSubscription(testUser.getId(), plannerId)).isTrue();
 
             assertThat(restrictionCheck.decisions()).containsExactly(Decision.CHECKED);
+            assertThat(restrictionCheck.clearances()).singleElement().isInstanceOfSatisfying(
+                    UnrestrictedMember.class, member -> assertThat(member.userId()).isEqualTo(testUser.getId()));
         }
 
         @Test
