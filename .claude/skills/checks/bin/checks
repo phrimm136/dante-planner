@@ -57,7 +57,7 @@ changed:    the checks the change set reaches, before a commit. The change set i
             runs the test classes named after it, a backend build or resource file runs every
             backend test, and a tooling or scripts/ops change, or a file the tooling tests read
             (fleet and envs terraform, chart, Argo CD root app, workflow, .claude/settings.json,
-            any scripts/ shell script), runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
+            Grafana alert rules, any scripts/ shell script), runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
 --full:     a whole test run that PR Gate already runs (fe test or e2e run with no file, be test
             with no --tests, be check, be pit, fe gate) takes a stated reason.
 
@@ -436,7 +436,7 @@ BACKEND_LINT_CONFIG = ("backend/config/checkstyle/", "backend/config/ast-grep/",
 TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/", "scripts/ops/")
 TOOLING_INPUTS = ("terraform/modules/fleet/", "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-",
                   ".github/workflows/deploy-fleet.yml", ".github/workflows/pr-gate.yml", "deploy/argocd/root-app-",
-                  ".claude/settings.json")
+                  ".claude/settings.json", "deploy/grafana/rules.py", "deploy/grafana/rules/")
 TOOLING_INPUT_PATTERNS = (re.compile(r"scripts/.+\.sh"), re.compile(r"terraform/[^/]+/envs/[^/]+\.tfvars"))
 STACK_FILE = re.compile(r"terraform/([^/]+)/([^/]+)")
 STACK_SUFFIXES = (".tf", ".tfvars.example")
