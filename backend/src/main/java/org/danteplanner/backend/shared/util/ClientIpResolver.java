@@ -46,10 +46,8 @@ public final class ClientIpResolver {
     }
 
     public static String resolve(HttpServletRequest request, SecurityProperties securityProperties) {
-        String directIp = request.getRemoteAddr();
-        Peer peer = securityProperties.isTrustedProxy(directIp) ? Peer.TRUSTED_PROXY : Peer.DIRECT;
-        IpClaim forwarded = IpClaim.forwarded(RequestHeaders.forwardedFor(request));
-        return ipOf(peer, forwarded, directIp);
+        Peer peer = Peer.of(securityProperties.isTrustedProxy(request.getRemoteAddr()));
+        return forwardedOrDirect(request, peer);
     }
 
     public static String resolveClientIdentifier(
@@ -57,11 +55,10 @@ public final class ClientIpResolver {
             SecurityProperties securityProperties,
             Supplier<UUID> deviceId
     ) {
-        String directIp = request.getRemoteAddr();
-        Peer peer = securityProperties.isTrustedProxy(directIp) ? Peer.TRUSTED_PROXY : Peer.DIRECT;
+        Peer peer = Peer.of(securityProperties.isTrustedProxy(request.getRemoteAddr()));
         IpClaim edge = IpClaim.edge(RequestHeaders.cfConnectingIp(request));
-        IpClaim forwarded = IpClaim.forwarded(RequestHeaders.forwardedFor(request));
-        String ip = ipOf(peer, edge, ipOf(peer, forwarded, directIp));
+        String forwardedOrDirect = forwardedOrDirect(request, peer);
+        String ip = ipOf(peer, edge, forwardedOrDirect);
 
         if (isPrivateIp(ip)) {
             UUID resolvedDeviceId = deviceId.get();
@@ -90,6 +87,11 @@ public final class ClientIpResolver {
         return PRIVATE_IPV4_RANGES.stream().anyMatch(range -> range.contains(ip));
     }
 
+    private static String forwardedOrDirect(HttpServletRequest request, Peer peer) {
+        IpClaim forwarded = IpClaim.forwarded(RequestHeaders.forwardedFor(request));
+        return ipOf(peer, forwarded, request.getRemoteAddr());
+    }
+
     /**
      * A claimed address counts only when the peer is a trusted proxy: the edge forwards
      * {@code CF-Connecting-IP} verbatim and a proxy appends to {@code X-Forwarded-For}.
@@ -105,7 +107,11 @@ public final class ClientIpResolver {
 
     private enum Peer {
         TRUSTED_PROXY,
-        DIRECT
+        DIRECT;
+
+        static Peer of(boolean trustedProxy) {
+            return trustedProxy ? TRUSTED_PROXY : DIRECT;
+        }
     }
 
     private sealed interface IpClaim {
