@@ -165,8 +165,9 @@ spec:
     - port: 3000
       targetPort: 3000
 ---
-# Hostname-scoped: Gateway API prefers a hostname-bearing route over the hostname-less
-# backend catch-all, which is what keeps this from shadowing the API.
+# Hostname-scoped: Gateway API prefers a hostname-bearing route over the hostname-less backend
+# route for every path on its host, /api included, so this owns the IdP host without shadowing
+# the API host.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

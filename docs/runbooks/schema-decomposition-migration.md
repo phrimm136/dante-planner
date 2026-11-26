@@ -301,7 +301,7 @@ and never re-attached.
 Confirm before declaring the window closed:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' https://api.dante-planner.com/actuator/health   # 200
+curl -s -o /dev/null -w '%{http_code}\n' https://api.dante-planner.com/healthz-local   # 200
 ```
 
 - Each tunnel still reports **≥4 edge connections**.

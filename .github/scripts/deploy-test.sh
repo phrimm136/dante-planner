@@ -320,23 +320,44 @@ unsupported_matches() {
   '
 }
 
+SERVES_AWK='
+  function serves(type, value, path) {
+    if (type == "Exact") return path == value
+    sub(/\/+$/, "", value)
+    return path == value || index(path, value "/") == 1
+  }
+'
+
 unserved_rows() {
-  awk -F '\t' '
+  awk -F '\t' "$SERVES_AWK"'
     NR == FNR { k = $1 SUBSEP $2; n[k]++; type[k, n[k]] = $3; value[k, n[k]] = $4; next }
     {
       k = $1 SUBSEP $2; served = 0; listed = ""
       for (i = 1; i <= n[k]; i++) {
-        v = value[k, i]; listed = listed (i > 1 ? ", " : "") type[k, i] " " v
-        if (type[k, i] == "Exact" && $3 == v) served = 1
-        if (type[k, i] == "PathPrefix") { sub(/\/+$/, "", v); if ($3 == v || index($3, v "/") == 1) served = 1 }
+        listed = listed (i > 1 ? ", " : "") type[k, i] " " value[k, i]
+        if (serves(type[k, i], value[k, i], $3)) served = 1
       }
       if (!served) printf "%s%s rule %s request_path %s (its matches: %s)", (bad++ ? ", " : ""), $1, $2, $3, listed
     }
   ' "$1" -
 }
 
+routed_unrouted_rows() {
+  awk -F '\t' "$SERVES_AWK"'
+    NR == FNR { n++; route[n] = $1; rule[n] = $2; type[n] = $3; value[n] = $4; next }
+    {
+      for (i = 1; i <= n; i++)
+        if (serves(type[i], value[i], $1)) printf "%s%s (HTTPRoute %s rule %s matches %s %s)", (bad++ ? ", " : ""), $1, route[i], rule[i], type[i], value[i]
+    }
+  ' "$1" -
+}
+
 contract_rows() {
   awk -F '\t' 'NR > 1 && NF' "$harness/route-contract.tsv"
+}
+
+unrouted_paths() {
+  awk 'NF' "$harness/unrouted-paths.txt"
 }
 
 verdict() {
@@ -376,6 +397,25 @@ check_route() {
   return 1
 }
 
+status_of() {
+  { docker exec "$cluster" wget -S -O /dev/null -T 5 "http://$gateway_ip:8000$1" 2>&1 || true; } \
+    | awk '$1 ~ /^HTTP\// { status = $2 } END { print status }'
+}
+
+check_unrouted() {
+  local request_path=$1 i status
+  for ((i = 1; i <= PROBE_ATTEMPTS; i++)); do
+    status=$(status_of "$request_path")
+    case $status in
+      404) return 0 ;;
+      200) echo "GET $request_path reached the backend (200), which no route may serve it to" >&2; return 1 ;;
+    esac
+    sleep 1
+  done
+  echo "GET $request_path: Traefik answered ${status:-nothing}, want 404" >&2
+  return 1
+}
+
 behavior_region() {
   local region=$1 rendered=$work/$1.yaml traefik_image route rule request_path backend_path present absent
   traefik_image=$(doc_named DaemonSet traefik < "$rendered" | first_image)
@@ -403,7 +443,7 @@ behavior_region() {
     || fail behavior "$region: an HTTPRoute was not Accepted by the Gateway within 60s"
   gateway_ip=$(kube -n danteplanner get service traefik-web -o jsonpath='{.spec.clusterIP}')
 
-  local known rendered_rules unknown stale unsupported unserved
+  local known rendered_rules unknown stale unsupported unserved routed
   known=$(contract_rows | cut -f 1,2)
   backend_rules > "$work/$region.rules"
   rendered_rules=$(cut -f 1,2 "$work/$region.rules" | awk '!seen[$0]++')
@@ -415,12 +455,17 @@ behavior_region() {
   [ -z "$unsupported" ] || fail behavior "$region: $unsupported, which the contract check cannot evaluate; only PathPrefix and Exact path matches without headers, queryParams or method are supported"
   unserved=$(contract_rows | unserved_rows "$work/$region.rules")
   [ -z "$unserved" ] || fail behavior "$region: route-contract.tsv row $unserved is not served by that rule; set request_path to a path under one of its matches"
+  routed=$(unrouted_paths | routed_unrouted_rows "$work/$region.rules")
+  [ -z "$routed" ] || fail behavior "$region: .github/deploy-test/unrouted-paths.txt lists $routed as unrouted; drop the match or move the path to a route-contract.tsv row"
 
   while IFS=$'\t' read -r route rule request_path backend_path present absent; do
     check_route "$route rule $rule" "$request_path" "$backend_path" "$present" "$absent" \
       || fail behavior "$region: route $route rule $rule broke its contract"
   done < <(contract_rows)
-  echo "  $region: $(contract_rows | wc -l | tr -d ' ') backend rules hold their contract through $traefik_image"
+  while read -r request_path; do
+    check_unrouted "$request_path" || fail behavior "$region: $request_path is served although .github/deploy-test/unrouted-paths.txt lists it as unrouted"
+  done < <(unrouted_paths)
+  echo "  $region: $(contract_rows | wc -l | tr -d ' ') routed rows and $(unrouted_paths | wc -l | tr -d ' ') unrouted paths hold through $traefik_image"
 }
 
 behavior() {
