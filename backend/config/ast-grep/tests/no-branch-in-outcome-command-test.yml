@@ -37,6 +37,16 @@ valid:
         return List.of(FooOutcome.DONE);
       }
     }
+  - |
+    class A {
+      FooOutcome run(boolean x, boolean y) {
+        if (y) throw new IllegalStateException();
+        return switch (choose(x)) {
+          case LEFT -> FooOutcome.LEFT;
+          case RIGHT -> FooOutcome.RIGHT;
+        };
+      }
+    }
 invalid:
   - |
     class A {
@@ -62,5 +72,49 @@ invalid:
           }
         };
         return Holder.BarOutcome.DONE;
+      }
+    }
+  - |
+    class A {
+      FooOutcome run(boolean x, boolean y) {
+        if (x || y) {
+          return FooOutcome.SKIPPED;
+        }
+        return FooOutcome.DONE;
+      }
+    }
+  - |
+    class A {
+      void run(boolean x) {
+        if (x) {
+          return;
+        }
+        save();
+      }
+      FooOutcome other(boolean x) {
+        if (x) {
+          return save();
+        }
+        return FooOutcome.DONE;
+      }
+    }
+  - |
+    class A {
+      FooOutcome run(boolean x) {
+        if (x) {
+          log();
+          return FooOutcome.LEFT;
+        }
+        return FooOutcome.RIGHT;
+      }
+    }
+  - |
+    class A {
+      FooOutcome run(boolean x) {
+        if (x) {
+          return FooOutcome.LEFT;
+        } else {
+          return FooOutcome.RIGHT;
+        }
       }
     }

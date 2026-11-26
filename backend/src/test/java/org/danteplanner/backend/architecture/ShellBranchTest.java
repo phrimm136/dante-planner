@@ -72,16 +72,21 @@ class ShellBranchTest {
 
     @Test
     void shells_WhenCounted_AreTheEffectfulMethodsWithABranch() {
-        assertThat(countedIn(SHELLS)).containsExactlyInAnyOrderEntriesOf(Map.of(
-                LATE, 1,
-                ACT.replace(".act(", ".actGuarded(").replace(")", ", boolean)"), 1,
-                SHELLS + ".choose(boolean, boolean, boolean)", 1,
-                SHELLS + ".drainEitherWay(boolean)", 1,
-                SHELLS + ".drainSkippingAfterA(boolean)", 1,
-                SHELLS + ".drainWhenAllowed(boolean)", 1,
-                SHELLS + ".f(boolean, boolean)", 1,
-                SHELLS + ".route(java.lang.String)", 1,
-                SAVE, 1));
+        assertThat(countedIn(SHELLS)).containsExactlyInAnyOrderEntriesOf(Map.ofEntries(
+                Map.entry(LATE, 1),
+                Map.entry(ACT.replace(".act(", ".actGuarded(").replace(")", ", boolean)"), 1),
+                Map.entry(SHELLS + ".choose(boolean, boolean, boolean)", 1),
+                Map.entry(SHELLS + ".drainEitherWay(boolean)", 1),
+                Map.entry(SHELLS + ".drainSkippingAfterA(boolean)", 1),
+                Map.entry(SHELLS + ".drainWhenAllowed(boolean)", 1),
+                Map.entry(SHELLS + ".f(boolean, boolean)", 1),
+                Map.entry(SHELLS + ".guardReturningACall(boolean)", 1),
+                Map.entry(SHELLS + ".guardReturningAConstant(boolean)", 1),
+                Map.entry(SHELLS + ".ternaryInAGuard(boolean, boolean)", 1),
+                Map.entry(SHELLS + ".route(java.lang.String)", 1),
+                Map.entry(SHELLS + ".switchOnNull(java.lang.String)", 1),
+                Map.entry(SHELLS + ".switchOnAPattern(java.lang.Object)", 1),
+                Map.entry(SAVE, 1)));
     }
 
     @Test
@@ -95,6 +100,7 @@ class ShellBranchTest {
                 Map.entry(SHAPES + ".breakingOutOfALoop(java.util.List, boolean)", 1),
                 Map.entry(SHAPES + ".termsOfALoopCondition(boolean)", 1),
                 Map.entry(SHAPES + ".numberLabels(int)", 1),
+                Map.entry(SHAPES + ".enumLabels(" + SHAPES + "$Level)", 1),
                 Map.entry(SHAPES + ".overloaded(java.lang.String)", 1),
                 Map.entry(SHAPES + ".overloaded([Ljava.lang.String;)", 2),
                 Map.entry(SHAPES + ".overloaded([[I)", 3),

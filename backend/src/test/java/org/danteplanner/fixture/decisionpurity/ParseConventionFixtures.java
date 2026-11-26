@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Setter;
 
 import org.danteplanner.backend.shared.failure.Parsed;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 final class ParseConventionFixtures {
 
@@ -144,6 +146,13 @@ final class ParseConventionFixtures {
         @Override
         public void checkGuard(Object object) {
         }
+    }
+
+    interface StoredFlags {
+
+        @Modifying
+        @Query("UPDATE Row r SET r.enabled = :enabled WHERE r.id = :id")
+        int assignEnabled(long id, boolean enabled);
     }
 
     interface Flagged {

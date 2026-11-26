@@ -3,33 +3,23 @@ org.danteplanner.backend.auth.controller.AuthController.googleCallback(java.lang
 org.danteplanner.backend.auth.oauth.GoogleIdTokenVerifier.<init>(org.danteplanner.backend.shared.config.OAuthProperties, org.springframework.web.client.RestOperations) # 1
 org.danteplanner.backend.auth.oauth.OAuthStateService.open(java.lang.String) # 3
 org.danteplanner.backend.auth.security.JwtAuthenticationFilter.shouldNotFilter(jakarta.servlet.http.HttpServletRequest) # 1
-org.danteplanner.backend.auth.token.AesGcmCipher.decrypt([B, [B) # 1
 org.danteplanner.backend.auth.token.JwtTokenService.generateRefreshToken(java.lang.Long, java.lang.String, java.lang.String) # 1
-org.danteplanner.backend.auth.token.TokenBlacklistService.blacklistToken(java.lang.String, java.util.Date) # 1
-org.danteplanner.backend.auth.token.TokenBlacklistService.revokeLogoutSession(java.util.Collection) # 3
+org.danteplanner.backend.auth.token.TokenBlacklistService.revokeLogoutSession(java.util.Collection) # 1
 org.danteplanner.backend.comment.service.PlannerCommentSseService.beforeRegister(java.util.UUID, java.util.concurrent.CopyOnWriteArrayList) # 1
 org.danteplanner.backend.comment.service.PlannerCommentSseService.broadcast(java.util.UUID, java.lang.String, java.lang.Object, org.danteplanner.backend.shared.sse.SseEnvelope$UserExclusion) # 2
 org.danteplanner.backend.comment.service.PlannerCommentSseService.cleanupZombieConnections() # 1
-org.danteplanner.backend.comment.service.PlannerCommentSseService.sendToSubscribers(java.util.UUID, java.util.concurrent.CopyOnWriteArrayList, java.lang.String, java.lang.String, org.danteplanner.backend.shared.sse.SseEnvelope$UserExclusion) # 1
 org.danteplanner.backend.moderation.dto.ModerationActionResponse.fromEntity(org.danteplanner.backend.moderation.entity.ModerationAction, java.lang.String, java.lang.String) # 3
-org.danteplanner.backend.moderation.service.CommentModerationService.deleteComment(java.lang.Long, java.lang.Long) # 1
 org.danteplanner.backend.moderation.service.CommentModerationService.deleteCommentByPublicId(java.lang.Long, java.util.UUID, java.lang.String) # 1
 org.danteplanner.backend.moderation.service.ModerationQueryService.getModerationActionsWithActors() # 2
 org.danteplanner.backend.notification.service.NotificationDispatchService.notifyPlannerPublished(java.lang.Long, java.util.UUID, java.lang.String) # 1
 org.danteplanner.backend.planner.controller.PlannerCommandController.upsertPlanner(org.danteplanner.backend.shared.security.Viewer$Member, java.util.UUID, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest, boolean) # 1
 org.danteplanner.backend.planner.effect.PlannerPublishedEffect.applyEffect(org.danteplanner.backend.shared.outbox.entity.DomainEvent, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 1
 org.danteplanner.backend.planner.effect.PlannerRecommendedEffect.applyEffect(org.danteplanner.backend.shared.outbox.entity.DomainEvent, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 2
-org.danteplanner.backend.planner.gamedata.GameDataLoader.forEachField(java.nio.file.Path, java.util.function.BiConsumer) # 2
-org.danteplanner.backend.planner.gamedata.GameDataLoader.loadEgoGiftThemePackMap(java.nio.file.Path) # 3
-org.danteplanner.backend.planner.gamedata.GameDataLoader.loadEgoMaxThreadspin(java.nio.file.Path) # 2
-org.danteplanner.backend.planner.gamedata.GameDataLoader.loadFloorRules(java.nio.file.Path) # 1
+org.danteplanner.backend.planner.gamedata.GameDataLoader.forEachField(java.nio.file.Path, java.util.function.BiConsumer) # 1
+org.danteplanner.backend.planner.gamedata.GameDataLoader.loadEgoGiftThemePackMap(java.nio.file.Path) # 2
+org.danteplanner.backend.planner.gamedata.GameDataLoader.loadEgoMaxThreadspin(java.nio.file.Path) # 1
 org.danteplanner.backend.planner.gamedata.GameDataLoader.loadIdMigrations(java.nio.file.Path) # 1
-org.danteplanner.backend.planner.gamedata.GameDataLoader.loadMirrorDungeonSeason(java.nio.file.Path) # 1
-org.danteplanner.backend.planner.gamedata.GameDataLoader.loadPlannerVersions(java.nio.file.Path) # 1
 org.danteplanner.backend.planner.gamedata.GameDataLoader.loadStartGiftPools(java.nio.file.Path) # 1
-org.danteplanner.backend.planner.gamedata.GameDataLoader.seasonDirectory(java.nio.file.Path, int) # 1
-org.danteplanner.backend.planner.gamedata.GameDataRegistry.init() # 1
-org.danteplanner.backend.planner.gamedata.GameDataRegistry.refresh() # 1
 org.danteplanner.backend.planner.scheduler.PlannerKeywordBackfill.backfill() # 1
 org.danteplanner.backend.planner.scheduler.ViewCountFlushJob.flush() # 1
 org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor.extract(tools.jackson.databind.JsonNode, org.danteplanner.backend.planner.entity.MDCategory) # 1
@@ -44,29 +34,23 @@ org.danteplanner.backend.planner.service.PlannerEngagementService.castVote(java.
 org.danteplanner.backend.planner.service.PlannerPublishingService.requireTitleAfterUpsert(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest) # 1
 org.danteplanner.backend.planner.service.PlannerQueryService.getPlanners(java.lang.Long, org.springframework.data.domain.Pageable, boolean) # 1
 org.danteplanner.backend.planner.service.PublishedPlannerQueryService.searchPlanners(org.danteplanner.backend.planner.dto.CatalogQuery, org.springframework.data.domain.Pageable, org.danteplanner.backend.shared.security.Viewer) # 1
-org.danteplanner.backend.planner.service.ViewCountFlushService.applyBatch(java.util.UUID, java.util.Map) # 1
-org.danteplanner.backend.planner.validation.PlannerContentValidator.season(int) # 1
 org.danteplanner.backend.shared.config.DeviceIdArgumentResolver.resolveArgument(org.springframework.core.MethodParameter, org.springframework.web.method.support.ModelAndViewContainer, org.springframework.web.context.request.NativeWebRequest, org.springframework.web.bind.support.WebDataBinderFactory) # 2
 org.danteplanner.backend.shared.config.DeviceIdResolver.resolve(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.shared.config.JwtProperties.loadPrivateKey(java.lang.String) # 1
 org.danteplanner.backend.shared.config.JwtProperties.loadPublicKey(java.lang.String) # 1
-org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource.acquire(org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource$Acquisition) # 1
 org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource.determineCurrentLookupKey() # 1
 org.danteplanner.backend.shared.config.ReadSourceHealthProbe$SourceProbe.probe() # 4
 org.danteplanner.backend.shared.config.ReadSourceProperties$Source.isEndpointMatchingItsRole() # 3
-org.danteplanner.backend.shared.config.ReadSourceSelector.acquire(org.danteplanner.backend.shared.config.ReadSourceSelector$ConnectionSource) # 2
 org.danteplanner.backend.shared.config.ReadSourceSelector.isUsable(org.danteplanner.backend.shared.config.ReadSourceSelector$Source) # 2
 org.danteplanner.backend.shared.config.ReadSourceSelector.skip(org.danteplanner.backend.shared.config.ReadSourceSelector$Source) # 1
-org.danteplanner.backend.shared.config.ReadSourcesConfig$SourcePoolRegistrar.registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata, org.springframework.beans.factory.support.BeanDefinitionRegistry) # 3
 org.danteplanner.backend.shared.config.ReadSourcesConfig.buildSourceHikariConfig(java.lang.String) # 1
 org.danteplanner.backend.shared.config.ReadSourcesConfig.readSourceSelector(com.zaxxer.hikari.HikariDataSource, io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry, io.micrometer.core.instrument.MeterRegistry, org.springframework.beans.factory.BeanFactory) # 2
 org.danteplanner.backend.shared.config.RedisConnectionConfig.standaloneConfiguration(org.danteplanner.backend.shared.config.RedisConnectionConfig$Endpoints$Endpoint) # 1
 org.danteplanner.backend.shared.config.RoutingDataSourceConfig.buildPrimaryHikariConfig() # 1
 org.danteplanner.backend.shared.config.SecurityProperties$CidrRange.contains(java.lang.String) # 5
-org.danteplanner.backend.shared.config.SecurityProperties$CidrRange.parse(java.lang.String) # 3
 org.danteplanner.backend.shared.config.SecurityProperties.isTrustedProxy(java.lang.String) # 4
 org.danteplanner.backend.shared.config.SecurityProperties.parseTrustedProxyIps() # 3
-org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard.checkDeclared() # 2
+org.danteplanner.backend.shared.config.ViewerArgumentResolver.currentPrincipal() # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.carriesDisconnectStrerror(java.io.IOException) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException, org.springframework.web.context.request.WebRequest) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleExceptionInternal(java.lang.Exception, java.lang.Object, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatusCode, org.springframework.web.context.request.WebRequest) # 3
@@ -76,12 +60,8 @@ org.danteplanner.backend.shared.freshness.FreshnessDeclarations.declare([Lorg.da
 org.danteplanner.backend.shared.freshness.FreshnessDeclarations.declareNone(java.lang.String) # 1
 org.danteplanner.backend.shared.freshness.FreshnessReadAspect.read(org.aspectj.lang.ProceedingJoinPoint, org.springframework.transaction.annotation.Transactional) # 3
 org.danteplanner.backend.shared.freshness.FreshnessReadGuard.await(org.danteplanner.backend.shared.config.ReadSourceSelector$Source, java.lang.String) # 2
-org.danteplanner.backend.shared.freshness.FreshnessReadGuard.read(org.danteplanner.backend.shared.freshness.FreshnessReadGuard$Attempt) # 3
-org.danteplanner.backend.shared.freshness.MarkerDispatchStamp.around(java.lang.Runnable) # 1
-org.danteplanner.backend.shared.freshness.MarkerStamp.judgeUndeclared(org.danteplanner.backend.shared.gtid.GtidWriteCapture$Capture) # 1
-org.danteplanner.backend.shared.freshness.MarkerStore.raise(java.util.Collection, java.lang.String) # 1
-org.danteplanner.backend.shared.freshness.MarkerStore.read(java.util.Collection) # 2
-org.danteplanner.backend.shared.freshness.MarkerStore.readFrom(org.danteplanner.backend.shared.freshness.MarkerStore$Source, java.util.List) # 1
+org.danteplanner.backend.shared.freshness.FreshnessReadGuard.read(org.danteplanner.backend.shared.freshness.FreshnessReadGuard$Attempt) # 1
+org.danteplanner.backend.shared.freshness.MarkerStore.read(java.util.Collection) # 1
 org.danteplanner.backend.shared.freshness.RaiseBatcher.await(io.lettuce.core.RedisFuture, long) # 1
 org.danteplanner.backend.shared.freshness.RaiseBatcher.close() # 1
 org.danteplanner.backend.shared.freshness.RaiseBatcher.drain() # 1
@@ -89,7 +69,6 @@ org.danteplanner.backend.shared.freshness.RaiseBatcher.enqueue(org.danteplanner.
 org.danteplanner.backend.shared.freshness.RaiseBatcher.pipeline(io.lettuce.core.api.async.RedisAsyncCommands, java.lang.String, java.util.List, long) # 3
 org.danteplanner.backend.shared.freshness.RaiseBatcher.raise([Ljava.lang.String;, [Ljava.lang.String;) # 1
 org.danteplanner.backend.shared.freshness.RaiseBatcher.send(java.util.List) # 1
-org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.captureCommittedGtid(java.sql.Connection) # 3
 org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.invoke(java.sql.Connection, java.lang.reflect.Method, [Ljava.lang.Object;) # 3
 org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.isWrapperFor(java.lang.Class) # 1
 org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.readGlobalGtidExecuted(java.sql.Connection) # 1
@@ -97,10 +76,8 @@ org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.readOwnGtid(java.sq
 org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.trackerActive(java.sql.Connection) # 2
 org.danteplanner.backend.shared.gtid.GtidCapturingDataSource.unwrap(java.lang.Class) # 1
 org.danteplanner.backend.shared.gtid.GtidWriteCapture.pollCapturedGtid() # 2
-org.danteplanner.backend.shared.gtid.GtidWriteCapture.recordCommit(java.lang.String, boolean) # 3
+org.danteplanner.backend.shared.gtid.GtidWriteCapture.recordCommit(java.lang.String, boolean) # 1
 org.danteplanner.backend.shared.gtid.GtidWriteCapture.takeCapture() # 1
-org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher.alarmIfSpent(long, int, java.lang.RuntimeException) # 1
-org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.charge(org.danteplanner.backend.shared.ratelimit.RateLimited, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.chargeBucket(org.danteplanner.backend.shared.ratelimit.RateLimitService, org.danteplanner.backend.shared.ratelimit.RateLimited, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 2
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.markStoreAvailable() # 1
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.preHandle(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, java.lang.Object) # 2
@@ -117,7 +94,7 @@ org.danteplanner.backend.shared.redis.RedisRoleProbe.connectionOf(java.util.Map,
 org.danteplanner.backend.shared.redis.RedisRoleProbe.probeEveryRole(org.danteplanner.backend.shared.redis.ProbePhase) # 3
 org.danteplanner.backend.shared.redis.RedisRoleProbe.probeUri(org.danteplanner.backend.shared.config.RedisConnectionConfig$Endpoints$Endpoint, org.danteplanner.backend.shared.redis.RedisRoleProbe$Timeouts) # 1
 org.danteplanner.backend.shared.redis.RoleGated.call(java.util.function.Function, java.util.function.Supplier) # 1
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.afterSingletonsInstantiated() # 2
+org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.afterSingletonsInstantiated() # 1
 org.danteplanner.backend.shared.sanitize.SanitizedStringDeserializer.createContextual(tools.jackson.databind.DeserializationContext, tools.jackson.databind.BeanProperty) # 2
 org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint.commence(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException) # 1
 org.danteplanner.backend.shared.security.MdcLoggingFilter.doFilterInternal(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, jakarta.servlet.FilterChain) # 2
@@ -125,22 +102,19 @@ org.danteplanner.backend.shared.security.ProblemAccessDeniedHandler.handle(jakar
 org.danteplanner.backend.shared.sse.AbstractSseService.connectionCount(java.lang.Object) # 1
 org.danteplanner.backend.shared.sse.AbstractSseService.open(java.lang.Object, java.util.UUID, org.danteplanner.backend.shared.security.Viewer, org.springframework.web.servlet.mvc.method.annotation.SseEmitter) # 1
 org.danteplanner.backend.shared.sse.AbstractSseService.removeConnection(java.lang.Object, java.util.UUID) # 3
-org.danteplanner.backend.shared.sse.SseService.broadcastToAll(org.danteplanner.backend.shared.sse.SseEnvelope$UserExclusion, java.lang.String, java.lang.Object) # 2
 org.danteplanner.backend.shared.sse.SseService.cleanupZombieConnections() # 1
-org.danteplanner.backend.shared.sse.SseService.sendToUser(java.lang.Long, java.lang.String, java.lang.Object) # 3
+org.danteplanner.backend.shared.sse.SseService.sendToUser(java.lang.Long, java.lang.String, java.lang.Object) # 1
 org.danteplanner.backend.shared.sse.SseSubscription.connect() # 3
 org.danteplanner.backend.shared.util.ClientIpResolver.isPrivateIp(java.lang.String) # 3
 org.danteplanner.backend.shared.util.ClientIpResolver.resolveClientIdentifier(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties, java.util.function.Supplier) # 2
 org.danteplanner.backend.shared.util.CookieUtils.buildCookie(java.lang.String, java.lang.String, int, boolean) # 1
 org.danteplanner.backend.shared.util.CookieUtils.getCookieValue(jakarta.servlet.http.HttpServletRequest, java.lang.String) # 2
 org.danteplanner.backend.shared.util.HtmlSanitizer.sanitize(java.lang.String) # 2
-org.danteplanner.backend.user.config.SentinelUserVerifier.run(org.springframework.boot.ApplicationArguments) # 1
 org.danteplanner.backend.user.scheduler.UserCleanupScheduler.cleanupExpiredUsers() # 2
 org.danteplanner.backend.user.security.PrivilegedRouteRules.liveActorAtLeast(org.danteplanner.backend.user.api.UserRole) # 1
 org.danteplanner.backend.user.security.PrivilegedRouteRules.refusal(java.util.Optional, org.danteplanner.backend.user.api.UserRole, java.time.Clock) # 2
 org.danteplanner.backend.user.service.RandomUsernameGenerator.selectWeightedEpithet() # 1
 org.danteplanner.backend.user.service.UserAccountLifecycleService.deleteAccount(java.lang.Long) # 1
 org.danteplanner.backend.user.service.UserAccountLifecycleService.performHardDelete(java.lang.Long, java.time.Instant) # 1
-org.danteplanner.backend.user.service.UserAccountLifecycleService.reactivateAccount(java.lang.Long) # 1
-org.danteplanner.backend.user.service.UserService.createUserWithUniqueUsername(org.danteplanner.backend.user.api.AuthProviderType, java.lang.String, java.lang.String) # 2
+org.danteplanner.backend.user.service.UserService.createUserWithUniqueUsername(org.danteplanner.backend.user.api.AuthProviderType, java.lang.String, java.lang.String) # 1
 org.danteplanner.backend.user.service.UserService.isUsernameSuffixCollision(org.springframework.dao.DataIntegrityViolationException) # 1

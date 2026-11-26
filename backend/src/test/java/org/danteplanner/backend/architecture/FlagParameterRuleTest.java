@@ -9,6 +9,8 @@ import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.lang.ArchRule;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import static com.tngtech.archunit.base.DescribedPredicate.describe;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -24,6 +26,7 @@ class FlagParameterRuleTest {
             method.getModifiers().contains(JavaModifier.PUBLIC)
                     && takesABoolean(method)
                     && !isSetter(method)
+                    && !isStoringQuery(method)
                     && VoidCheckRuleTest.isHandWritten(method)
                     && VoidCheckRuleTest.overriddenBy(method).noneMatch(FlagParameterRuleTest::answersForItsOverrides));
 
@@ -67,13 +70,18 @@ class FlagParameterRuleTest {
                 .should(VoidCheckRuleTest.beExactly(listed))
                 .allowEmptyShould(true)
                 .as("a public method takes an enum, or is two methods, instead of a boolean; the flag parameters left"
-                        + " are exactly the lines of backend/config/flag-parameters.txt, which only shrinks:"
+                        + " are exactly the lines of backend/config/flag-parameters.txt, which only shrinks (a"
+                        + " modifying query that stores the boolean is outside the rule):"
                         + " an unlisted one becomes an enum or two methods, not a line");
     }
 
     private static boolean takesABoolean(JavaMethod method) {
         return method.getRawParameterTypes().stream()
                 .anyMatch(type -> type.isEquivalentTo(boolean.class) || type.isEquivalentTo(Boolean.class));
+    }
+
+    private static boolean isStoringQuery(JavaMethod method) {
+        return method.isAnnotatedWith(Modifying.class) && method.isAnnotatedWith(Query.class);
     }
 
     private static boolean isSetter(JavaMethod method) {

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.restriction;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -21,7 +22,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.jspecify.annotations.Nullable;
 
@@ -49,10 +49,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
     }
 
     public static void recordDecision() {
-        switch (currentState()) {
-            case RequestStateOutcome.None none -> { }
-            case RequestStateOutcome.Tracked tracked -> tracked.state().decided = Decided.DECIDED;
-        }
+        withState(state -> state.decided = true);
     }
 
     @Override
@@ -69,27 +66,22 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void afterBegin(TransactionExecution transaction, @Nullable Throwable beginFailure) {
-        switch (Guard.begun(beginFailure, Access.of(transaction.isReadOnly()))) {
-            case UNGUARDED -> { }
-            case GUARDED -> beginGuarded(transaction);
+        if (beginFailure != null || transaction.isReadOnly()) {
+            return;
         }
-    }
-
-    private void beginGuarded(TransactionExecution transaction) {
-        switch (currentState()) {
-            case RequestStateOutcome.None none -> { }
-            case RequestStateOutcome.Tracked tracked -> {
-                RequestState state = tracked.state();
-                switch (BeginStep.of(state.declaration, state.checked, state.principal)) {
-                    case BeginStep.Check check -> check(state, check.userId(), transaction);
-                    case BeginStep.Pass pass -> { }
-                }
+        withState(state -> {
+            if (state.declaration != Declaration.RESTRICTED || state.checked) {
+                return;
             }
-        }
+            switch (state.principal) {
+                case Principal.Authenticated authenticated -> check(state, authenticated.userId(), transaction);
+                case Principal.Anonymous anonymous -> { }
+            }
+        });
     }
 
     private void check(RequestState state, Long userId, TransactionExecution transaction) {
-        state.checked = Checked.CHECKED;
+        state.checked = true;
         try {
             checkHandler.getObject().requireUnrestricted(userId);
         } catch (RuntimeException refusal) {
@@ -101,27 +93,21 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void beforeCommit(TransactionExecution transaction) {
-        switch (Guard.committing(Access.of(transaction.isReadOnly()))) {
-            case UNGUARDED -> { }
-            case GUARDED -> commitGuarded();
+        if (transaction.isReadOnly()) {
+            return;
         }
-    }
-
-    private void commitGuarded() {
-        switch (currentState()) {
-            case RequestStateOutcome.None none -> { }
-            case RequestStateOutcome.Tracked tracked -> {
-                RequestState state = tracked.state();
-                switch (CommitStep.of(state.declaration, state.decided, onUndecided)) {
-                    case PASS -> { }
-                    case FAIL -> throw new IllegalStateException(undecidedMessage(state));
-                    case COUNT -> {
-                        undecidedCounter.increment();
-                        log.warn(undecidedMessage(state));
-                    }
+        withState(state -> {
+            if (state.declaration != Declaration.BY_STATE || state.decided) {
+                return;
+            }
+            switch (onUndecided) {
+                case FAIL -> throw new IllegalStateException(undecidedMessage(state));
+                case COUNT -> {
+                    undecidedCounter.increment();
+                    log.warn(undecidedMessage(state));
                 }
             }
-        }
+        });
     }
 
     private static String undecidedMessage(RequestState state) {
@@ -129,33 +115,30 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
                 + "RestrictionCheck.requireUnrestricted or RestrictionCheck.recordPrivate";
     }
 
-    private static RequestStateOutcome currentState() {
-        return switch (RequestScope.of(RequestContextHolder.getRequestAttributes())) {
-            case RequestScope.Unbound unbound -> new RequestStateOutcome.None();
-            case RequestScope.Bound bound -> stateIn(bound.attributes());
-        };
+    private static void withState(Consumer<RequestState> action) {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return;
+        }
+        Object stored = attributes.getAttribute(STATE_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+        Object matched = attributes.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE,
+                RequestAttributes.SCOPE_REQUEST);
+        switch (Dispatch.of(stored, matched)) {
+            case Dispatch.Tracked tracked -> action.accept(tracked.state());
+            case Dispatch.Handled handled -> {
+                RequestState created = track(handled.handler(), attributes);
+                action.accept(created);
+            }
+            case Dispatch.Unhandled unhandled -> { }
+        }
     }
 
-    private static RequestStateOutcome stateIn(RequestAttributes attributes) {
-        return switch (Dispatch.of(
-                attributes.getAttribute(STATE_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST),
-                attributes.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE,
-                        RequestAttributes.SCOPE_REQUEST))) {
-            case Dispatch.Tracked tracked -> new RequestStateOutcome.Tracked(tracked.state());
-            case Dispatch.Handled handled -> track(handled.handler(), attributes);
-            case Dispatch.Unhandled unhandled -> new RequestStateOutcome.None();
-        };
-    }
-
-    private static RequestStateOutcome track(HandlerMethod handler, RequestAttributes attributes) {
-        Principal principal = switch (SignIn.of(SecurityContextHolder.getContext().getAuthentication())) {
-            case SignIn.Present present -> Principal.of(present.authentication().getPrincipal());
-            case SignIn.Absent absent -> new Principal.Anonymous();
-        };
-        RequestState state = new RequestState(declarationOf(handler),
-                handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName(), principal);
+    private static RequestState track(HandlerMethod handler, RequestAttributes attributes) {
+        Principal principal = Principal.of(SecurityContextHolder.getContext().getAuthentication());
+        String handlerName = handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName();
+        RequestState state = new RequestState(declarationOf(handler), handlerName, principal);
         attributes.setAttribute(STATE_ATTRIBUTE, state, RequestAttributes.SCOPE_REQUEST);
-        return new RequestStateOutcome.Tracked(state);
+        return state;
     }
 
     private static Declaration declarationOf(HandlerMethod handler) {
@@ -166,28 +149,6 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
             return Declaration.BY_STATE;
         }
         return Declaration.NONE;
-    }
-
-    private sealed interface RequestStateOutcome extends CommandOutcome {
-
-        record None() implements RequestStateOutcome {
-        }
-
-        record Tracked(RequestState state) implements RequestStateOutcome {
-        }
-    }
-
-    private sealed interface RequestScope {
-
-        record Bound(RequestAttributes attributes) implements RequestScope {
-        }
-
-        record Unbound() implements RequestScope {
-        }
-
-        static RequestScope of(@Nullable RequestAttributes attributes) {
-            return attributes == null ? new Unbound() : new Bound(attributes);
-        }
     }
 
     private sealed interface Dispatch {
@@ -209,79 +170,6 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         }
     }
 
-    private enum Access {
-        READ_ONLY,
-        READ_WRITE;
-
-        static Access of(boolean readOnly) {
-            return readOnly ? READ_ONLY : READ_WRITE;
-        }
-    }
-
-    private enum Guard {
-        GUARDED,
-        UNGUARDED;
-
-        static Guard begun(@Nullable Throwable beginFailure, Access access) {
-            return beginFailure == null ? committing(access) : UNGUARDED;
-        }
-
-        static Guard committing(Access access) {
-            return switch (access) {
-                case READ_ONLY -> UNGUARDED;
-                case READ_WRITE -> GUARDED;
-            };
-        }
-    }
-
-    private sealed interface BeginStep {
-
-        record Check(Long userId) implements BeginStep {
-        }
-
-        record Pass() implements BeginStep {
-        }
-
-        private static BeginStep of(Declaration declaration, Checked checked, Principal principal) {
-            if (declaration != Declaration.RESTRICTED || checked == Checked.CHECKED) {
-                return new Pass();
-            }
-            return switch (principal) {
-                case Principal.Authenticated authenticated -> new Check(authenticated.userId());
-                case Principal.Anonymous anonymous -> new Pass();
-            };
-        }
-    }
-
-    private enum CommitStep {
-        PASS,
-        FAIL,
-        COUNT;
-
-        static CommitStep of(Declaration declaration, Decided decided, OnUndeclared onUndecided) {
-            if (declaration != Declaration.BY_STATE || decided == Decided.DECIDED) {
-                return PASS;
-            }
-            return switch (onUndecided) {
-                case FAIL -> FAIL;
-                case COUNT -> COUNT;
-            };
-        }
-    }
-
-    private sealed interface SignIn {
-
-        record Present(Authentication authentication) implements SignIn {
-        }
-
-        record Absent() implements SignIn {
-        }
-
-        static SignIn of(@Nullable Authentication authentication) {
-            return authentication == null ? new Absent() : new Present(authentication);
-        }
-    }
-
     private sealed interface Principal {
 
         record Authenticated(Long userId) implements Principal {
@@ -290,8 +178,10 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         record Anonymous() implements Principal {
         }
 
-        static Principal of(@Nullable Object principal) {
-            return principal instanceof Long userId ? new Authenticated(userId) : new Anonymous();
+        static Principal of(@Nullable Authentication authentication) {
+            return authentication != null && authentication.getPrincipal() instanceof Long userId
+                    ? new Authenticated(userId)
+                    : new Anonymous();
         }
     }
 
@@ -301,23 +191,13 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         NONE
     }
 
-    private enum Checked {
-        PENDING,
-        CHECKED
-    }
-
-    private enum Decided {
-        UNDECIDED,
-        DECIDED
-    }
-
     private static final class RequestState {
 
         private final Declaration declaration;
         private final String handlerName;
         private final Principal principal;
-        private Checked checked = Checked.PENDING;
-        private Decided decided = Decided.UNDECIDED;
+        private boolean checked;
+        private boolean decided;
 
         private RequestState(Declaration declaration, String handlerName, Principal principal) {
             this.declaration = declaration;
