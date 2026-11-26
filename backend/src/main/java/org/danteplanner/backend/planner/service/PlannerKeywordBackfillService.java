@@ -8,7 +8,10 @@ import tools.jackson.databind.node.MissingNode;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.CatalogCopy;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordBackfillRow;
+import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordColumn;
+import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.PublishState;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.springframework.stereotype.Service;
@@ -53,15 +56,6 @@ public class PlannerKeywordBackfillService {
 
         private static BackfillCursor following(BackfillCursor cursor, List<KeywordBackfillRow> page) {
             return page.isEmpty() ? cursor : new After(page.getLast().plannerId());
-        }
-    }
-
-    private sealed interface KeywordColumn {
-
-        record Empty() implements KeywordColumn {
-        }
-
-        record Json(String text) implements KeywordColumn {
         }
     }
 
@@ -148,41 +142,64 @@ public class PlannerKeywordBackfillService {
         record Stale(List<Correction> corrections) implements RowState {
         }
 
-        static RowState of(KeywordBackfillRow row, KeywordColumn derived, KeywordColumn column,
-                KeywordColumn catalog) {
+        static RowState of(PublishState publication, KeywordColumn derived, KeywordColumn column,
+                CatalogCopy catalog) {
             List<Correction> corrections = new ArrayList<>();
             if (!derived.equals(column)) {
                 corrections.add(new Correction.Content(derived));
-                if (row.published()) {
-                    corrections.add(new Correction.FilterRows());
+                switch (publication) {
+                    case PUBLISHED -> corrections.add(new Correction.FilterRows());
+                    case UNPUBLISHED -> { }
                 }
             }
-            if (row.catalogued() && !derived.equals(catalog)) {
-                corrections.add(new Correction.Catalog(derived));
+            switch (catalog) {
+                case CatalogCopy.Uncatalogued uncatalogued -> { }
+                case CatalogCopy.Catalogued(KeywordColumn stored) -> {
+                    if (!derived.equals(stored)) {
+                        corrections.add(new Correction.Catalog(derived));
+                    }
+                }
             }
             return corrections.isEmpty() ? new Current() : new Stale(corrections);
         }
     }
 
     private RowState stateOf(KeywordBackfillRow row) {
-        return RowState.of(row, derivedColumn(row.contentKeywords()), canonical(row.columnKeywords()),
-                canonical(row.catalogKeywords()));
+        return RowState.of(row.publication(), derivedColumn(row.contentKeywords()), canonical(row.columnKeywords()),
+                canonical(row.catalog()));
     }
 
-    private KeywordColumn derivedColumn(String selectionJson) {
-        JsonNode selection;
-        try {
-            selection = selectionJson == null ? MissingNode.getInstance() : objectMapper.readTree(selectionJson);
-        } catch (JacksonException e) {
-            throw new IllegalStateException("MySQL returned an unreadable JSON selection: " + selectionJson, e);
-        }
+    private KeywordColumn derivedColumn(KeywordColumn contentSelection) {
+        JsonNode selection = switch (contentSelection) {
+            case KeywordColumn.Empty empty -> MissingNode.getInstance();
+            case KeywordColumn.Json(String text) -> selectionOf(text);
+        };
         return serialized(List.copyOf(PlannerKeywords.fromSelection(selection).asSet()));
     }
 
-    private KeywordColumn canonical(String stored) {
-        if (stored == null) {
-            return new KeywordColumn.Empty();
+    private JsonNode selectionOf(String selectionJson) {
+        try {
+            return objectMapper.readTree(selectionJson);
+        } catch (JacksonException e) {
+            throw new IllegalStateException("MySQL returned an unreadable JSON selection: " + selectionJson, e);
         }
+    }
+
+    private CatalogCopy canonical(CatalogCopy catalog) {
+        return switch (catalog) {
+            case CatalogCopy.Uncatalogued uncatalogued -> uncatalogued;
+            case CatalogCopy.Catalogued(KeywordColumn stored) -> new CatalogCopy.Catalogued(canonical(stored));
+        };
+    }
+
+    private KeywordColumn canonical(KeywordColumn column) {
+        return switch (column) {
+            case KeywordColumn.Empty empty -> empty;
+            case KeywordColumn.Json(String stored) -> reserialized(stored);
+        };
+    }
+
+    private KeywordColumn reserialized(String stored) {
         try {
             List<String> keywords = objectMapper.readValue(stored, STRING_LIST);
             return keywords == null || keywords.contains(null)
