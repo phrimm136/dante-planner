@@ -26,6 +26,16 @@ describe('applyTextStyles', () => {
     expect(applyTextStyles('plain')).toBe('plain')
   })
 
+  it('draws an italic run in italics', () => {
+    const container = renderStyled('a <i>b</i> c')
+
+    const italic = [...container.querySelectorAll<HTMLElement>('span')].find(
+      (span) => span.textContent === 'b',
+    )
+    expect(italic?.style.fontStyle).toBe('italic')
+    expect(container.textContent).toBe('a b c')
+  })
+
   it('breaks lines at newlines', () => {
     const container = renderStyled('a\nb')
 

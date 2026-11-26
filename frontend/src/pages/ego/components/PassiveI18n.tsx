@@ -1,5 +1,5 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
-import { FormattedDescription } from '@/shared/gameText'
+import { applyTextStyles, FormattedDescription } from '@/shared/gameText'
 import { NamePlate, type NamePlateImportance } from '@/shared/gameText'
 import { EGOPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import type { PassiveId } from '@/shared/gameData'
@@ -63,7 +63,7 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
       className="italic whitespace-pre-line"
       style={passiveBoxLayout().flavor}
     >
-      {flavor}
+      {applyTextStyles(flavor)}
     </p>
   )
 }

@@ -44,6 +44,12 @@ describe('SkillDescription', () => {
       expect(flavor).toHaveTextContent('A technique that cuts through space itself.')
     })
 
+    it('renders a tagged flavor without its tags', () => {
+      render(<SkillDescription descData={baseDesc} flavor="off heat <i>completely</i>" />)
+
+      expect(screen.getByTestId('skill-flavor')).toHaveTextContent(/^off heat completely$/)
+    })
+
     it('omits the flavor element when flavor is undefined', () => {
       render(<SkillDescription descData={baseDesc} />)
       expect(screen.queryByTestId('skill-flavor')).not.toBeInTheDocument()
@@ -73,13 +79,14 @@ describe('SkillDescription', () => {
       expect(lastChild).toBe(screen.getByTestId('skill-flavor'))
     })
 
-    it('preserves multi-line flavor via whitespace-pre-line', () => {
+    it('breaks a multi-line flavor at its newline', () => {
       const multiLine = 'First line.\nSecond line.'
       render(<SkillDescription descData={baseDesc} flavor={multiLine} />)
 
       const flavor = screen.getByTestId('skill-flavor')
       expect(flavor).toHaveClass('whitespace-pre-line')
-      expect(flavor.textContent).toBe(multiLine)
+      expect(flavor.querySelectorAll('br')).toHaveLength(1)
+      expect(flavor.textContent).toBe('First line.Second line.')
     })
   })
 

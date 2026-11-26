@@ -2,7 +2,12 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PANEL_TEXT_NODES, UNIT_PANEL_COLORS } from '@/lib/constants'
-import { FormattedDescription, NamePlate, type NamePlateImportance } from '@/shared/gameText'
+import {
+  applyTextStyles,
+  FormattedDescription,
+  NamePlate,
+  type NamePlateImportance,
+} from '@/shared/gameText'
 import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import { textBlockStyle } from '@/shared/skill'
 import type { ImportancePalette } from '@/shared/gameData'
@@ -120,7 +125,7 @@ function PassiveFlavor({ source, passiveId }: { source: BattleTextSource; passiv
       className="italic whitespace-pre-line"
       style={passiveBoxLayout().flavor}
     >
-      {flavor}
+      {applyTextStyles(flavor)}
     </p>
   )
 }

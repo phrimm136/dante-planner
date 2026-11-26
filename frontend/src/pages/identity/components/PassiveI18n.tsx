@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
-import { FormattedDescription } from '@/shared/gameText'
+import { applyTextStyles, FormattedDescription } from '@/shared/gameText'
 import { NamePlate, StyledSkillName, type NamePlateImportance } from '@/shared/gameText'
 import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
 import {
@@ -70,7 +70,7 @@ export function PassiveCard({ name, desc, flavor, condition, isLocked }: Passive
           className="text-sm italic whitespace-pre-line pt-1"
           style={{ color: FLAVOR_TEXT_COLOR }}
         >
-          {flavor}
+          {applyTextStyles(flavor)}
         </p>
       )}
     </div>
@@ -136,7 +136,7 @@ function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: Passiv
       className="italic whitespace-pre-line"
       style={passiveBoxLayout().flavor}
     >
-      {flavor}
+      {applyTextStyles(flavor)}
     </p>
   )
 }

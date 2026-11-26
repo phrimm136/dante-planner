@@ -1,6 +1,6 @@
 import { getCoinDescIconPath } from '@/shared/assets'
 import { type SkillDescEntry } from '@/shared/gameData'
-import { FormattedDescription } from '@/shared/gameText'
+import { applyTextStyles, FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PANEL_TEXT_NODES, SKILL_LOWER_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
@@ -87,7 +87,7 @@ export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
 
       {flavor && (
         <p data-testid="skill-flavor" className="italic whitespace-pre-line" style={flavorStyle}>
-          {flavor}
+          {applyTextStyles(flavor)}
         </p>
       )}
     </div>

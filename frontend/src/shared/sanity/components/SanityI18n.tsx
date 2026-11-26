@@ -2,7 +2,7 @@ import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { usePanicInfo, getPanicEntry } from '../hooks/usePanicInfo'
-import { FormattedDescription } from '@/shared/gameText'
+import { applyTextStyles, FormattedDescription } from '@/shared/gameText'
 import { FormattedSanityText } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/shared/assets'
@@ -125,7 +125,7 @@ export function PanicTypeSection({
                 whiteSpace: 'pre-line',
               }}
             >
-              {flavor}
+              {applyTextStyles(flavor)}
             </span>
           </>
         )}

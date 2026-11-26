@@ -10,7 +10,15 @@ import {
 import readings from './__fixtures__/plainTextReadings.json'
 
 function run(text: string, state: Partial<Omit<TmpRun, 'kind' | 'text'>> = {}): TmpRun {
-  return { kind: 'run', text, bold: false, underline: false, strike: false, ...state }
+  return {
+    kind: 'run',
+    text,
+    bold: false,
+    italic: false,
+    underline: false,
+    strike: false,
+    ...state,
+  }
 }
 
 const br: TmpBreak = { kind: 'break' }
@@ -250,10 +258,10 @@ const cases: Case[] = [
     expected: [run(`a<size=${'0'.repeat(120)}95%>`, { fontSize: '95%' })],
   },
   {
-    rule: '<i> is consumed without italic (D5)',
+    rule: '<i> opens an italic run and </i> closes it',
     source: 'TMP_Text.cs:6982-7007',
-    input: '<i>a</i>',
-    expected: [run('a')],
+    input: '<i>a</i>b',
+    expected: [run('a', { italic: true }), run('b')],
   },
 ]
 
