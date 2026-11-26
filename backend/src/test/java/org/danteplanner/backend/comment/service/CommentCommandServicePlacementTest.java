@@ -1,5 +1,6 @@
 package org.danteplanner.backend.comment.service;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
 import org.danteplanner.backend.support.CommentRows;
@@ -298,7 +299,7 @@ class CommentCommandServicePlacementTest {
 
     private void givenThePlanner(boolean published) {
         when(plannerRepository.findThread(PLANNER_ID))
-                .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, 41L, published, false)));
+                .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, 41L, published ? Visibility.SHOWN : Visibility.HIDDEN)));
     }
 
     private void givenParent(UUID plannerId, Long parentCommentId, int depth) {

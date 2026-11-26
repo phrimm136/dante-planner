@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -148,9 +148,9 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         void adminEndpoint_WhenRegularUser_Returns403() throws Exception {
-            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.id()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))
@@ -159,9 +159,9 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         void adminEndpoint_WhenAdminUser_Returns200() throws Exception {
-            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))

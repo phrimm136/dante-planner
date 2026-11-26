@@ -5,13 +5,13 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.planner.dto.VoteResponse;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.Upvote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator.FirstVote;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
@@ -62,7 +62,7 @@ public class PlannerEngagementService {
 
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
-        Planner planner = accessGuard.requirePublished(plannerId);
+        StoredPlanner planner = accessGuard.requirePublished(plannerId);
 
         PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);
         Upvote prior = plannerVoteRepository.existsById(voteId) ? Upvote.CAST : Upvote.NONE;
@@ -82,7 +82,7 @@ public class PlannerEngagementService {
             int rowsUpdated = plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
                 domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_RECOMMENDED, plannerId,
-                        Map.of("ownerId", planner.getUserId()));
+                        Map.of("ownerId", planner.userId()));
                 log.debug("Planner {} crossed threshold ({}→{}), notification recorded",
                         plannerId, upvotesBefore, upvotesAfter);
             } else {

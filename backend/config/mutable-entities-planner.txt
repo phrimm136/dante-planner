@@ -1,3 +1,0 @@
-org.danteplanner.backend.planner.entity.Planner
-org.danteplanner.backend.planner.entity.PlannerCatalog
-org.danteplanner.backend.planner.entity.PlannerContent

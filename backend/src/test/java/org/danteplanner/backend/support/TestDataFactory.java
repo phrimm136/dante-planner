@@ -9,15 +9,17 @@ import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import java.util.concurrent.atomic.AtomicLong;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
+import org.danteplanner.backend.planner.entity.Listing;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PlannerRows;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.StoredPlannerContent;
+import org.danteplanner.backend.planner.entity.Takedown;
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
@@ -37,6 +39,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -226,12 +229,14 @@ public class TestDataFactory {
                 .save(userRepository);
     }
 
-    public static Planner createTestPlanner(PlannerRepository plannerRepository, User owner, boolean published) {
+    public static StoredPlanner createTestPlanner(PlannerRepository plannerRepository, User owner,
+            boolean published) {
         return planner(owner).published(published).save(plannerRepository);
     }
 
-    public static void addToCatalog(PlannerCatalogService catalogService, Planner planner) {
-        catalogService.add(planner, (Publication.Published) planner.publicationState(), planner.listing());
+    public static void addToCatalog(PlannerCatalogService catalogService, StoredPlanner planner) {
+        catalogService.add(planner, new PlannerPublishValidator().requirePublishable(planner),
+                (Publication.Published) planner.publication());
     }
 
     public static PlannerBuilder planner(User owner) {
@@ -384,6 +389,7 @@ public class TestDataFactory {
         private Instant takenDownAt;
         private int upvotes;
         private long syncVersion = 1L;
+        private UUID deviceId;
 
         private PlannerBuilder(User owner) {
             this.ownerId = owner::getId;
@@ -459,48 +465,41 @@ public class TestDataFactory {
             return this;
         }
 
+        public PlannerBuilder deviceId(UUID deviceId) {
+            this.deviceId = deviceId;
+            return this;
+        }
+
         public PlannerBuilder syncVersion(long syncVersion) {
             this.syncVersion = syncVersion;
             return this;
         }
 
-        public Planner build() {
+        public StoredPlanner build() {
             String document = selectedKeywords == null ? content : withSelectedKeywords(content, selectedKeywords);
-            Planner planner = Planner.builder()
-                    .id(id)
-                    .userId(ownerId.get())
-                    .plannerType(plannerType)
-                    .build();
-            planner.attach(
-                    PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(StoredPlannerContent.builder()
-                            .title(title)
-                            .category(category)
-                            .status(status != null ? status
-                                    : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT))
-                            .contentSchemaVersion(schemaVersion)
-                            .gameContentVersion(contentVersion)
-                            .syncVersion(syncVersion)
-                            .selectedKeywords(PlannerKeywords.fromContent(document).asSet())
-                            .build(), document)),
-                    PlannerPublication.builder()
-                            .planner(planner)
-                            .published(published)
-                            .firstPublishedAt(firstPublishedAt != null || !published ? firstPublishedAt : Instant.now())
-                            .build(),
-                    PlannerModeration.builder().planner(planner).takenDownAt(takenDownAt).build());
-            return planner;
+            UUID plannerId = id;
+            Instant stamp = Instant.now().truncatedTo(ChronoUnit.MICROS);
+            Publication publication = published
+                    ? new Publication.Published(firstPublishedAt != null ? firstPublishedAt : stamp)
+                    : Publication.unlisted(firstPublishedAt);
+            return new StoredPlanner(plannerId, ownerId.get(), plannerType, stamp,
+                    new StoredContent(title, status != null ? status
+                            : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT),
+                            category, PlannerKeywords.fromContent(document).asSet(), document, schemaVersion,
+                            contentVersion, syncVersion, deviceId, stamp),
+                    publication, NotificationSetting.ON, new Listing.Listed(), Takedown.of(takenDownAt));
         }
 
-        public Planner save(PlannerRepository plannerRepository) {
-            return plannerRepository.save(build());
+        public StoredPlanner save(PlannerRepository plannerRepository) {
+            return PlannerRows.insert(plannerRepository, build());
         }
 
-        public Planner savePublished(PlannerRepository plannerRepository, PlannerStatsRepository statsRepository,
+        public StoredPlanner savePublished(PlannerRepository plannerRepository, PlannerStatsRepository statsRepository,
                 PlannerCatalogService catalogService) {
             published = true;
-            Planner planner = save(plannerRepository);
+            StoredPlanner planner = save(plannerRepository);
             statsRepository.save(PlannerStats.builder()
-                    .plannerId(planner.getId())
+                    .plannerId(planner.id())
                     .upvotes(upvotes)
                     .build());
             addToCatalog(catalogService, planner);

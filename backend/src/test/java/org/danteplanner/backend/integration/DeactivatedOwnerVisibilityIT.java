@@ -1,6 +1,6 @@
 package org.danteplanner.backend.integration;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -89,13 +89,13 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     private PlannerSubscriptionRepository subscriptionRepository;
 
     private User owner;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
         owner = TestDataFactory.createTestUser(userRepository, "deactivated-owner@example.com");
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
     }
 
@@ -120,7 +120,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     @Test
     void publishedDetail_WhenOwnerActive_Returns200() throws Exception {
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+        mockMvc.perform(get("/api/planner/md/published/{id}", planner.id()))
                 .andExpect(status().isOk());
     }
 
@@ -128,7 +128,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     void publishedDetail_WhenOwnerDeactivated_Returns404PlannerNotFound() throws Exception {
         lifecycleService.deleteAccount(owner.getId());
 
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+        mockMvc.perform(get("/api/planner/md/published/{id}", planner.id()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
     }
@@ -138,7 +138,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         lifecycleService.deleteAccount(owner.getId());
         lifecycleService.reactivateAccount(owner.getId());
 
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+        mockMvc.perform(get("/api/planner/md/published/{id}", planner.id()))
                 .andExpect(status().isOk());
     }
 
@@ -146,7 +146,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     void checkPublished_WhenOwnerDeactivated_ThrowsPlannerNotFound() {
         lifecycleService.deleteAccount(owner.getId());
 
-        assertRejected(() -> accessGuard.checkPublished(planner.getId()))
+        assertRejected(() -> accessGuard.checkPublished(planner.id()))
                 .withCode("PLANNER_NOT_FOUND");
     }
 
@@ -156,10 +156,10 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(membershipRecordsFor(records, planner.getId()))
+        assertThat(membershipRecordsFor(records, planner.id()))
                 .as("a withdrawn row of a deactivated owner is not membership drift")
                 .isEmpty();
-        assertThat(catalogRows(planner.getId())).isZero();
+        assertThat(catalogRows(planner.id())).isZero();
     }
 
     @Test
@@ -169,7 +169,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(membershipRecordsFor(records, planner.getId()))
+        assertThat(membershipRecordsFor(records, planner.id()))
                 .extracting(DriftRecord::expected, DriftRecord::actual)
                 .containsExactly(tuple("row absent", "row present"));
     }
@@ -178,10 +178,10 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     void commentTree_WhenOwnerDeactivated_Returns404PlannerNotFound() throws Exception {
         lifecycleService.deleteAccount(owner.getId());
 
-        mockMvc.perform(get("/api/planner/{id}/comments", planner.getId()))
+        mockMvc.perform(get("/api/planner/{id}/comments", planner.id()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
-                .andExpect(jsonPath("$.detail").value("Planner not found with id: " + planner.getId()));
+                .andExpect(jsonPath("$.detail").value("Planner not found with id: " + planner.id()));
     }
 
     @Test
@@ -189,25 +189,25 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         lifecycleService.deleteAccount(owner.getId());
         lifecycleService.reactivateAccount(owner.getId());
 
-        mockMvc.perform(get("/api/planner/{id}/comments", planner.getId()))
+        mockMvc.perform(get("/api/planner/{id}/comments", planner.id()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void deleteAccount_WhenCommitted_ClearsTheFilterRowsAndReactivationRebuildsThem() {
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
-        int built = filterRows(planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
+        int built = filterRows(planner.id());
         assertThat(built).isPositive();
 
         lifecycleService.deleteAccount(owner.getId());
 
-        assertThat(filterRows(planner.getId()))
+        assertThat(filterRows(planner.id()))
                 .as("the deactivation's own soft delete hides the planner from the clear's visibility check")
                 .isZero();
 
         lifecycleService.reactivateAccount(owner.getId());
 
-        assertThat(filterRows(planner.getId())).isEqualTo(built);
+        assertThat(filterRows(planner.id())).isEqualTo(built);
     }
 
     @Test
@@ -240,9 +240,9 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     }
 
     private void assertRaceNeverLeavesAPublishedPlannerVisible(String holderLock, Object holderKey) throws Exception {
-        Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         new TransactionTemplate(transactionManager).executeWithoutResult(status ->
-                subscriptionRepository.insertIfAbsent(owner.getId(), draft.getId(), Instant.now()));
+                subscriptionRepository.insertIfAbsent(owner.getId(), draft.id(), Instant.now()));
         CompletableFuture<Void> deactivation;
         CompletableFuture<Void> publication;
 
@@ -258,7 +258,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
                     "the deactivation queueing on the holder's lock");
             assertThat(deactivation).as("the deactivation must be held behind the holder's lock").isNotDone();
 
-            publication = CompletableFuture.runAsync(() -> publishingService.publish(owner.getId(), draft.getId()));
+            publication = CompletableFuture.runAsync(() -> publishingService.publish(owner.getId(), draft.id()));
             LockWaits.await(new JdbcTemplate(dataSource), 2, publication::isDone,
                     "the publication queueing on the holder's lock");
 
@@ -272,14 +272,14 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         } catch (ExecutionException e) {
             publishFailure = e.getCause();
         }
-        if (!published(draft.getId())) {
+        if (!published(draft.id())) {
             assertThat(publishFailure).isInstanceOf(AccountDeletedException.class);
         }
 
         mockMvc.perform(get("/api/planner/md/published").param("size", "100"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[*].id", not(hasItem(draft.getId().toString()))));
-        mockMvc.perform(get("/api/planner/md/published/{id}", draft.getId()))
+                .andExpect(jsonPath("$.content[*].id", not(hasItem(draft.id().toString()))));
+        mockMvc.perform(get("/api/planner/md/published/{id}", draft.id()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
     }
@@ -294,17 +294,17 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     void publish_WhenRacingDeactivationAfterItsIdRead_NeverLeavesAPublishedPlannerVisible() throws Exception {
         assertRaceNeverLeavesAPublishedPlannerVisible(
                 "SELECT planner_id FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?) FOR UPDATE",
-                planner.getId().toString());
+                planner.id().toString());
     }
 
     @Test
     void publish_WhenOwnerDeactivated_IsRejected() {
-        Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         lifecycleService.deleteAccount(owner.getId());
 
-        assertRejected(() -> publishingService.publish(owner.getId(), draft.getId()))
+        assertRejected(() -> publishingService.publish(owner.getId(), draft.id()))
                 .withCode("UNAUTHORIZED")
                 .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Account with ID " + owner.getId() + " has been deleted"));
-        assertThat(published(draft.getId())).isFalse();
+        assertThat(published(draft.id())).isFalse();
     }
 }

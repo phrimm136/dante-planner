@@ -3,7 +3,7 @@ package org.danteplanner.backend.integration;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -87,9 +87,9 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     private void cleanUp() {
     }
 
-    private Planner draft() {
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+    private StoredPlanner draft() {
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         return planner;
     }
 
@@ -101,60 +101,60 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     @Test
     void catalogMembership_WhenVisibilityTransitions_RowPresenceMatches() {
         // publish -> row
-        Planner planner = draft();
-        publishingService.publish(owner.getId(), planner.getId());
-        assertThat(hasCatalogRow(planner.getId())).as("published planner has a catalog row").isTrue();
+        StoredPlanner planner = draft();
+        publishingService.publish(owner.getId(), planner.id());
+        assertThat(hasCatalogRow(planner.id())).as("published planner has a catalog row").isTrue();
 
         // unpublish -> gone
-        publishingService.unpublish(owner.getId(), planner.getId());
-        assertThat(hasCatalogRow(planner.getId())).as("unpublished planner has no catalog row").isFalse();
+        publishingService.unpublish(owner.getId(), planner.id());
+        assertThat(hasCatalogRow(planner.id())).as("unpublished planner has no catalog row").isFalse();
 
         // republish then owner delete -> gone
-        publishingService.publish(owner.getId(), planner.getId());
-        assertThat(hasCatalogRow(planner.getId())).isTrue();
-        commandService.deletePlanner(owner.getId(), planner.getId());
-        assertThat(hasCatalogRow(planner.getId())).as("deleted planner has no catalog row").isFalse();
+        publishingService.publish(owner.getId(), planner.id());
+        assertThat(hasCatalogRow(planner.id())).isTrue();
+        commandService.deletePlanner(owner.getId(), planner.id());
+        assertThat(hasCatalogRow(planner.id())).as("deleted planner has no catalog row").isFalse();
 
         // fresh published planner, moderator takedown -> gone
-        Planner takenDown = draft();
-        publishingService.publish(owner.getId(), takenDown.getId());
-        assertThat(hasCatalogRow(takenDown.getId())).isTrue();
-        plannerModerationService.deletePlanner(admin.getId(), takenDown.getId(), "violation");
-        assertThat(hasCatalogRow(takenDown.getId())).as("taken-down planner has no catalog row").isFalse();
+        StoredPlanner takenDown = draft();
+        publishingService.publish(owner.getId(), takenDown.id());
+        assertThat(hasCatalogRow(takenDown.id())).isTrue();
+        plannerModerationService.deletePlanner(admin.getId(), takenDown.id(), "violation");
+        assertThat(hasCatalogRow(takenDown.id())).as("taken-down planner has no catalog row").isFalse();
     }
 
     // recommended-flag-and-detail
     @Test
     void recommendedFlag_WhenVoteAndModerationTransitions_TracksDerivation() {
-        Planner planner = draft();
-        publishingService.publish(owner.getId(), planner.getId());
-        assertThat(catalogRepository.findById(planner.getId())
+        StoredPlanner planner = draft();
+        publishingService.publish(owner.getId(), planner.id());
+        assertThat(catalogRepository.findById(planner.id())
                 .map(PlannerCatalog::isRecommended).orElseThrow()).isFalse();
 
         // votes up to one below the threshold: still not recommended
         for (int i = 0; i < recommendedThreshold - 1; i++) {
             User voter = TestDataFactory.createTestUser(userRepository, "voter" + i + "@example.com");
-            engagementService.castVote(voter.getId(), planner.getId(), VoteType.UP);
+            engagementService.castVote(voter.getId(), planner.id(), VoteType.UP);
         }
-        assertThat(catalogRepository.findById(planner.getId())
+        assertThat(catalogRepository.findById(planner.id())
                 .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("below threshold stays unrecommended").isFalse();
 
         // the crossing vote flips the derived flag
         User crosser = TestDataFactory.createTestUser(userRepository, "crosser@example.com");
-        engagementService.castVote(crosser.getId(), planner.getId(), VoteType.UP);
-        assertThat(catalogRepository.findById(planner.getId())
+        engagementService.castVote(crosser.getId(), planner.id(), VoteType.UP);
+        assertThat(catalogRepository.findById(planner.id())
                 .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("threshold crossing sets recommended").isTrue();
 
         // moderation hide clears it; unhide recomputes it from stats
-        plannerModerationService.hideFromRecommended(planner.getId(), admin.getId(), new HidePlannerRequest("off-list"));
-        assertThat(catalogRepository.findById(planner.getId())
+        plannerModerationService.hideFromRecommended(planner.id(), admin.getId(), new HidePlannerRequest("off-list"));
+        assertThat(catalogRepository.findById(planner.id())
                 .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("hidden planner is not recommended").isFalse();
 
-        plannerModerationService.unhideFromRecommended(planner.getId(), admin.getId());
-        assertThat(catalogRepository.findById(planner.getId())
+        plannerModerationService.unhideFromRecommended(planner.id(), admin.getId());
+        assertThat(catalogRepository.findById(planner.id())
                 .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("unhide restores the stats-derived flag").isTrue();
     }
@@ -162,15 +162,15 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     // takedown-blocks-republish
     @Test
     void takedownBlocksRepublish_WhenOwnerPublishes_RejectedWithoutCatalogRow() {
-        Planner planner = draft();
-        publishingService.publish(owner.getId(), planner.getId());
-        plannerModerationService.deletePlanner(admin.getId(), planner.getId(), "violation");
-        assertThat(hasCatalogRow(planner.getId())).isFalse();
+        StoredPlanner planner = draft();
+        publishingService.publish(owner.getId(), planner.id());
+        plannerModerationService.deletePlanner(admin.getId(), planner.id(), "violation");
+        assertThat(hasCatalogRow(planner.id())).isFalse();
 
-        assertRejected(() -> publishingService.publish(owner.getId(), planner.getId()))
+        assertRejected(() -> publishingService.publish(owner.getId(), planner.id()))
                 .as("the aggregate root rejects republishing a taken-down planner")
                 .withCode("PLANNER_FORBIDDEN");
-        assertThat(hasCatalogRow(planner.getId()))
+        assertThat(hasCatalogRow(planner.id()))
                 .as("no catalog row appears for the rejected publish").isFalse();
     }
 }

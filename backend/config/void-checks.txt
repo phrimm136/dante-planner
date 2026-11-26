@@ -1,4 +1,0 @@
-org.danteplanner.backend.planner.precondition.PlannerPublishValidator.requireTitle(java.lang.String)
-org.danteplanner.backend.planner.service.PlannerAccessGuard.requireUser(java.lang.Long)
-org.danteplanner.backend.planner.service.PlannerAccessGuard.requireVisible(org.danteplanner.backend.planner.service.PlannerVisibilityFacts)
-org.danteplanner.backend.planner.service.PlannerPublishingService.requireTitleAfterUpsert(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest)

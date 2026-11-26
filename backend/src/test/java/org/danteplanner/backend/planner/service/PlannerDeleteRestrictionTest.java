@@ -1,9 +1,10 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -30,7 +31,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +41,11 @@ class PlannerDeleteRestrictionTest {
 
     @Mock
     private PlannerRepository plannerRepository;
+
+
+    @Mock
+
+    private PlannerContentRepository contentRepository;
 
     @Mock
     private PlannerEntityFilterRepository entityFilterRepository;
@@ -67,6 +74,7 @@ class PlannerDeleteRestrictionTest {
                 objectMapper, 10);
         commandService = new PlannerCommandService(
                 plannerRepository,
+                contentRepository,
                 null,
                 publicationRepository,
                 null,
@@ -84,11 +92,11 @@ class PlannerDeleteRestrictionTest {
         owner = users.add(TestDataFactory.unsavedUser(1L));
     }
 
-    private Planner ownedPlanner(boolean published) {
-        Planner planner = TestDataFactory.planner(owner).published(published).build();
-        when(plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()))
+    private StoredPlanner ownedPlanner(boolean published) {
+        StoredPlanner planner = TestDataFactory.planner(owner).published(published).build();
+        when(plannerRepository.findAggregateForOwner(planner.id(), owner.getId()))
                 .thenReturn(Optional.of(planner));
-        when(plannerRepository.findOwnershipById(planner.getId()))
+        when(plannerRepository.findOwnershipById(planner.id()))
                 .thenReturn(Optional.of(OwnershipRows.of(planner)));
         return planner;
     }
@@ -100,14 +108,15 @@ class PlannerDeleteRestrictionTest {
         }
     }
 
-    private void deleteAndCommit(Planner planner) {
+    private void deleteAndCommit(StoredPlanner planner) {
+        when(contentRepository.markDeleted(eq(planner.id()), any())).thenReturn(1);
         TransactionSynchronizationManager.initSynchronization();
-        commandService.deletePlanner(owner.getId(), planner.getId());
+        commandService.deletePlanner(owner.getId(), planner.id());
         TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
     }
 
-    private void assertWithdrawnFromTheCatalog(Planner planner) {
-        verify(catalogRepository).deleteByPlannerId(planner.getId());
+    private void assertWithdrawnFromTheCatalog(StoredPlanner planner) {
+        verify(catalogRepository).deleteByPlannerId(planner.id());
     }
 
     private void ban() {
@@ -121,45 +130,45 @@ class PlannerDeleteRestrictionTest {
     @Test
     void deletePlanner_WhenOwnerBanned_WithdrawsThePublishedPlanner() {
         ban();
-        Planner planner = ownedPlanner(true);
+        StoredPlanner planner = ownedPlanner(true);
 
         deleteAndCommit(planner);
 
-        verify(publicationRepository).unpublish(planner.getId());
-        assertThat(planner.getContent().getDeletedAt()).isNotNull();
+        verify(publicationRepository).unpublish(planner.id());
+        verify(contentRepository).markDeleted(eq(planner.id()), any());
         assertWithdrawnFromTheCatalog(planner);
     }
 
     @Test
     void deletePlanner_WhenOwnerTimedOut_WithdrawsThePublishedPlanner() {
         timeOut();
-        Planner planner = ownedPlanner(true);
+        StoredPlanner planner = ownedPlanner(true);
 
         deleteAndCommit(planner);
 
-        verify(publicationRepository).unpublish(planner.getId());
-        assertThat(planner.getContent().getDeletedAt()).isNotNull();
+        verify(publicationRepository).unpublish(planner.id());
+        verify(contentRepository).markDeleted(eq(planner.id()), any());
         assertWithdrawnFromTheCatalog(planner);
     }
 
     @Test
     void deletePlanner_WhenOwnerBanned_DeletesTheUnpublishedDraft() {
         ban();
-        Planner planner = ownedPlanner(false);
+        StoredPlanner planner = ownedPlanner(false);
 
         deleteAndCommit(planner);
 
-        assertThat(planner.getContent().getDeletedAt()).isNotNull();
+        verify(contentRepository).markDeleted(eq(planner.id()), any());
     }
 
     @Test
     void deletePlanner_WhenOwnerUnrestricted_WithdrawsThePublishedPlanner() {
-        Planner planner = ownedPlanner(true);
+        StoredPlanner planner = ownedPlanner(true);
 
         deleteAndCommit(planner);
 
-        verify(publicationRepository).unpublish(planner.getId());
-        assertThat(planner.getContent().getDeletedAt()).isNotNull();
+        verify(publicationRepository).unpublish(planner.id());
+        verify(contentRepository).markDeleted(eq(planner.id()), any());
         assertWithdrawnFromTheCatalog(planner);
     }
 }

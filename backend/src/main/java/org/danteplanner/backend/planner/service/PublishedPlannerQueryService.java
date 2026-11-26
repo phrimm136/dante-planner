@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.MemberView;
+import org.danteplanner.backend.planner.dto.ReportState;
+import org.danteplanner.backend.planner.dto.Subscription;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
@@ -16,7 +19,6 @@ import org.danteplanner.backend.planner.specification.CatalogSpecifications;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerVote;
@@ -27,6 +29,8 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
@@ -191,8 +195,8 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
     @Transactional(readOnly = true)
     public ScopedRead<PublishedPlannerDetailResponse> getPublishedPlanner(UUID plannerId, Viewer viewer) {
         PublishedPlannerRow published = accessGuard.requirePublishedWithAuthor(plannerId);
-        Planner planner = published.planner();
-        Set<FreshnessScope> scopes = PlannerVisibility.scopes(plannerId, planner.getUserId());
+        StoredPlanner planner = published.planner();
+        Set<FreshnessScope> scopes = PlannerVisibility.scopes(plannerId, planner.userId());
 
         PlannerStats stats = plannerStatsRepository.findById(plannerId).orElse(NO_STATS);
         int viewCount = stats.getViewCount();
@@ -202,13 +206,20 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         return switch (viewer) {
             case Viewer.Guest guest -> new ScopedRead<>(PublishedPlannerDetailResponse.forAnonymous(
                     planner, published.author(), commentCount, viewCount, upvotes), scopes);
-            case Viewer.Member member -> new ScopedRead<>(PublishedPlannerDetailResponse.fromEntity(
-                planner, published.author(),
-                hasUpvoted(plannerId, member.userId()),
-                subscriptionService.isSubscribed(member.userId(), plannerId),
-                reportService.hasReported(member.userId(), plannerId),
-                commentCount, ownerNotificationsFor(member, planner), viewCount, upvotes), scopes);
+            case Viewer.Member member -> new ScopedRead<>(PublishedPlannerDetailResponse.from(
+                    planner, published.author(), memberView(member, planner), commentCount, viewCount, upvotes),
+                    scopes);
         };
+    }
+
+    private MemberView memberView(Viewer.Member member, StoredPlanner planner) {
+        Upvote upvote = hasUpvoted(planner.id(), member.userId()) ? Upvote.CAST : Upvote.NONE;
+        Subscription subscription = subscriptionService.isSubscribed(member.userId(), planner.id())
+                ? Subscription.SUBSCRIBED : Subscription.NOT_SUBSCRIBED;
+        ReportState report = reportService.hasReported(member.userId(), planner.id())
+                ? ReportState.REPORTED : ReportState.NOT_REPORTED;
+        return new MemberView(upvote, subscription, report,
+                ownerNotificationsFor(member, planner));
     }
 
     @Transactional(readOnly = true)
@@ -228,16 +239,16 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
     }
 
     private ScopedRead<PlannerFlagsResponse> memberFlags(UUID plannerId, Long userId) {
-        Planner planner = accessGuard.requirePublished(plannerId);
+        StoredPlanner planner = accessGuard.requirePublished(plannerId);
         return new ScopedRead<>(new PlannerFlagsResponse(
                 hasUpvoted(plannerId, userId),
                 subscriptionService.isSubscribed(userId, plannerId),
-                ownerNotificationsFor(new Viewer.Member(userId), planner)),
-                PlannerVisibility.scopes(plannerId, planner.getUserId()));
+                ownerNotificationsFor(new Viewer.Member(userId), planner) == NotificationSetting.ON),
+                PlannerVisibility.scopes(plannerId, planner.userId()));
     }
 
-    private static boolean ownerNotificationsFor(Viewer viewer, Planner planner) {
-        return viewer.is(planner.getUserId()) && planner.isOwnerNotificationsEnabled();
+    private static NotificationSetting ownerNotificationsFor(Viewer viewer, StoredPlanner planner) {
+        return viewer.is(planner.userId()) ? planner.ownerNotifications() : NotificationSetting.OFF;
     }
 
     @Override

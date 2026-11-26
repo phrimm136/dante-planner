@@ -641,7 +641,7 @@ class DegradationIT {
     void viewCount_WhenAuthRedisUnreachable_Returns204AndCountsTheFailure() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-views-" + UUID.randomUUID() + "@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).getId();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).id();
         new ReplicationControl(degradationPrimaryJdbcTemplate, degradationReplicaJdbcTemplate)
                 .awaitCaughtUp();
         double before = viewRecordFailedCount();

@@ -505,7 +505,7 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
                 .id(plannerId.toString())
                 .title(REPLICATED_TITLE)
                 .status(PlannerStatus.SAVED)
-                .content(TestDataFactory.planner(session.user()).build().getContentJson())
+                .content(TestDataFactory.planner(session.user()).build().content().json())
                 .build();
     }
 

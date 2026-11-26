@@ -73,7 +73,7 @@ class UndeclaredPrimaryAccessIT extends SharedRoutingSupport {
         publishedPlannerId = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository)
-                .getId();
+                .id();
     }
 
     @Test

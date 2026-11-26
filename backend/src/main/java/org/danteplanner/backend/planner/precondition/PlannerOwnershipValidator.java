@@ -1,11 +1,11 @@
 package org.danteplanner.backend.planner.precondition;
 
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -34,11 +34,11 @@ public class PlannerOwnershipValidator {
     }
 
     @Parsed
-    public record OwnedPlanner(Planner planner) {
+    public record OwnedPlanner(StoredPlanner planner) {
 
-        private static OwnedPlanner parse(Planner planner, Long userId) {
-            if (!planner.isOwnedBy(userId)) {
-                throw new PlannerForbiddenException(planner.getId());
+        private static OwnedPlanner parse(StoredPlanner planner, Long userId) {
+            if (!planner.userId().equals(userId)) {
+                throw new PlannerForbiddenException(planner.id());
             }
             return new OwnedPlanner(planner);
         }
@@ -94,7 +94,7 @@ public class PlannerOwnershipValidator {
         }
     }
 
-    public OwnedPlanner requireOwner(Planner planner, Long userId) {
+    public OwnedPlanner requireOwner(StoredPlanner planner, Long userId) {
         return OwnedPlanner.parse(planner, userId);
     }
 

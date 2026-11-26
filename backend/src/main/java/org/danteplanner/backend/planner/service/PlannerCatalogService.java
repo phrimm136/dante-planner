@@ -3,11 +3,10 @@ package org.danteplanner.backend.planner.service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.planner.entity.Listing;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator.Publishable;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -16,6 +15,8 @@ import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepositor
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
+import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 import org.danteplanner.backend.planner.sync.JsonDocuments;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
@@ -27,7 +28,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,9 +67,9 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public void onBecameVisible(Planner planner, Publication.Published publication, Listing listing) {
-        add(planner, publication, listing);
-        syncFilterRows(planner.getId());
+    public void onBecameVisible(StoredPlanner planner, Publishable publishable, Publication.Published publication) {
+        add(planner, publishable, publication);
+        syncFilterRows(planner.id());
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -101,10 +101,12 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public void onVisibleEditCommitted(Planner planner) {
-        syncScalarCopy(planner);
-        if (searchableCompositionChanged(planner)) {
-            syncFilterRows(planner.getId());
+    public void onVisibleEditCommitted(StoredPlanner before, StoredPlanner after) {
+        StoredContent saved = after.content();
+        catalogRepository.copyScalars(after.id(), saved.title(), saved.category(), saved.keywords());
+        switch (SearchRows.between(before.content(), saved, objectMapper)) {
+            case KEEP -> { }
+            case REBUILD -> syncFilterRows(after.id());
         }
     }
 
@@ -126,48 +128,43 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         return floorRules.floorCount(MDCategory.fromValue(scope.getCategory()));
     }
 
-    private boolean searchableCompositionChanged(Planner planner) {
-        return !sameDocument(planner.getContentJson(), planner.getLoadedContentJson())
-                || !planner.getSelectedKeywords().equals(planner.getLoadedKeywords())
-                || !Objects.equals(planner.getCategory(), planner.getLoadedCategory());
-    }
+    private enum SearchRows {
+        KEEP,
+        REBUILD;
 
-    private boolean sameDocument(String current, String loaded) {
-        if (current == null || loaded == null) {
-            return Objects.equals(current, loaded);
+        static SearchRows between(StoredContent before, StoredContent after, ObjectMapper mapper) {
+            boolean unchanged = sameDocument(before.json(), after.json(), mapper)
+                    && before.keywords().equals(after.keywords())
+                    && before.category().equals(after.category());
+            return unchanged ? KEEP : REBUILD;
         }
-        try {
-            return JsonDocuments.sameDocument(objectMapper.readTree(current), objectMapper.readTree(loaded));
-        } catch (JacksonException e) {
-            return false;
+
+        private static boolean sameDocument(String before, String after, ObjectMapper mapper) {
+            try {
+                return JsonDocuments.sameDocument(mapper.readTree(before), mapper.readTree(after));
+            } catch (JacksonException e) {
+                return false;
+            }
         }
     }
 
     @Transactional
-    public void add(Planner planner, Publication.Published publication, Listing listing) {
+    public void add(StoredPlanner planner, Publishable publishable, Publication.Published publication) {
         boolean recommended = RecommendedSql.isRecommended(
-                statsRepository.upvotesOf(planner.getId()),
-                listing,
+                statsRepository.upvotesOf(planner.id()),
+                planner.listing(),
                 recommendedThreshold);
+        StoredContent content = planner.content();
         catalogRepository.insert(PlannerCatalog.builder()
-                .plannerId(planner.getId())
-                .plannerType(planner.getPlannerType())
-                .category(planner.getCategory())
-                .title(planner.getTitle())
-                .selectedKeywords(planner.getSelectedKeywords())
+                .plannerId(planner.id())
+                .plannerType(planner.plannerType())
+                .category(content.category())
+                .title(publishable.title().value())
+                .selectedKeywords(content.keywords())
                 .firstPublishedAt(publication.firstAt())
                 .recommended(recommended)
                 .build());
-        log.debug("Catalog row added for planner {}", planner.getId());
-    }
-
-    @Transactional
-    public void syncScalarCopy(Planner planner) {
-        catalogRepository.findById(planner.getId()).ifPresent(row -> {
-            row.setTitle(planner.getTitle());
-            row.setCategory(planner.getCategory());
-            row.setSelectedKeywords(planner.getSelectedKeywords());
-        });
+        log.debug("Catalog row added for planner {}", planner.id());
     }
 
     @Transactional

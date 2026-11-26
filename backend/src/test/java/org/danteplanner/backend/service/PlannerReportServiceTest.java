@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import java.util.Optional;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
@@ -72,7 +73,7 @@ class PlannerReportServiceTest {
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(false);
             when(reportRepository.insert(any(PlannerReport.class)))
@@ -92,7 +93,7 @@ class PlannerReportServiceTest {
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(true);
 
@@ -111,7 +112,7 @@ class PlannerReportServiceTest {
             DataIntegrityViolationException duplicate =
                     IntegrityViolations.duplicateEntry("planner_reports.uk_planner_report_user_planner");
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(reportRepository.insert(any(PlannerReport.class))).thenThrow(duplicate);
 
             assertThatThrownBy(() -> reportService.createReport(testUser.getId(), plannerId)).isSameAs(duplicate);

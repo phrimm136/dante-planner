@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
@@ -12,7 +13,7 @@ import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.Upvote;
@@ -240,13 +241,13 @@ class PublishedPlannerQueryServiceTest {
     @Nested
     class GetPublishedPlannerTests {
 
-        private Planner createPublishedPlannerWithId(UUID id) {
+        private StoredPlanner createPublishedPlannerWithId(UUID id) {
             return TestDataFactory.planner(testUser).id(id).published(true).build();
         }
 
         private void mockPublished(UUID plannerId) {
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(createPublishedPlannerWithId(plannerId), TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(createPublishedPlannerWithId(plannerId), TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
             when(plannerStatsRepository.findById(plannerId))
                     .thenReturn(Optional.of(PlannerStats.builder()
                             .plannerId(plannerId)
@@ -306,9 +307,9 @@ class PublishedPlannerQueryServiceTest {
         @Test
         void getPublishedPlanner_WhenRowIsUnpublished_ThrowsHiddenNamingTheOwner() {
             UUID plannerId = UUID.randomUUID();
-            Planner draft = TestDataFactory.planner(testUser).id(plannerId).published(false).build();
+            StoredPlanner draft = TestDataFactory.planner(testUser).id(plannerId).published(false).build();
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(draft, TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(draft, TestDataFactory.profileOf(testUser), Visibility.HIDDEN)));
 
             assertRejected(() -> publishedQueryService.getPublishedPlanner(plannerId, new Viewer.Guest()))
                     .withCode("PLANNER_NOT_FOUND")

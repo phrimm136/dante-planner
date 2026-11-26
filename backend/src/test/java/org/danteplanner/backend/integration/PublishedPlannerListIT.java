@@ -1,9 +1,12 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.planner.entity.PlannerRows;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.danteplanner.backend.support.PlannerContentRows;
 import com.jayway.jsonpath.JsonPath;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -27,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -58,6 +60,11 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+
+    @Autowired
+
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private PlannerStatsRepository plannerStatsRepository;
@@ -103,33 +110,32 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
     @Test
     void list_WhenSeeded_ShowsOnlyPublished() throws Exception {
-        Planner p1 = plannerRepository.save(base("P1").published(true).build());
+        StoredPlanner p1 = base("P1").published(true).save(plannerRepository);
         TestDataFactory.addToCatalog(catalogService, p1);
 
-        Planner p2 = plannerRepository.save(base("P2").published(true).build());
-        plannerTarget.takeDown(p2.getId());
+        StoredPlanner p2 = base("P2").published(true).save(plannerRepository);
+        plannerTarget.takeDown(p2.id());
 
-        Planner p3 = base("P3").published(true).build();
-        p3.softDelete(Instant.now());
-        plannerRepository.save(p3);
+        StoredPlanner p3 = base("P3").published(true).save(plannerRepository);
+        PlannerContentRows.markDeleted(jdbcTemplate, p3.id());
 
-        plannerRepository.save(base("P4").published(false).build());
+        base("P4").published(false).save(plannerRepository);
 
         mockMvc.perform(get("/api/planner/md/published").param("q", marker))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].id").value(p1.getId().toString()));
+                .andExpect(jsonPath("$.content[0].id").value(p1.id().toString()));
     }
 
     @Test
     void list_WhenSummaryProjected_MatchesEntityFields() throws Exception {
-        Planner p = base("Field Parity")
+        StoredPlanner p = base("Field Parity")
                 .published(true)
                 .selectedKeywords(Set.of("Burst", "Sinking"))
                 .build();
-        p = plannerRepository.save(p);
+        p = PlannerRows.insert(plannerRepository, p);
         plannerStatsRepository.save(PlannerStats.builder()
-                .plannerId(p.getId())
+                .plannerId(p.id())
                 .upvotes(7)
                 .viewCount(42)
                 .build());
@@ -137,7 +143,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
         mockMvc.perform(get("/api/planner/md/published").param("q", marker))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(p.getId().toString()))
+                .andExpect(jsonPath("$.content[0].id").value(p.id().toString()))
                 .andExpect(jsonPath("$.content[0].title").value(titled("Field Parity")))
                 .andExpect(jsonPath("$.content[0].category").value("5F"))
                 .andExpect(jsonPath("$.content[0].plannerType").value("MIRROR_DUNGEON"))
@@ -150,16 +156,15 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.content[0].firstPublishedAt").isNotEmpty());
     }
 
-    private Planner listed(String title, String category, Set<String> keywords) {
-        Planner planner = plannerRepository.save(
-                base(title).category(category).selectedKeywords(keywords).published(true).build());
+    private StoredPlanner listed(String title, String category, Set<String> keywords) {
+        StoredPlanner planner = base(title).category(category).selectedKeywords(keywords).published(true).save(plannerRepository);
         TestDataFactory.addToCatalog(catalogService, planner);
         return planner;
     }
 
-    private Planner listedWithKeywords(String title, Set<String> keywords) {
-        Planner planner = listed(title, "5F", keywords);
-        transactionTemplate.executeWithoutResult(status -> catalogService.syncFilterRows(planner.getId()));
+    private StoredPlanner listedWithKeywords(String title, Set<String> keywords) {
+        StoredPlanner planner = listed(title, "5F", keywords);
+        transactionTemplate.executeWithoutResult(status -> catalogService.syncFilterRows(planner.id()));
         return planner;
     }
 
@@ -184,49 +189,49 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     @Test
     void list_WhenTheSearchTermIsBlank_DoesNotFilterByIt() throws Exception {
         String category = UUID.randomUUID().toString();
-        Planner listed = listed("Listed", category, Set.of("Burst"));
+        StoredPlanner listed = listed("Listed", category, Set.of("Burst"));
 
         assertThat(listedIds(get("/api/planner/md/published").param("q", "  ").param("category", category)))
-                .containsExactly(listed.getId().toString());
+                .containsExactly(listed.id().toString());
     }
 
     @Test
     void list_WhenTheCategoryIsRepeated_FiltersByTheJoinedText() throws Exception {
         listed("Five", "5F", Set.of("Burst"));
         listed("Ten", "10F", Set.of("Burst"));
-        Planner joined = listed("Joined", "5F,10F", Set.of("Burst"));
+        StoredPlanner joined = listed("Joined", "5F,10F", Set.of("Burst"));
 
         assertThat(listedIds(publishedMarked().param("category", "5F", "10F")))
-                .containsExactly(joined.getId().toString());
+                .containsExactly(joined.id().toString());
     }
 
     @Test
     void list_WhenTheKeywordIsRepeated_RequiresEveryKeyword() throws Exception {
         listedWithKeywords("One", Set.of("Burst"));
-        Planner both = listedWithKeywords("Both", Set.of("Burst", "Sinking"));
+        StoredPlanner both = listedWithKeywords("Both", Set.of("Burst", "Sinking"));
 
         assertThat(listedIds(publishedMarked().param("keyword", "Burst", "Sinking")))
-                .containsExactly(both.getId().toString());
+                .containsExactly(both.id().toString());
     }
 
     @Test
     void list_WhenTheKeywordIsEmptyOrBlank_DoesNotFilterByIt() throws Exception {
-        Planner listed = listed("Listed", "5F", Set.of("Burst"));
+        StoredPlanner listed = listed("Listed", "5F", Set.of("Burst"));
 
         for (String keyword : List.of("", "  ", ",", " , ")) {
             assertThat(listedIds(publishedMarked().param("keyword", keyword)))
                     .as("keyword '%s'", keyword)
-                    .containsExactly(listed.getId().toString());
+                    .containsExactly(listed.id().toString());
         }
     }
 
     @Test
     void list_WhenEntityFiltersAreBlank_DoesNotFilterByThem() throws Exception {
-        Planner listed = listed("Listed", "5F", Set.of("Burst"));
+        StoredPlanner listed = listed("Listed", "5F", Set.of("Burst"));
 
         assertThat(listedIds(publishedMarked()
                 .param("identity", "").param("ego", "  ").param("gift", ",").param("themePack", "")))
-                .containsExactly(listed.getId().toString());
+                .containsExactly(listed.id().toString());
     }
 
     @ParameterizedTest
@@ -239,12 +244,12 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
     @Test
     void list_WhenAHeaderCarriesAParametersName_DoesNotReadIt() throws Exception {
-        Planner listed = listed("Listed", "5F", Set.of("Burst"));
+        StoredPlanner listed = listed("Listed", "5F", Set.of("Burst"));
 
         assertThat(listedIds(publishedMarked()
                 .header("Category", "10F").header("Keyword", "Sinking").header("Identity", "99999999")
                 .header("Page", "7").header("Size", "1")))
-                .containsExactly(listed.getId().toString());
+                .containsExactly(listed.id().toString());
     }
 
     @ParameterizedTest

@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -94,17 +94,17 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
                 .isZero();
     }
 
-    private Planner plannerWithViews(User plannerOwner, String title, int days) {
-        Planner planner = TestDataFactory.planner(plannerOwner)
+    private StoredPlanner plannerWithViews(User plannerOwner, String title, int days) {
+        StoredPlanner planner = TestDataFactory.planner(plannerOwner)
                 .title(title)
                 .published(true)
                 .save(plannerRepository);
-        viewedPlanners.add(planner.getId());
+        viewedPlanners.add(planner.id());
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         for (int day = 0; day < days; day++) {
             jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                             + "VALUES (UUID_TO_BIN(?), SHA2(?, 256), ?, NOW())",
-                    planner.getId().toString(), "viewer-" + day, today.minusDays(day));
+                    planner.id().toString(), "viewer-" + day, today.minusDays(day));
         }
         return planner;
     }
@@ -136,20 +136,20 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
     @Test
     void plannerViews_WhenOwnerAccountHardDeleted_AreDeletedWithoutForeignKeySupport() {
         assertNoForeignKeyBacksTheSweep();
-        Planner viewed = plannerWithViews(owner, "Swept Views", 3);
-        Planner alsoViewed = plannerWithViews(owner, "Swept Views Too", 2);
-        assertThat(viewRowsFor(viewed.getId())).isEqualTo(3);
-        assertThat(viewRowsFor(alsoViewed.getId())).isEqualTo(2);
+        StoredPlanner viewed = plannerWithViews(owner, "Swept Views", 3);
+        StoredPlanner alsoViewed = plannerWithViews(owner, "Swept Views Too", 2);
+        assertThat(viewRowsFor(viewed.id())).isEqualTo(3);
+        assertThat(viewRowsFor(alsoViewed.id())).isEqualTo(2);
 
         purge(owner.getId());
 
         assertThat(userRepository.findById(owner.getId())).as("the account row is gone").isEmpty();
-        for (Planner planner : List.of(viewed, alsoViewed)) {
-            assertThat(coreRowsFor(planner.getId()))
-                    .as("the planner core row for %s is gone", planner.getId())
+        for (StoredPlanner planner : List.of(viewed, alsoViewed)) {
+            assertThat(coreRowsFor(planner.id()))
+                    .as("the planner core row for %s is gone", planner.id())
                     .isZero();
-            assertThat(viewRowsFor(planner.getId()))
-                    .as("no view row survives planner %s", planner.getId())
+            assertThat(viewRowsFor(planner.id()))
+                    .as("no view row survives planner %s", planner.id())
                     .isZero();
         }
     }
@@ -157,15 +157,15 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
     @Test
     void plannerViews_WhenAnotherAccountHardDeleted_SurviveOnTheUntouchedPlanner() {
         assertNoForeignKeyBacksTheSweep();
-        Planner theirs = plannerWithViews(other, "Kept Views", 2);
+        StoredPlanner theirs = plannerWithViews(other, "Kept Views", 2);
         plannerWithViews(owner, "Swept Views Elsewhere", 1);
 
         purge(owner.getId());
 
-        assertThat(coreRowsFor(theirs.getId()))
+        assertThat(coreRowsFor(theirs.id()))
                 .as("the third party's planner is untouched")
                 .isEqualTo(1);
-        assertThat(viewRowsFor(theirs.getId()))
+        assertThat(viewRowsFor(theirs.id()))
                 .as("the set-based delete named the purged account's planners and no others")
                 .isEqualTo(2);
     }

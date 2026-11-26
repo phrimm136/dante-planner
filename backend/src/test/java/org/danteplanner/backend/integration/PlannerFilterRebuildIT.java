@@ -2,7 +2,7 @@ package org.danteplanner.backend.integration;
 
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -114,16 +114,16 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenRowsAlreadyExist_ReplacesWithoutDuplicateKey() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         long entityRowsAfterFirstBuild = entityFilterRepository.count();
         assertThat(entityRowsAfterFirstBuild).isPositive();
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         assertThat(entityFilterRepository.count()).isEqualTo(entityRowsAfterFirstBuild);
         assertThat(keywordFilterRepository.findAll())
@@ -133,17 +133,17 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenAStoredKeywordDiffersFromTheContentOnlyInCase_KeepsExactlyTheContentsSpelling() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking"))
                 .published(true)
                 .save(plannerRepository);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         assertThat(storedKeywords(planner)).containsExactly("Sinking");
 
         new JdbcTemplate(dataSource).update(
                 "UPDATE planner_content SET selected_keywords = '[\"sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
-                planner.getId().toString());
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+                planner.id().toString());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         assertThat(storedKeywords(planner))
                 .as("the case-insensitive key holds one spelling, and the rebuild compares by binary collation")
@@ -152,11 +152,11 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenTheContentDropsSomeKeysAndAddsOthers_LeavesExactlyTheNewSet() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
                 .published(true)
                 .save(plannerRepository);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         Set<String> before = indexedRows(planner);
         assertThat(before).contains("IDENTITY:10101", "EGO_GIFT:9001");
 
@@ -165,10 +165,10 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 TestDataFactory.VALID_CONTENT
                         .replace("\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9003\"]")
                         .replace("{\"id\":\"10101\"", "{\"id\":\"10102\""),
-                "[\"Burst\", \"Combustion\"]", planner.getId().toString());
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+                "[\"Burst\", \"Combustion\"]", planner.id().toString());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
-        Planner changed = plannerRepository.findById(planner.getId()).orElseThrow();
+        StoredPlanner changed = plannerRepository.findAggregate(planner.id()).orElseThrow();
         assertThat(indexedRows(changed))
                 .doesNotContain("IDENTITY:10101", "EGO_GIFT:9001")
                 .contains("IDENTITY:10102", "EGO_GIFT:9003")
@@ -176,28 +176,28 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         assertThat(storedKeywords(changed)).containsExactlyInAnyOrder("Burst", "Combustion");
     }
 
-    private List<String> storedKeywords(Planner planner) {
+    private List<String> storedKeywords(StoredPlanner planner) {
         return keywordFilterRepository.findAll().stream()
-                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .filter(f -> f.getPlannerId().equals(planner.id()))
                 .map(PlannerKeywordFilter::getKeyword)
                 .toList();
     }
 
     @Test
     void rebuildFilters_WhenFactoryContent_MatchesExtractorOracle() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         Set<String> expected = extractor
-                .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
+                .extract(objectMapper.readTree(planner.content().json()), MDCategory.fromValue(planner.content().category()))
                 .stream()
                 .map(ref -> ref.type().name() + ":" + ref.id())
                 .collect(Collectors.toSet());
         Set<String> actual = entityFilterRepository.findAll().stream()
-                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .filter(f -> f.getPlannerId().equals(planner.id()))
                 .map(f -> f.getEntityType().name() + ":" + f.getEntityId())
                 .collect(Collectors.toSet());
 
@@ -214,15 +214,15 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                  "comprehensiveGiftIds":[],
                  "floorSelections":[{"giftIds":["29002"],"themePackId":null}]}
                 """;
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .content(content)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         Set<Integer> gifts = entityFilterRepository.findAll().stream()
-                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .filter(f -> f.getPlannerId().equals(planner.id()))
                 .filter(f -> f.getEntityType().name().equals("EGO_GIFT"))
                 .map(f -> f.getEntityId())
                 .collect(Collectors.toSet());
@@ -231,7 +231,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         assertThat(gifts).containsExactlyInAnyOrder(9154, 9001, 9002);
 
         Set<String> oracle = extractor
-                .extract(objectMapper.readTree(content), MDCategory.fromValue(planner.getCategory()))
+                .extract(objectMapper.readTree(content), MDCategory.fromValue(planner.content().category()))
                 .stream()
                 .filter(ref -> ref.type().name().equals("EGO_GIFT"))
                 .map(ref -> String.valueOf(ref.id()))
@@ -239,16 +239,16 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         assertThat(oracle).isEqualTo(gifts.stream().map(String::valueOf).collect(Collectors.toSet()));
     }
 
-    private Set<String> indexedRows(Planner planner) {
+    private Set<String> indexedRows(StoredPlanner planner) {
         return entityFilterRepository.findAll().stream()
-                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .filter(f -> f.getPlannerId().equals(planner.id()))
                 .map(f -> f.getEntityType().name() + ":" + f.getEntityId())
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> oracleRows(Planner planner) throws Exception {
+    private Set<String> oracleRows(StoredPlanner planner) throws Exception {
         return extractor
-                .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
+                .extract(objectMapper.readTree(planner.content().json()), MDCategory.fromValue(planner.content().category()))
                 .stream()
                 .map(ref -> ref.type().name() + ":" + ref.id())
                 .collect(Collectors.toSet());
@@ -256,13 +256,13 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenAFiveFloorPlannerStoresASixthFloor_SkipsItsThemePackAndGifts() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("5F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         assertThat(indexedRows(planner))
                 .doesNotContain("THEME_PACK:1006", "EGO_GIFT:9004")
@@ -273,13 +273,13 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenAFifteenFloorPlannerStoresTheSameSixthFloor_IndexesItsThemePackAndGifts() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("15F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         assertThat(indexedRows(planner))
                 .contains("THEME_PACK:1006", "EGO_GIFT:9004")
@@ -289,13 +289,13 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
     @Test
     void rebuildFilters_WhenEachCategoryStoresFifteenFloors_IndexesExactlyTheJavaFloorCount() throws Exception {
         for (MDCategory category : MDCategory.values()) {
-            Planner planner = TestDataFactory.planner(owner)
+            StoredPlanner planner = TestDataFactory.planner(owner)
                     .category(category.getValue())
                     .content(FIFTEEN_FLOORS)
                     .published(true)
                     .save(plannerRepository);
 
-            FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+            FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
             Set<String> rendered = IntStream.range(0, gameDataRegistry.floorRules().floorCount(category))
                     .boxed()
@@ -308,9 +308,9 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         }
     }
 
-    private void callProcedure(Planner planner, int floorCount) {
+    private void callProcedure(StoredPlanner planner, int floorCount) {
         new TransactionTemplate(transactionManager).executeWithoutResult(
-                status -> entityFilterRepository.rebuildPlannerFilters(planner.getId(), floorCount));
+                status -> entityFilterRepository.rebuildPlannerFilters(planner.id(), floorCount));
     }
 
     private static Set<String> floorRows(int fromFloor, int toFloor) {
@@ -322,7 +322,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildPlannerFilters_WhenCountIsTenOnAFifteenFloorPlanner_IndexesFloorsOneToTen() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("15F")
                 .content(FIFTEEN_FLOORS)
                 .published(true)
@@ -335,7 +335,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildPlannerFilters_WhenCountExceedsTheStoredFloors_IndexesEveryStoredFloor() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("5F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
@@ -349,7 +349,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildPlannerFilters_WhenCountIsZero_IndexesNoFloorButKeepsEquipmentAndTopLevelGifts() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("15F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
@@ -365,14 +365,14 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenARefractedRailwayPlannerIsPublished_KeepsItsNonFloorRows() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .plannerType(PlannerType.REFRACTED_RAILWAY)
                 .category("RR_PLACEHOLDER")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         assertThat(indexedRows(planner))
                 .contains("IDENTITY:10101", "EGO:20101", "EGO_GIFT:9001")
@@ -380,21 +380,21 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .noneMatch(row -> row.startsWith("THEME_PACK:"));
     }
 
-    private void callRolloutProcedure(Planner planner) {
-        new JdbcTemplate(dataSource).update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.getId().toString());
+    private void callRolloutProcedure(StoredPlanner planner) {
+        new JdbcTemplate(dataSource).update("CALL rebuild_planner_filters(UUID_TO_BIN(?))", planner.id().toString());
     }
 
     @Test
     void rebuildPlannerFilters_WhenThePreviousImageCallsTheOneArgumentProcedure_IndexesWhatTheScopedOneDoes()
             throws Exception {
         for (MDCategory category : MDCategory.values()) {
-            Planner planner = TestDataFactory.planner(owner)
+            StoredPlanner planner = TestDataFactory.planner(owner)
                     .category(category.getValue())
                     .content(FIFTEEN_FLOORS)
                     .published(true)
                     .save(plannerRepository);
 
-            FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+            FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
             Set<String> scoped = indexedRows(planner);
             callRolloutProcedure(planner);
 
@@ -407,14 +407,14 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildPlannerFilters_WhenTheOneArgumentProcedureMeetsARefractedRailwayPlanner_IndexesNoFloor() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .plannerType(PlannerType.REFRACTED_RAILWAY)
                 .category("RR_PLACEHOLDER")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         Set<String> scoped = indexedRows(planner);
         callRolloutProcedure(planner);
 
@@ -426,13 +426,13 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void rebuildFilters_WhenObjectFloorsFailTheBoundary_IndexesTheSalvagedFieldsTheExtractorIndexes() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("5F")
                 .content(MALFORMED_OBJECT_FLOORS)
                 .published(true)
                 .save(plannerRepository);
 
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
         assertThat(indexedRows(planner))
                 .filteredOn(row -> row.startsWith("THEME_PACK:") || row.startsWith("EGO_GIFT:"))
@@ -443,14 +443,14 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Test
     void floorScopeOf_WhenReadInsideARebuildTransaction_HoldsOffACategoryChangeUntilCommit() throws Exception {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .category("5F")
                 .content(FIFTEEN_FLOORS)
                 .published(true)
                 .save(plannerRepository);
 
         new TransactionTemplate(transactionManager).executeWithoutResult(rebuild -> {
-            assertThat(entityFilterRepository.floorScopeOf(planner.getId())).isPresent();
+            assertThat(entityFilterRepository.floorScopeOf(planner.id())).isPresent();
 
             assertThatThrownBy(() -> changeCategory(planner, "15F"))
                     .isInstanceOf(SQLException.class)
@@ -460,7 +460,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         assertThat(changeCategory(planner, "15F")).isEqualTo(1);
     }
 
-    private int changeCategory(Planner planner, String category) throws SQLException {
+    private int changeCategory(StoredPlanner planner, String category) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              Statement session = connection.createStatement();
              PreparedStatement update = connection.prepareStatement(
@@ -468,7 +468,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
             session.execute("SET SESSION innodb_lock_wait_timeout = 1");
             try {
                 update.setString(1, category);
-                update.setString(2, planner.getId().toString());
+                update.setString(2, planner.id().toString());
                 return update.executeUpdate();
             } finally {
                 session.execute("SET SESSION innodb_lock_wait_timeout = DEFAULT");

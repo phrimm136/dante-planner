@@ -1,11 +1,12 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerThread;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
@@ -17,8 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -66,7 +65,7 @@ class PlannerAccessGuardTest {
         @Test
         void checkPublished_WhenVisible_ServesThePlannerAndUserScopesWithoutLoadingTheAggregate() {
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, true, false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, Visibility.SHOWN)));
 
             ScopedRead<UUID> read = accessGuard.checkPublished(plannerId);
 
@@ -84,11 +83,10 @@ class PlannerAccessGuardTest {
                     .isEqualTo(new PlannerMiss.Absent(plannerId));
         }
 
-        @ParameterizedTest
-        @CsvSource({"false, false", "true, true", "false, true"})
-        void checkPublished_WhenRowIsNotVisible_ThrowsHiddenNamingTheOwner(boolean published, boolean ownerDeactivated) {
+        @Test
+        void checkPublished_WhenRowIsNotVisible_ThrowsHiddenNamingTheOwner() {
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, published, ownerDeactivated)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, Visibility.HIDDEN)));
 
             PlannerNotFoundException miss = missOf(() -> accessGuard.checkPublished(plannerId));
 
@@ -113,9 +111,9 @@ class PlannerAccessGuardTest {
 
         @Test
         void requirePublished_WhenUnpublished_ThrowsHiddenNamingTheOwner() {
-            Planner planner = TestDataFactory.planner(owner).id(plannerId).published(false).build();
+            StoredPlanner planner = TestDataFactory.planner(owner).id(plannerId).published(false).build();
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner), Visibility.HIDDEN)));
 
             assertThat(missOf(() -> accessGuard.requirePublished(plannerId)).miss())
                     .isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
@@ -123,9 +121,9 @@ class PlannerAccessGuardTest {
 
         @Test
         void requirePublished_WhenPublished_ReturnsAggregate() {
-            Planner planner = TestDataFactory.planner(owner).id(plannerId).published(true).build();
+            StoredPlanner planner = TestDataFactory.planner(owner).id(plannerId).published(true).build();
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner), Visibility.SHOWN)));
 
             assertThat(accessGuard.requirePublished(plannerId)).isSameAs(planner);
         }

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.comment.controller;
 
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
@@ -70,7 +71,7 @@ class CommentThreadNotFoundContractTest {
 
         plannerId = UUID.randomUUID();
         when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, false, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, Visibility.HIDDEN)));
     }
 
     @AfterEach

@@ -1,11 +1,13 @@
 package org.danteplanner.backend.integration;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.danteplanner.backend.support.PlannerContentRows;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.util.PlannerConstants;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -22,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -60,14 +61,19 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerRepository plannerRepository;
 
+
+    @Autowired
+
+    private JdbcTemplate jdbcTemplate;
+
     @Autowired
     private JwtTokenService jwtTokenService;
 
     private String token;
-    private Planner owned;
-    private Planner ownedToo;
-    private Planner deleted;
-    private Planner foreign;
+    private StoredPlanner owned;
+    private StoredPlanner ownedToo;
+    private StoredPlanner deleted;
+    private StoredPlanner foreign;
 
     @BeforeEach
     void setUp() {
@@ -78,8 +84,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
         owned = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         ownedToo = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         deleted = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        deleted.softDelete(Instant.now());
-        plannerRepository.save(deleted);
+        PlannerContentRows.markDeleted(jdbcTemplate, deleted.id());
         foreign = TestDataFactory.createTestPlanner(plannerRepository, stranger, false);
     }
 
@@ -104,14 +109,14 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
     @Test
     void batchPull_WhenIdsMixOwnershipAndState_ReturnsOnlyTheOwnedLiveOnes() throws Exception {
         List<UUID> ids = List.of(
-                owned.getId(), deleted.getId(), foreign.getId(), UUID.randomUUID());
+                owned.id(), deleted.id(), foreign.id(), UUID.randomUUID());
 
         String json = pull(ids)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         assertThat(idsOf(objectMapper.readTree(json)))
-                .containsExactly(owned.getId().toString());
+                .containsExactly(owned.id().toString());
     }
 
     @Test
@@ -144,22 +149,22 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
 
     @Test
     void batchGet_WhenIdsAreCommaSeparated_ReturnsTheCallersPlanners() throws Exception {
-        String json = pullByQuery(List.of(owned.getId(), ownedToo.getId()))
+        String json = pullByQuery(List.of(owned.id(), ownedToo.id()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         assertThat(idsOf(objectMapper.readTree(json)))
-                .containsExactlyInAnyOrder(owned.getId().toString(), ownedToo.getId().toString());
+                .containsExactlyInAnyOrder(owned.id().toString(), ownedToo.id().toString());
     }
 
     @Test
     void batchGet_WhenAnIdBelongsToAnotherOwner_DropsIt() throws Exception {
-        String json = pullByQuery(List.of(owned.getId(), foreign.getId()))
+        String json = pullByQuery(List.of(owned.id(), foreign.id()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         assertThat(idsOf(objectMapper.readTree(json)))
-                .containsExactly(owned.getId().toString());
+                .containsExactly(owned.id().toString());
     }
 
     @Test
@@ -182,7 +187,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
 
     @Test
     void batchGet_WhenOnlyAHeaderCarriesTheIds_Returns400() throws Exception {
-        performAuthed(mockMvc, get("/api/planner/md/batch").header("Ids", owned.getId().toString()), token)
+        performAuthed(mockMvc, get("/api/planner/md/batch").header("Ids", owned.id().toString()), token)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }

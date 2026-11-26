@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.RecordingRestrictionCheck;
@@ -68,7 +69,7 @@ class PlannerSubscriptionServiceTest {
 
     private void published() {
         when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
     }
 
     private void toggles(int affectedRows, boolean entered) {

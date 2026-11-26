@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
@@ -47,9 +47,9 @@ class UpsertRequestsTest {
 
     @Test
     void resending_WhenBuilt_CarriesThePlannerId() {
-        Planner planner = stored();
+        StoredPlanner planner = stored();
 
-        assertThat(UpsertRequests.resending(planner).build().id()).isEqualTo(planner.getId().toString());
+        assertThat(UpsertRequests.resending(planner).build().id()).isEqualTo(planner.id().toString());
     }
 
     @Test
@@ -92,7 +92,7 @@ class UpsertRequestsTest {
         assertThat(UpsertRequests.resending(stored()).build().selectedKeywords()).isNull();
     }
 
-    private static Planner stored() {
+    private static StoredPlanner stored() {
         return TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL))
                 .category("10F")
                 .title("T")

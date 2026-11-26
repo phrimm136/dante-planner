@@ -2,7 +2,7 @@ package org.danteplanner.backend.support;
 
 import java.time.Instant;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 
 public final class OwnershipRows {
@@ -10,8 +10,8 @@ public final class OwnershipRows {
     private OwnershipRows() {
     }
 
-    public static PlannerOwnershipRow of(Planner planner) {
-        return of(planner.getUserId(), planner.getContent().getDeletedAt());
+    public static PlannerOwnershipRow of(StoredPlanner planner) {
+        return of(planner.userId(), null);
     }
 
     public static PlannerOwnershipRow of(Long userId, Instant deletedAt) {

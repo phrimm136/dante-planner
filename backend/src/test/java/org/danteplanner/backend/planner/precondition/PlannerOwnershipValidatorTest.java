@@ -9,7 +9,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.OwnershipRows;
@@ -69,7 +69,7 @@ class PlannerOwnershipValidatorTest {
 
     @Test
     void requireOwner_WhenTheCallerOwnsThePlanner_CarriesIt() {
-        Planner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(CALLER)).build();
+        StoredPlanner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(CALLER)).build();
 
         assertThat(validator.requireOwner(planner, CALLER).planner()).isSameAs(planner);
         assertRefusedSilently(FORBIDDEN, () -> validator.requireOwner(planner, OTHER));

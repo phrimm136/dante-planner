@@ -8,7 +8,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerVote;
@@ -49,7 +49,7 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
     private TransactionTemplate transactionTemplate;
 
     private User testUser;
-    private Planner testPlanner;
+    private StoredPlanner testPlanner;
 
     @BeforeEach
     void setUp() {
@@ -63,15 +63,15 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
                 .status(PlannerStatus.DRAFT)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(testPlanner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(testPlanner.id()).build());
     }
 
     private void seedUpvotes(int upvotes) {
         // Replace the setUp row: PlannerStats persists as-new, so a second save
         // of the same id inserts rather than updates
-        statsRepository.deleteById(testPlanner.getId());
+        statsRepository.deleteById(testPlanner.id());
         statsRepository.save(PlannerStats.builder()
-                .plannerId(testPlanner.getId())
+                .plannerId(testPlanner.id())
                 .upvotes(upvotes)
                 .build());
     }
@@ -81,27 +81,27 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
     @Test
     void incrementUpvotes_WhenExistingPlanner_IncrementsCount() {
         // Act
-        transactionTemplate.executeWithoutResult(status -> statsRepository.incrementUpvotes(testPlanner.getId()));
+        transactionTemplate.executeWithoutResult(status -> statsRepository.incrementUpvotes(testPlanner.id()));
 
         // Assert
-        PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
+        PlannerStats updated = statsRepository.findById(testPlanner.id()).orElseThrow();
         assertThat(updated.getUpvotes()).isEqualTo(1);
     }
 
     @Test
     void upvotesOf_WhenTheRowWasLoadedBeforeTheCounterMoved_ReadsTheMovedCounter() {
         transactionTemplate.executeWithoutResult(status -> {
-            assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getUpvotes()).isZero();
+            assertThat(statsRepository.findById(testPlanner.id()).orElseThrow().getUpvotes()).isZero();
 
-            statsRepository.incrementUpvotes(testPlanner.getId());
+            statsRepository.incrementUpvotes(testPlanner.id());
 
-            assertThat(statsRepository.upvotesOf(testPlanner.getId())).isEqualTo(1);
+            assertThat(statsRepository.upvotesOf(testPlanner.id())).isEqualTo(1);
         });
     }
 
     @Test
     void upvotesOf_WhenNoRowExists_ReadsZeroAndTheFirstIncrementInsertsIt() {
-        UUID plannerId = testPlanner.getId();
+        UUID plannerId = testPlanner.id();
         statsRepository.deleteById(plannerId);
 
         transactionTemplate.executeWithoutResult(status -> {
@@ -116,20 +116,20 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
     @Test
     void incrementUpvotes_WhenAVoteInsertIsPending_KeepsTheVoteAndCountsIt() {
         transactionTemplate.executeWithoutResult(status -> {
-            voteRepository.insert(new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP));
-            statsRepository.incrementUpvotes(testPlanner.getId());
+            voteRepository.insert(new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP));
+            statsRepository.incrementUpvotes(testPlanner.id());
         });
 
-        assertThat(voteRepository.findByUserIdAndPlannerId(testUser.getId(), testPlanner.getId())).isPresent();
-        assertThat(statsRepository.upvotesOf(testPlanner.getId())).isEqualTo(1);
+        assertThat(voteRepository.findByUserIdAndPlannerId(testUser.getId(), testPlanner.id())).isPresent();
+        assertThat(statsRepository.upvotesOf(testPlanner.id())).isEqualTo(1);
     }
 
     @Test
     void decrementCommentCount_WhenAtZero_StaysAtZero() {
         transactionTemplate.executeWithoutResult(status ->
-                statsRepository.decrementCommentCount(testPlanner.getId()));
+                statsRepository.decrementCommentCount(testPlanner.id()));
 
-        assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getCommentCount()).isZero();
+        assertThat(statsRepository.findById(testPlanner.id()).orElseThrow().getCommentCount()).isZero();
     }
 
     // ==================== Atomic Notification Flag Tests ====================
@@ -140,11 +140,11 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
         seedUpvotes(10);
 
         // Act
-        int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
+        int rowsUpdated = trySetRecommendedNotified(testPlanner.id());
 
         // Assert
         assertThat(rowsUpdated).isEqualTo(1);
-        PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
+        PlannerStats updated = statsRepository.findById(testPlanner.id()).orElseThrow();
         assertThat(updated.getRecommendedNotifiedAt()).isNotNull();
     }
 
@@ -154,10 +154,10 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
         seedUpvotes(15);
 
         // First call sets the flag
-        trySetRecommendedNotified(testPlanner.getId());
+        trySetRecommendedNotified(testPlanner.id());
 
         // Act - Second call should return 0
-        int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
+        int rowsUpdated = trySetRecommendedNotified(testPlanner.id());
 
         // Assert
         assertThat(rowsUpdated).isEqualTo(0);
@@ -169,11 +169,11 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
         seedUpvotes(5);
 
         // Act
-        int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
+        int rowsUpdated = trySetRecommendedNotified(testPlanner.id());
 
         // Assert
         assertThat(rowsUpdated).isEqualTo(0);
-        PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
+        PlannerStats updated = statsRepository.findById(testPlanner.id()).orElseThrow();
         assertThat(updated.getRecommendedNotifiedAt()).isNull();
     }
 

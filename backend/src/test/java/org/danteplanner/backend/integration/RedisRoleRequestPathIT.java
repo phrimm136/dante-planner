@@ -47,7 +47,7 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -295,7 +295,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
             throws IOException {
         User user = TestDataFactory.createTestUser(userRepository, "role-both-open@example.com");
         String token = TestDataFactory.generateAccessToken(jwtTokenService, user);
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, user, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, user, false);
         replicationControl.awaitCaughtUp();
         awaitAvailable(RedisRole.AUTH_LOCAL, RedisRole.AUTH);
 
@@ -317,7 +317,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
             blacklistBefore = counter(BLACKLIST_SKIPPED);
             localGateBefore = gateSkipped(AUTH_LOCAL_GATE);
             authGateBefore = gateSkipped(AUTH_GATE);
-            Sample byId = send(PLANNER_PATH + planner.getId(), token);
+            Sample byId = send(PLANNER_PATH + planner.id(), token);
             assertThat(byId.status()).isEqualTo(200);
             assertThat(counter(BLACKLIST_SKIPPED) - blacklistBefore).isEqualTo(2.0);
             assertThat(gateSkipped(AUTH_LOCAL_GATE) - localGateBefore).isEqualTo(2.0);
