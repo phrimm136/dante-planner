@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public record CatalogQuery(
-        boolean recommendedOnly,
+        Shelf shelf,
         TextFilter category,
         TextFilter searchTerm,
         List<String> keywords,
@@ -18,6 +18,11 @@ public record CatalogQuery(
     public CatalogQuery {
         keywords = List.copyOf(keywords);
         entityFilters = normalize(entityFilters);
+    }
+
+    public enum Shelf {
+        ALL_PUBLISHED,
+        RECOMMENDED
     }
 
     public sealed interface TextFilter {

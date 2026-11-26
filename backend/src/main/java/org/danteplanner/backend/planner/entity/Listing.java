@@ -23,8 +23,4 @@ public sealed interface Listing {
         }
         return new Hidden(row.getHiddenByModeratorId(), reason, at);
     }
-
-    default boolean isHidden() {
-        return this instanceof Hidden;
-    }
 }

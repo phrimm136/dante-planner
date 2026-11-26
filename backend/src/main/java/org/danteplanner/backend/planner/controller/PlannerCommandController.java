@@ -42,15 +42,11 @@ public class PlannerCommandController {
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        UpsertResult result = plannerCommandService.upsertPlanner(
-                member.userId(), deviceId, id, request, writeMode(force));
+        WriteMode mode = force ? WriteMode.FORCED : WriteMode.CHECKED;
+        UpsertResult result = plannerCommandService.upsertPlanner(member.userId(), deviceId, id, request, mode);
 
         HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(status).body(result.response());
-    }
-
-    private static WriteMode writeMode(boolean force) {
-        return force ? WriteMode.FORCED : WriteMode.CHECKED;
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "delete")

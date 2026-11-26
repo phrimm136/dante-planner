@@ -32,6 +32,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -210,7 +211,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
         transactionTemplate.executeWithoutResult(status -> {
             assertThat(published(id)).isFalse();
             elsewhere(() -> publishingService.publish(owner.getId(), id));
-            publishingService.toggleOwnerNotifications(owner.getId(), id, false);
+            publishingService.toggleOwnerNotifications(owner.getId(), id, NotificationSetting.OFF);
         });
 
         assertThat(stored(id).isOwnerNotificationsEnabled()).isFalse();

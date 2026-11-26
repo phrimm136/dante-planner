@@ -61,6 +61,7 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -75,6 +76,7 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -131,7 +133,7 @@ class PlannerScopeDeclarationTest {
         TransactionSynchronizationManager.initSynchronization();
         lenient().when(publicationRepository.publishFirst(any(), any())).thenReturn(1);
         lenient().when(publicationRepository.unpublish(any())).thenReturn(1);
-        lenient().when(publicationRepository.disableOwnerNotifications(any())).thenReturn(1);
+        lenient().when(publicationRepository.setOwnerNotifications(any(), anyBoolean())).thenReturn(1);
         lenient().when(moderationRepository.takeDown(any(), any())).thenReturn(1);
         lenient().when(moderationRepository.hide(any(), any(), any(), any())).thenReturn(1);
         FreshnessDeclarations.begin();
@@ -317,7 +319,7 @@ class PlannerScopeDeclarationTest {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).toggleOwnerNotifications(OWNER_ID, planner.getId(),
-                false);
+                NotificationSetting.OFF);
 
         assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(planner.getId()));
     }

@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -652,15 +653,15 @@ class PlannerPublishingServiceTest {
             lenient().when(plannerRepository.findOwnershipById(planner.getId()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
-            when(publicationRepository.disableOwnerNotifications(planner.getId())).thenReturn(1);
+            when(publicationRepository.setOwnerNotifications(planner.getId(), false)).thenReturn(1);
 
             // Act
             ToggleOwnerNotificationsResponse response =
-                    publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), false);
+                    publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), NotificationSetting.OFF);
 
             // Assert
             assertThat(response.ownerNotificationsEnabled()).isFalse();
-            verify(publicationRepository).disableOwnerNotifications(planner.getId());
+            verify(publicationRepository).setOwnerNotifications(planner.getId(), false);
             verifyNoMoreInteractions(publicationRepository);
         }
 
@@ -676,7 +677,7 @@ class PlannerPublishingServiceTest {
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             // Act & Assert
-            assertRejected(() -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true))
+            assertRejected(() -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), NotificationSetting.ON))
                     .withCode("PLANNER_FORBIDDEN");
             verifyNoInteractions(publicationRepository);
         }

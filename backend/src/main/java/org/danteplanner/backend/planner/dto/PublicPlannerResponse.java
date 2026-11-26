@@ -6,6 +6,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.Upvote;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.util.PlannerConstants;
 
@@ -42,7 +43,7 @@ public record PublicPlannerResponse(
             PlannerCatalog row,
             PlannerCoreInfo.PlannerCore core,
             PlannerStats stats,
-            boolean hasUpvoted) {
+            Upvote upvote) {
         PublicPlannerResponseBuilder response = PublicPlannerResponse.builder()
                 .id(row.getPlannerId())
                 .title(row.getTitle())
@@ -52,7 +53,7 @@ public record PublicPlannerResponse(
                 .upvotes(stats.getUpvotes())
                 .viewCount(stats.getViewCount())
                 .firstPublishedAt(row.getFirstPublishedAt())
-                .hasUpvoted(hasUpvoted)
+                .hasUpvoted(upvote == Upvote.CAST)
                 .commentCount(stats.getCommentCount());
         return switch (core) {
             case PlannerCoreInfo.PlannerCore.Known(PlannerCoreInfo info) -> response

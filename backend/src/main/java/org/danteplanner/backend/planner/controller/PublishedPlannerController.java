@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.planner.dto.CatalogQuery.Shelf;
 import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
 import org.danteplanner.backend.planner.dto.PlannerStatsResponse;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
@@ -44,7 +45,7 @@ public class PublishedPlannerController {
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
             @ModelAttribute PublishedListParams params, Viewer viewer) {
         return ResponseEntity.ok(publishedPlannerQueryService
-                .searchPlanners(params.catalogQuery(false), params.pageable(), viewer).value());
+                .searchPlanners(params.catalogQuery(Shelf.ALL_PUBLISHED), params.pageable(), viewer).value());
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -52,7 +53,7 @@ public class PublishedPlannerController {
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
             @ModelAttribute PublishedListParams params, Viewer viewer) {
         return ResponseEntity.ok(publishedPlannerQueryService
-                .searchPlanners(params.catalogQuery(true), params.pageable(), viewer).value());
+                .searchPlanners(params.catalogQuery(Shelf.RECOMMENDED), params.pageable(), viewer).value());
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)

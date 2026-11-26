@@ -78,7 +78,7 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(member.userId(), id, request.enabled());
+        ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(member.userId(), id, request.setting());
         return ResponseEntity.ok(response);
     }
 }

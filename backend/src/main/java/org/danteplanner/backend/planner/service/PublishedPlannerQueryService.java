@@ -21,6 +21,7 @@ import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.Upvote;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -102,11 +103,10 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
     public ScopedRead<Page<PublicPlannerResponse>> searchPlanners(
             CatalogQuery catalogQuery, Pageable pageable, Viewer viewer) {
 
-        Specification<PlannerCatalog> spec = (root, query, cb) -> cb.conjunction();
-
-        if (catalogQuery.recommendedOnly()) {
-            spec = spec.and(CatalogSpecifications.isRecommended());
-        }
+        Specification<PlannerCatalog> spec = switch (catalogQuery.shelf()) {
+            case ALL_PUBLISHED -> (root, query, cb) -> cb.conjunction();
+            case RECOMMENDED -> CatalogSpecifications.isRecommended();
+        };
         spec = switch (catalogQuery.category()) {
             case CatalogQuery.TextFilter.Any any -> spec;
             case CatalogQuery.TextFilter.Text text -> spec.and(CatalogSpecifications.hasCategory(text.value()));
@@ -164,7 +164,8 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
             UUID id = row.getPlannerId();
             PlannerCoreInfo.PlannerCore core = PlannerCoreInfo.PlannerCore.of(coreInfoMap.get(id));
             PlannerStats stats = statsMap.getOrDefault(id, NO_STATS);
-            return PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
+            Upvote upvote = upvotedIds.contains(id) ? Upvote.CAST : Upvote.NONE;
+            return PublicPlannerResponse.fromCatalog(row, core, stats, upvote);
         });
         Set<FreshnessScope> scopes = new LinkedHashSet<>();
         scopes.add(new FreshnessScope.Global());
@@ -198,17 +199,15 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         int upvotes = stats.getUpvotes();
         long commentCount = stats.getCommentCount();
 
-        boolean ownerNotificationsEnabled = ownerNotificationsFor(viewer, planner);
-
         return switch (viewer) {
             case Viewer.Guest guest -> new ScopedRead<>(PublishedPlannerDetailResponse.forAnonymous(
-                    planner, published.author(), commentCount, ownerNotificationsEnabled, viewCount, upvotes), scopes);
+                    planner, published.author(), commentCount, viewCount, upvotes), scopes);
             case Viewer.Member member -> new ScopedRead<>(PublishedPlannerDetailResponse.fromEntity(
                 planner, published.author(),
                 hasUpvoted(plannerId, member.userId()),
                 subscriptionService.isSubscribed(member.userId(), plannerId),
                 reportService.hasReported(member.userId(), plannerId),
-                commentCount, ownerNotificationsEnabled, viewCount, upvotes), scopes);
+                commentCount, ownerNotificationsFor(member, planner), viewCount, upvotes), scopes);
         };
     }
 

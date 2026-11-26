@@ -31,11 +31,16 @@ public class PlannerQueryService {
     private final PlannerAccessGuard accessGuard;
 
     @Transactional(readOnly = true)
-    public ScopedRead<Page<PlannerSummaryResponse>> getPlanners(
-            Long userId, Pageable pageable, boolean includeDeleted) {
-        Page<PlannerSummaryRow> rows = includeDeleted
-                ? plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable)
-                : plannerRepository.findOwnerSummaries(userId, pageable);
+    public ScopedRead<Page<PlannerSummaryResponse>> getPlanners(Long userId, Pageable pageable) {
+        return ownerSummaries(userId, plannerRepository.findOwnerSummaries(userId, pageable));
+    }
+
+    @Transactional(readOnly = true)
+    public ScopedRead<Page<PlannerSummaryResponse>> getPlannersWithTombstones(Long userId, Pageable pageable) {
+        return ownerSummaries(userId, plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable));
+    }
+
+    private static ScopedRead<Page<PlannerSummaryResponse>> ownerSummaries(Long userId, Page<PlannerSummaryRow> rows) {
         return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.User(userId)));
     }
 

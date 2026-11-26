@@ -36,8 +36,9 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.planner.api.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.CommentConstants;
@@ -348,7 +349,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     private void silence(UUID comment) {
-        engagementService.toggleNotification(comment, author.getId(), false);
+        engagementService.toggleNotification(comment, author.getId(), NotificationSetting.OFF);
     }
 
     private CommentTreeNode shown(UUID comment, User viewer) {

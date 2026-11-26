@@ -50,7 +50,7 @@ import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
-import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.planner.api.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.entity.VoteType;
 

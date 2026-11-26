@@ -131,7 +131,7 @@ class PlannerQueryServiceTest {
                     .thenReturn(rowPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false).value();
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable).value();
 
             // Assert
             assertThat(result.getTotalElements()).isEqualTo(2);
@@ -153,7 +153,7 @@ class PlannerQueryServiceTest {
 
             // Act
             Page<PlannerSummaryResponse> result =
-                    queryService.getPlanners(testUser.getId(), pageable, true).value();
+                    queryService.getPlannersWithTombstones(testUser.getId(), pageable).value();
 
             // Assert
             assertThat(result.getContent().get(0).deletedAt()).isEqualTo(deletedAt);
@@ -169,7 +169,7 @@ class PlannerQueryServiceTest {
                     .thenReturn(emptyPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false).value();
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable).value();
 
             // Assert
             assertThat(result.getTotalElements()).isEqualTo(0);
