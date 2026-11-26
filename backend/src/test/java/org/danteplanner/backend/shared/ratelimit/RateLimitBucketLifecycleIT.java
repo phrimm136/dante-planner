@@ -96,7 +96,7 @@ class RateLimitBucketLifecycleIT {
     }
 
     private ConsumptionProbe charge(long userId) {
-        return rateLimitService.charge(RateLimitPolicy.CRUD, ChargeKey.parseUser(RateLimitPolicy.CRUD, userId, ENDPOINT));
+        return rateLimitService.charge(RateLimitPolicy.CRUD, ChargeKey.User.parse(RateLimitPolicy.CRUD, userId, ENDPOINT));
     }
 
     private int successfulCharges(long userId, int attempts) {

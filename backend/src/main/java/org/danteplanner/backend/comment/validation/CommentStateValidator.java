@@ -2,9 +2,9 @@ package org.danteplanner.backend.comment.validation;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
+import org.danteplanner.backend.comment.exception.CommentVoteAlreadyExistsException;
 import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator.ParentInPlanner;
-import org.danteplanner.backend.planner.api.VoteAlreadyExistsException;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.danteplanner.backend.shared.failure.Result;
 
@@ -43,7 +43,7 @@ public final class CommentStateValidator {
         return new CommentNotFoundException(commentPublicId);
     }
 
-    public static VoteAlreadyExistsException alreadyVoted(UUID plannerId, Long userId) {
-        return new VoteAlreadyExistsException(plannerId, userId);
+    public static CommentVoteAlreadyExistsException alreadyVoted(UUID commentPublicId, Long userId) {
+        return new CommentVoteAlreadyExistsException(commentPublicId, userId);
     }
 }

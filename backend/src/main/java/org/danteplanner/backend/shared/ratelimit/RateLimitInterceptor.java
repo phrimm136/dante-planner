@@ -199,8 +199,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private boolean chargeBucket(RateLimitService service, RateLimited declaration, HttpServletRequest request,
             HttpServletResponse response) {
-        ChargeKey key = keyOf(declaration, request, response);
-        ConsumptionProbe probe = service.charge(declaration.value(), key);
+        RateLimitPolicy policy = declaration.value();
+        ChargeKey key = switch (policy.subject()) {
+            case CLIENT -> ChargeKey.Client.parse(policy, ClientIpResolver.resolveClientIdentifier(
+                    request, securityProperties, () -> deviceIdResolver.resolve(request, response)));
+            case USER -> ChargeKey.User.parse(policy, authenticatedUserId(), declaration.endpoint());
+        };
+        ConsumptionProbe probe = service.charge(policy, key);
         Admission admission = probe.isConsumed() ? Admission.ADMIT : Admission.refused(declaration.denial());
         return switch (admission) {
             case ADMIT -> {
@@ -219,15 +224,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private static RateLimitExceededException refusalOf(ChargeKey key, ConsumptionProbe probe) {
         long retryAfterSeconds = RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill());
         return key.refusal(retryAfterSeconds);
-    }
-
-    private ChargeKey keyOf(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
-        RateLimitPolicy policy = declaration.value();
-        return switch (policy.subject()) {
-            case CLIENT -> ChargeKey.parseClient(policy, ClientIpResolver.resolveClientIdentifier(
-                    request, securityProperties, () -> deviceIdResolver.resolve(request, response)));
-            case USER -> ChargeKey.parseUser(policy, authenticatedUserId(), declaration.endpoint());
-        };
     }
 
     private long authenticatedUserId() {

@@ -148,7 +148,7 @@ class ReadOnlyRoutingDataSourceTest {
     }
 
     @Test
-    void determineCurrentLookupKey_WhenWriteTransaction_ReturnsPrimary() {
+    void determineCurrentLookupKey_WhenNoTransactionIsDeclared_ReturnsPrimaryAndCountsIt() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 
         Object key = new ReadOnlyRoutingDataSource(guard(OnUndeclared.COUNT, true)).determineCurrentLookupKey();

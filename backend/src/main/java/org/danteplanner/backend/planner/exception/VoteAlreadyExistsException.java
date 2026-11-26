@@ -1,4 +1,4 @@
-package org.danteplanner.backend.planner.api;
+package org.danteplanner.backend.planner.exception;
 
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.ErrorKind;

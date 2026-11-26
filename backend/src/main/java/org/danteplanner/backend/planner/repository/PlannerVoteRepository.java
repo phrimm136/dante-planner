@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +34,13 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
     @Modifying
     @Query("UPDATE PlannerVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
     int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+
+    @Modifying
+    @Query(value = "INSERT IGNORE INTO planner_votes (user_id, planner_id, vote_type, created_at) "
+            + "VALUES (:userId, :plannerId, :voteType, :now)",
+            nativeQuery = true)
+    int insertIgnore(@Param("userId") Long userId, @Param("plannerId") UUID plannerId,
+            @Param("voteType") String voteType, @Param("now") Instant now);
 
     default PlannerVote insert(PlannerVote vote) {
         return save(vote);

@@ -32,7 +32,7 @@ org.danteplanner.backend.planner.service.PlannerCatalogService.syncFilterRows(ja
 org.danteplanner.backend.planner.service.PlannerDriftReconciler.auditCatalogKeywords() # 1
 org.danteplanner.backend.planner.service.PlannerDriftReconciler.extractEntityKeys(java.util.UUID, java.lang.String, tools.jackson.databind.JsonNode) # 1
 org.danteplanner.backend.planner.service.PlannerDriftReconciler.rebuildExpectedIndexes() # 2
-org.danteplanner.backend.planner.service.PlannerEngagementService.castVote(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.entity.VoteType) # 4
+org.danteplanner.backend.planner.service.PlannerEngagementService.castVote(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.entity.VoteType) # 3
 org.danteplanner.backend.planner.service.PublishedPlannerQueryService.mapCatalogWithUserContext(org.springframework.data.domain.Page, org.danteplanner.backend.shared.security.Viewer) # 1
 org.danteplanner.backend.planner.service.PublishedPlannerQueryService.memberView(org.danteplanner.backend.shared.security.Viewer$Member, org.danteplanner.backend.planner.repository.StoredPlanner) # 3
 org.danteplanner.backend.planner.service.ViewCountFlushService.applyBatch(java.util.UUID, java.util.Map) # 1
