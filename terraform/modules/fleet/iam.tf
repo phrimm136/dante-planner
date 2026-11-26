@@ -118,6 +118,74 @@ resource "aws_iam_role_policy" "app_join" {
   policy = data.aws_iam_policy_document.read_join_token.json
 }
 
+locals {
+  ebs_csi_volume_arn   = "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:volume/*"
+  ebs_csi_instance_arn = "arn:aws:ec2:${var.region}:${data.aws_caller_identity.current.account_id}:instance/*"
+}
+
+data "aws_iam_policy_document" "data_ebs_csi" {
+  statement {
+    sid = "Describe"
+    actions = [
+      "ec2:DescribeAvailabilityZones",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceTypes",
+      "ec2:DescribeSnapshots",
+      "ec2:DescribeTags",
+      "ec2:DescribeVolumes",
+      "ec2:DescribeVolumesModifications",
+      "ec2:DescribeVolumeStatus",
+    ]
+    resources = ["*"]
+  }
+  statement {
+    sid       = "CreateClusterVolume"
+    actions   = ["ec2:CreateVolume"]
+    resources = [local.ebs_csi_volume_arn]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/ebs.csi.aws.com/cluster"
+      values   = ["true"]
+    }
+  }
+  statement {
+    sid       = "TagClusterVolumeOnCreate"
+    actions   = ["ec2:CreateTags"]
+    resources = [local.ebs_csi_volume_arn]
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:CreateAction"
+      values   = ["CreateVolume"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/ebs.csi.aws.com/cluster"
+      values   = ["true"]
+    }
+  }
+  statement {
+    sid       = "ManageClusterVolume"
+    actions   = ["ec2:AttachVolume", "ec2:DetachVolume", "ec2:ModifyVolume"]
+    resources = [local.ebs_csi_volume_arn]
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:ResourceTag/ebs.csi.aws.com/cluster"
+      values   = ["true"]
+    }
+  }
+  statement {
+    sid       = "AttachToInstance"
+    actions   = ["ec2:AttachVolume", "ec2:DetachVolume"]
+    resources = [local.ebs_csi_instance_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "data_ebs_csi" {
+  name   = "${var.name_prefix}-${var.region_name_suffix}-data-ebs-csi"
+  role   = aws_iam_role.data.id
+  policy = data.aws_iam_policy_document.data_ebs_csi.json
+}
+
 # --- App: the External Secrets Operator controller (pinned to role=app nodes)
 # reads the RS256 key from Secrets Manager via this instance profile. Coarser
 # than IRSA — any pod on an app node inherits it. Documented deviation (README).

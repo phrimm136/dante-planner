@@ -13,11 +13,11 @@ resource "aws_instance" "data" {
   user_data = local.data_user_data
 
   metadata_options {
-    http_tokens   = "required"
-    http_endpoint = "enabled"
+    http_tokens                 = "required"
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 2
   }
 
-  # AZ-pinned EBS gp3 for the Redis AOF/RDB PVC (StatefulSet durability tier).
   root_block_device {
     volume_type = "gp3"
     volume_size = 30
