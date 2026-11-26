@@ -55,7 +55,9 @@ changed:    the checks the change set reaches, before a commit. The change set i
             (vitest --changed), a static.lock change runs every vitest file, an e2e change runs
             e2e typecheck, a Java source or its lint configuration runs be lint, a backend source
             runs the test classes named after it, a backend build or resource file runs every
-            backend test, and a tooling change runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
+            backend test, and a tooling or scripts/ops change, or a file the tooling tests read
+            (fleet and envs terraform, chart, Argo CD root app, workflow, .claude/settings.json,
+            any scripts/ shell script), runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
 --full:     a whole test run that PR Gate already runs (fe test or e2e run with no file, be test
             with no --tests, be check, be pit, fe gate) takes a stated reason.
 
@@ -104,7 +106,7 @@ CHECK_TABLE = (
     CheckSpec("be", "freeze-branches", "[--reason REASON]",
               f"rewrite {BRANCH_STORE} from the sources; adding or raising a line needs the reason"),
     CheckSpec("be", "pit", "", "pitestRatchet, the surviving-mutant ratchet"),
-    CheckSpec("tools", "test", "", f"every skill CLI and git-hook test suite ({TOOLING_SCRIPT}, "
+    CheckSpec("tools", "test", "", f"every skill CLI, git-hook and ops script test suite and the no-real-time check ({TOOLING_SCRIPT}, "
               f"what PR Gate job {TOOLING_JOB} runs)"),
 )
 
@@ -431,7 +433,26 @@ FRONTEND_WHOLE = ("frontend/package.json", "frontend/yarn.lock", "static.lock")
 BACKEND_SOURCES = ("backend/src/main/java/", "backend/src/test/java/")
 BACKEND_LINT_CONFIG = ("backend/config/checkstyle/", "backend/config/ast-grep/", "backend/sgconfig.yml",
                        "backend/build.gradle.kts")
-TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/")
+TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/", "scripts/ops/")
+TOOLING_INPUTS = ("terraform/modules/fleet/", "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-",
+                  ".github/workflows/deploy-fleet.yml", ".github/workflows/pr-gate.yml", "deploy/argocd/root-app-",
+                  ".claude/settings.json")
+TOOLING_INPUT_PATTERNS = (re.compile(r"scripts/.+\.sh"), re.compile(r"terraform/[^/]+/envs/[^/]+\.tfvars"))
+STACK_FILE = re.compile(r"terraform/([^/]+)/([^/]+)")
+STACK_SUFFIXES = (".tf", ".tfvars.example")
+FLEET_SOURCE = re.compile(r'^\s*source\s*=\s*"\.\./modules/fleet"$', re.MULTILINE)
+
+
+def tooling_reads(repo_root, one_path):
+    if one_path.startswith(TOOLING_DIRS + TOOLING_INPUTS) or any(
+            input_pattern.fullmatch(one_path) for input_pattern in TOOLING_INPUT_PATTERNS):
+        return True
+    stack_match = STACK_FILE.fullmatch(one_path)
+    if not stack_match or not stack_match.group(2).endswith(STACK_SUFFIXES):
+        return False
+    main_path = repo_root / "terraform" / stack_match.group(1) / "main.tf"
+    return stack_match.group(2) == "main.tf" or (main_path.is_file()
+                                                 and bool(FLEET_SOURCE.search(main_path.read_text(encoding="utf-8"))))
 
 
 def whole_run(lane_name, check_name, arg_words):
@@ -509,7 +530,7 @@ def changed_plans(repo_paths, changed_paths, base_commit):
                              for pattern_word in ("--tests", test_pattern)]
             plan_rows.append((build_plan(repo_paths, "be", "test", pattern_words),
                               f"{len(test_patterns)} backend file(s) changed; their test classes run"))
-    tooling_path = first_path(lambda one_path: one_path.startswith(TOOLING_DIRS))
+    tooling_path = first_path(lambda one_path: tooling_reads(repo_paths.repo_root, one_path))
     if tooling_path:
         plan_rows.append((build_plan(repo_paths, "tools", "test", []), f"{tooling_path} changed"))
     return plan_rows

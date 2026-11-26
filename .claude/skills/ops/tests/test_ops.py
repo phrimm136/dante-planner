@@ -1867,7 +1867,8 @@ class ProfileTest(unittest.TestCase):
             fake_aws.chmod(0o755)
             child_env = {env_key: env_value for env_key, env_value in os.environ.items()
                          if not env_key.startswith("AWS_")}
-            child_env["PATH"] = f"{fake_dir}:/usr/bin:/bin"
+            child_env["PATH"] = ":".join(path_dir for path_dir in (
+                fake_dir, os.environ.get("TOOLING_SLEEP_GUARD_DIR", ""), "/usr/bin", "/bin") if path_dir)
             script_run = subprocess.run([str(REPO_ROOT / ops_cli.SQL_SCRIPT), "SELECT 1"], env=child_env,
                                         capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=60)
         self.assertNotEqual(script_run.returncode, 0)

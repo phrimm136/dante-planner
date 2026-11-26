@@ -259,7 +259,8 @@ jobs:
   # needs a second NODE, not a second pod. Both app ASGs go to 2 BEFORE the tag
   # bump lands — if ArgoCD synced the bump first, maxUnavailable=1 would kill
   # the region's only pod before the surge node exists. settle-down returns the
-  # ASGs to 1 after the rollout completes.
+  # ASGs to 1 once the rollout completes, or at once when no bump landed; a
+  # failed rollout leaves the surge nodes up.
   surge-up:
     needs: [build-push]
     runs-on: ubuntu-latest
