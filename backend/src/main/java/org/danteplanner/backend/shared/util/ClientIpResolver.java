@@ -5,11 +5,12 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.shared.config.SecurityProperties;
-import org.danteplanner.backend.shared.config.SecurityProperties.CidrRange;
 
 /**
  * An {@code X-Forwarded-For} or {@code CF-Connecting-IP} header is honoured only when the direct
@@ -34,11 +35,11 @@ public final class ClientIpResolver {
     );
 
     /** RFC 1918 space plus loopback: not routable, so never a caller's own address. */
-    private static final List<CidrRange> PRIVATE_IPV4_RANGES = List.of(
-            CidrRange.parse("10.0.0.0/8"),
-            CidrRange.parse("172.16.0.0/12"),
-            CidrRange.parse("192.168.0.0/16"),
-            CidrRange.parse("127.0.0.0/8"));
+    private static final List<IpAddressMatcher> PRIVATE_IPV4_RANGES = List.of(
+            new IpAddressMatcher("10.0.0.0/8"),
+            new IpAddressMatcher("172.16.0.0/12"),
+            new IpAddressMatcher("192.168.0.0/16"),
+            new IpAddressMatcher("127.0.0.0/8"));
 
     private static final List<String> PRIVATE_IPV6_ADDRESSES = List.of("::1", "::");
 
@@ -47,7 +48,8 @@ public final class ClientIpResolver {
 
     public static String resolve(HttpServletRequest request, SecurityProperties securityProperties) {
         String directIp = request.getRemoteAddr();
-        return clientIp(directIp, securityProperties.isTrustedProxy(directIp), RequestHeaders.forwardedFor(request));
+        return clientIp(
+                directIp, securityProperties.trustedProxies().contains(directIp), RequestHeaders.forwardedFor(request));
     }
 
     private static String clientIp(String directIp, boolean peerIsTrustedProxy, @Nullable String forwarded) {
@@ -65,7 +67,8 @@ public final class ClientIpResolver {
             Supplier<UUID> deviceId
     ) {
         String ip = switch (ClientIpEvidence.of(
-                RequestHeaders.cfConnectingIp(request), securityProperties.isTrustedProxy(request.getRemoteAddr()))) {
+                RequestHeaders.cfConnectingIp(request),
+                securityProperties.trustedProxies().contains(request.getRemoteAddr()))) {
             case ClientIpEvidence.Trusted trusted -> trusted.ip();
             case ClientIpEvidence.NotEvidence notEvidence -> resolve(request, securityProperties);
         };
@@ -94,7 +97,7 @@ public final class ClientIpResolver {
         if (!IPV4_PATTERN.matcher(ip).matches()) {
             return false;
         }
-        return PRIVATE_IPV4_RANGES.stream().anyMatch(range -> range.contains(ip));
+        return PRIVATE_IPV4_RANGES.stream().anyMatch(range -> range.matches(ip));
     }
 
     private sealed interface ClientIpEvidence {

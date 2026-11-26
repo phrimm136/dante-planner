@@ -81,7 +81,7 @@ class PublishedPlannerClientBucketTest {
         ObjectMapper objectMapper = TestJsonMappers.springDefaults();
 
         SecurityProperties securityProperties = new SecurityProperties();
-        securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP);
+        securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP + "/32");
         securityProperties.parseTrustedProxyIps();
         DeviceIdResolver deviceIdResolver = new DeviceIdResolver(new CookieUtils(false, "", "Lax"));
 
