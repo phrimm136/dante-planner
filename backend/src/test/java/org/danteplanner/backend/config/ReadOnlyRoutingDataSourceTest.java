@@ -83,6 +83,7 @@ class ReadOnlyRoutingDataSourceTest {
     @AfterEach
     void resetReadOnlyFlag() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+        TransactionSynchronizationManager.setActualTransactionActive(false);
         ReadSourceSelector.clearSkips();
         ChosenReadSource.clear();
     }
@@ -154,6 +155,16 @@ class ReadOnlyRoutingDataSourceTest {
 
         assertThat(key).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isEqualTo(1.0);
+    }
+
+    @Test
+    void determineCurrentLookupKey_WhenAnActualWriteTransaction_ReturnsPrimaryUncounted() {
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+
+        Object key = new ReadOnlyRoutingDataSource(guard(OnUndeclared.FAIL, true)).determineCurrentLookupKey();
+
+        assertThat(key).isEqualTo(RoutingKey.PRIMARY);
+        assertThat(undeclaredCount()).isZero();
     }
 
     @Test

@@ -1,10 +1,9 @@
 package org.danteplanner.backend.shared.config;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.context.ApplicationListener;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 
@@ -22,7 +21,7 @@ public class UndeclaredPrimaryAccessGuard implements ApplicationListener<Applica
 
     private final Counter undeclaredCounter;
     private final OnUndeclared onUndeclared;
-    private final AtomicBoolean armed = new AtomicBoolean();
+    private final AtomicReference<Phase> phase = new AtomicReference<>(Phase.STARTING);
 
     public UndeclaredPrimaryAccessGuard(MeterRegistry meterRegistry, OnUndeclared onUndeclared) {
         this.undeclaredCounter = Counter.builder(UNDECLARED_COUNTER).register(meterRegistry);
@@ -31,18 +30,25 @@ public class UndeclaredPrimaryAccessGuard implements ApplicationListener<Applica
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        armed.set(true);
+        phase.set(Phase.READY);
     }
 
-    public void checkDeclared() {
-        if (!armed.get() || TransactionSynchronizationManager.isActualTransactionActive()) {
-            return;
+    public void reportUndeclared() {
+        switch (phase.get()) {
+            case STARTING -> { }
+            case READY -> {
+                switch (onUndeclared) {
+                    case FAIL -> throw new IllegalStateException(
+                            "PRIMARY connection acquired outside a transaction: declare the caller with "
+                                    + "@Transactional(readOnly = true) so the read can route to the replica");
+                    case COUNT -> undeclaredCounter.increment();
+                }
+            }
         }
-        switch (onUndeclared) {
-            case FAIL -> throw new IllegalStateException(
-                    "PRIMARY connection acquired outside a transaction: declare the caller with "
-                            + "@Transactional(readOnly = true) so the read can route to the replica");
-            case COUNT -> undeclaredCounter.increment();
-        }
+    }
+
+    private enum Phase {
+        STARTING,
+        READY
     }
 }

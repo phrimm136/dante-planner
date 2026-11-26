@@ -3,6 +3,7 @@ package org.danteplanner.backend.shared.security;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
@@ -15,6 +16,11 @@ public final class SpringContextAdapter {
 
     public static Viewer viewer() {
         return viewerOf(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    public static TransactionScope transactionScope() {
+        return TransactionScope.of(TransactionSynchronizationManager.isCurrentTransactionReadOnly(),
+                TransactionSynchronizationManager.isActualTransactionActive());
     }
 
     public static void signIn(Authentication authentication) {
