@@ -11,7 +11,7 @@ module "fleet" {
   vpc_cidr                        = var.vpc_cidr
   availability_zones              = var.availability_zones
   public_subnet_cidrs             = var.public_subnet_cidrs
-  ingress_allowed_cidrs           = var.ingress_allowed_cidrs
+  ingress_allowed_cidrs           = local.ingress_allowed_cidrs
   redis_cross_region_cidr         = var.redis_cross_region_cidr
   enable_global_accelerator       = var.enable_global_accelerator
   instance_type                   = var.instance_type
@@ -30,7 +30,7 @@ module "fleet" {
   alarm_sns_topic_arn             = var.alarm_sns_topic_arn
   etcd_snapshot_retention         = var.etcd_snapshot_retention
   tags                            = var.tags
-  rds_vpc_id                      = var.rds_vpc_id
+  rds_vpc_id                      = data.terraform_remote_state.rds.outputs.rds_vpc_id
 
   node_generation = { cp = 1, data = 1, ingress = 1 }
 }

@@ -622,8 +622,8 @@ guards the parse but likewise skips the schema gate.
   sts:AssumeRoleWithWebIdentity". Declaring `environment: production` would satisfy the
   trust but attaches that environment's required reviewer, which an unattended cron cannot
   clear — an ungated environment plus a matching `sub` condition on the role is the shape
-  that works. (2) Inputs: `TFVARS_OREGON`, `TFVARS_SEOUL`, `TFVARS_SECRETS` and
-  `TFVARS_CLOUDFLARE` do not exist at repository scope or in any environment, and the workflow's own note
+  that works. (2) Inputs: oregon, seoul and secrets plan from their tracked `envs/` files and
+  SSM, but `TFVARS_CLOUDFLARE` does not exist at repository scope or in any environment, and the workflow's own note
   explains the consequence — "a partial set is worse than none: variables that gate a
   resource default to empty, so a plan missing one reports the resource's destruction as
   drift". (3) Account: the workflow writes `backend.hcl` as

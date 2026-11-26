@@ -74,7 +74,7 @@ region      = us-west-2
 ```
 
 ```bash
-.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf plan oregon
 .claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
