@@ -108,7 +108,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
             throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         int overlapped = 0;
-        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
+        try (TransactionSpans.Installed _ = TransactionSpans.install(transactionManager)) {
             for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
                 long current = plannerRepository.findAggregate(planner.id()).orElseThrow().content().syncVersion();
                 String title = "Conflict Test " + attempt;

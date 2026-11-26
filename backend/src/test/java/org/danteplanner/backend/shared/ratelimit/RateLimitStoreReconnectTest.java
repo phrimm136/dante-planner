@@ -39,7 +39,7 @@ class RateLimitStoreReconnectTest {
     @AfterEach
     void tearDown() throws IOException {
         redis.close();
-        var unused = clientResources.shutdown();
+        var _ = clientResources.shutdown();
     }
 
     @Test

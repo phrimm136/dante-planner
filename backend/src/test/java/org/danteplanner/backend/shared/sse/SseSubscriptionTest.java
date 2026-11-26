@@ -155,7 +155,7 @@ class SseSubscriptionTest {
                 return health.isAvailable(RedisRole.SSE_LOCAL);
             }, "the probe closing sse-local once the subscription can be made");
         } finally {
-            var unused = clientResources.shutdown();
+            var _ = clientResources.shutdown();
         }
 
         assertThat(listening).isTrue();
