@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 USAGE_TEXT = """usage: debt [--file <path>] <command> [--only <substring>]
+       debt adr doctor|check [--dir <path>]
        debt absent <path> <rg arguments>...
        debt python <body>
        debt help
@@ -50,9 +51,37 @@ commands:
            or 1 (or ends, or calls sys.exit(), for 0); a compile error, any other exception
            or any other exit code exits 2 with one '<Type>: <message>' line on stderr
 
+ADR re-check lines:
+  A decision in an ADR's '## Decisions' section states how to re-verify it with
+  'Re-check [<kind>]:', where the kind is one of
+    assert     the backticked command right after the marker, in the same decision
+               bullet, exits 0 while the decision's constraint holds and 1 when it is gone
+    absent     the same, with rg's polarity: a single rg clause that exits 1 (nothing
+               found) while the constraint holds and 0 when something matches
+    gh         needs the GitHub CLI and its login
+    prod-read  needs production or cloud access
+    manual     needs a person: a build, a running instance, a judgement of the output
+    prose      names no command, only a source to read
+  Only assert and absent lines run, under the clause rules and the 5 s budget above. Their
+  command follows the marker directly and is the whole check: a second backticked span in the
+  same sentence makes the line malformed, while prose that explains the result is allowed.
+  A 'Re-check:' without a kind is unmarked.
+
+adr commands:
+  adr doctor  print 'lines N, assert A, absent B, gh C, prod-read D, manual E, prose F,
+              unmarked U, malformed M', then one 'unmarked: <adr>:<line>' line per
+              Re-check without a kind and one 'malformed: <adr>:<line> — <fix>' line per
+              unknown kind or asserting line whose command breaks the rules; exit 1 when U or
+              M is not zero
+  adr check   run every assert and absent line and print 'PASS', 'FAIL' or 'BROKEN' with
+              '<adr>:<line>' and the command, an unmarked or malformed line as 'BROKEN', then
+              one 'not run <kind>:' line per other kind naming its lines; exit 1 with a count
+              line when a line fails or is broken
+
 options:
   --file <path>         read this ledger instead of docs/debt.md in the repository
-  --only <substring>    check: run only the entries whose title contains the substring"""
+  --only <substring>    check: run only the entries whose title contains the substring
+  --dir <path>          adr: read the ADRs in this directory instead of docs/adr"""
 
 RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
 LEDGER_CLI = ".claude/skills/debt-ledger/bin/debt"
@@ -62,12 +91,29 @@ SHELL_ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 SUBSTITUTION_MARK = "$(…)"
 SENTENCE_END = re.compile(r"(?<!e\.g)(?<!i\.e)[.?!](?=\s|$)")
 TIME_BUDGET = 5
+ADR_MARKER = re.compile(r"(?:^|(?<=\s))Re-check(?: \[([^\]]*)\])?:")
+BACKTICK_SPAN = re.compile(r"`([^`]+)`")
+BULLET_CLAUSE = re.compile(r"^\s+(REJECTED|INVARIANT|NON-GOAL):")
+ADR_FILE_GLOB = "[0-9][0-9][0-9]-*.md"
+RUN_KINDS = ("assert", "absent")
+NOT_RUN_KINDS = ("gh", "prod-read", "manual", "prose")
+ADR_KINDS = RUN_KINDS + NOT_RUN_KINDS
+KIND_LIST_TEXT = ", ".join(f"[{kind_name}]" for kind_name in ADR_KINDS)
 
 
 @dataclass
 class LedgerEntry:
     entry_title: str
     recheck_command: str | None
+
+
+@dataclass
+class AdrRecheck:
+    line_label: str
+    line_kind: str | None
+    recheck_command: str | None
+    lead_text: str = ""
+    sentence_tail: str = ""
 
 
 def stop_with(error_message, exit_code=2):
@@ -315,6 +361,151 @@ def run_check(ledger_entries, only_text, repo_root):
     return 0
 
 
+def parse_adr(adr_number, adr_text):
+    adr_rechecks = []
+    in_decisions = False
+    text_lines = adr_text.splitlines()
+    for line_index, text_line in enumerate(text_lines):
+        line_number = line_index + 1
+        if text_line.startswith("## "):
+            in_decisions = text_line.startswith("## Decisions")
+            continue
+        if not in_decisions:
+            continue
+        continuation_lines = []
+        for next_line in text_lines[line_index + 1:]:
+            if not next_line.startswith(" ") or BULLET_CLAUSE.match(next_line):
+                break
+            continuation_lines.append(next_line.strip())
+        for marker_match in ADR_MARKER.finditer(text_line):
+            following_text = " ".join([text_line[marker_match.end():], *continuation_lines])
+            command_match = BACKTICK_SPAN.search(following_text)
+            if command_match is None:
+                adr_rechecks.append(AdrRecheck(f"{adr_number}:{line_number}", marker_match.group(1), None))
+                continue
+            adr_rechecks.append(AdrRecheck(f"{adr_number}:{line_number}", marker_match.group(1),
+                                           command_match.group(1),
+                                           following_text[:command_match.start()].strip(),
+                                           sentence_rest(following_text[command_match.end():])))
+    return adr_rechecks
+
+
+def sentence_rest(tail_text):
+    for sentence_end in SENTENCE_END.finditer(tail_text):
+        if tail_text.count("`", 0, sentence_end.start()) % 2 == 0:
+            return tail_text[:sentence_end.start()]
+    return tail_text
+
+
+def read_adrs(adr_dir):
+    adr_rechecks = []
+    for adr_file in sorted(adr_dir.glob(ADR_FILE_GLOB)):
+        adr_rechecks.extend(parse_adr(adr_file.name[:3], adr_file.read_text(encoding="utf-8")))
+    return adr_rechecks
+
+
+def adr_problem(adr_recheck):
+    if adr_recheck.line_kind is None:
+        return f"unmarked; add one of {KIND_LIST_TEXT} after Re-check"
+    if adr_recheck.line_kind not in ADR_KINDS:
+        return f'kind "[{adr_recheck.line_kind}]" is not one of {KIND_LIST_TEXT}'
+    if adr_recheck.line_kind not in RUN_KINDS:
+        return None
+    if adr_recheck.recheck_command is None:
+        return "names no backticked command after the marker; mark it [manual] or [prose]"
+    if adr_recheck.lead_text or BACKTICK_SPAN.search(adr_recheck.sentence_tail):
+        return "states more than its command checks; mark it [manual] or make the command the whole check"
+    problem_text = command_problem(adr_recheck.recheck_command)
+    if problem_text is not None:
+        return f"{problem_text}, or mark it [manual]"
+    if adr_recheck.line_kind == "absent":
+        command_clauses = split_clauses(adr_recheck.recheck_command)
+        if len(command_clauses) != 1 or command_clauses[0].split()[:1] != ["rg"]:
+            return "an [absent] line runs one rg clause; mark it [assert] or [manual]"
+    return None
+
+
+def adr_verdict(line_kind, run_result):
+    if isinstance(run_result, str):
+        return "BROKEN"
+    holds_code = 0 if line_kind == "assert" else 1
+    return "PASS" if run_result == holds_code else "FAIL"
+
+
+def run_adr_doctor(adr_rechecks):
+    kind_counts = {kind_name: 0 for kind_name in ADR_KINDS}
+    unmarked_labels = []
+    malformed_lines = []
+    for adr_recheck in adr_rechecks:
+        problem_text = adr_problem(adr_recheck)
+        if adr_recheck.line_kind is None:
+            unmarked_labels.append(adr_recheck.line_label)
+        elif problem_text is not None:
+            malformed_lines.append(f"{adr_recheck.line_label} — {problem_text}")
+        if adr_recheck.line_kind in kind_counts:
+            kind_counts[adr_recheck.line_kind] += 1
+    count_text = ", ".join(f"{kind_name} {kind_count}" for kind_name, kind_count in kind_counts.items())
+    print(f"lines {len(adr_rechecks)}, {count_text}, "
+          f"unmarked {len(unmarked_labels)}, malformed {len(malformed_lines)}")
+    for line_label in unmarked_labels:
+        print(f"unmarked: {line_label}")
+    for malformed_line in malformed_lines:
+        print(f"malformed: {malformed_line}")
+    return 1 if unmarked_labels or malformed_lines else 0
+
+
+def run_adr_check(adr_rechecks, repo_root):
+    fail_count = broken_count = 0
+    not_run_labels = {kind_name: [] for kind_name in NOT_RUN_KINDS}
+    for adr_recheck in adr_rechecks:
+        problem_text = adr_problem(adr_recheck)
+        if problem_text is not None:
+            broken_count += 1
+            print(f"BROKEN {adr_recheck.line_label}: {problem_text}")
+            continue
+        if adr_recheck.line_kind in not_run_labels:
+            not_run_labels[adr_recheck.line_kind].append(adr_recheck.line_label)
+            continue
+        run_result = run_recheck(adr_recheck.recheck_command, repo_root)
+        line_verdict = adr_verdict(adr_recheck.line_kind, run_result)
+        if line_verdict == "BROKEN":
+            broken_count += 1
+            print(f"BROKEN {adr_recheck.line_label}: {run_result} — {adr_recheck.recheck_command}")
+        else:
+            fail_count += line_verdict == "FAIL"
+            print(f"{line_verdict} {adr_recheck.line_label} {adr_recheck.recheck_command}")
+    for kind_name, line_labels in not_run_labels.items():
+        if line_labels:
+            print(f"not run {kind_name}: {', '.join(line_labels)}")
+    if fail_count or broken_count:
+        print(f"{count_of(fail_count, 'line', 'lines')} failed, "
+              f"{count_of(broken_count, 'line', 'lines')} broken")
+        return 1
+    return 0
+
+
+def run_adr(adr_args):
+    if not adr_args or adr_args[0] not in ("doctor", "check"):
+        stop_with("adr takes doctor or check; run debt adr doctor or debt adr check")
+    command_name, option_args = adr_args[0], adr_args[1:]
+    adr_dir = None
+    while option_args:
+        option_arg = option_args.pop(0)
+        if option_arg != "--dir":
+            stop_with(f"unknown argument '{option_arg}' after adr {command_name}; see debt help")
+        if not option_args:
+            stop_with("--dir needs a value; run debt adr check --dir <path>")
+        adr_dir = Path(option_args.pop(0))
+    repo_root = find_root()
+    adr_dir = adr_dir or repo_root / "docs" / "adr"
+    if not adr_dir.is_dir():
+        stop_with(f"no ADR directory at {adr_dir}; pass --dir <path> to a directory of NNN-title.md files")
+    adr_rechecks = read_adrs(adr_dir)
+    if command_name == "doctor":
+        return run_adr_doctor(adr_rechecks)
+    return run_adr_check(adr_rechecks, repo_root)
+
+
 def main():
     for git_variable in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR"):
         os.environ.pop(git_variable, None)
@@ -334,6 +525,10 @@ def main():
                 ledger_path = Path(arg_list.pop(0))
             else:
                 only_text = arg_list.pop(0)
+        elif current_arg == "adr":
+            if command_name is not None or ledger_path is not None or only_text is not None:
+                stop_with("adr takes no ledger command or option; run debt adr check")
+            return run_adr(arg_list)
         elif current_arg == "absent":
             if command_name is not None or ledger_path is not None or only_text is not None:
                 stop_with("absent takes no other command or option; run debt absent <path> <rg arguments>")
@@ -349,7 +544,7 @@ def main():
         else:
             stop_with(f"unknown argument '{current_arg}'; see debt help")
     if command_name is None:
-        stop_with("name a command, doctor, check, absent or python; see debt help")
+        stop_with("name a command, doctor, check, adr, absent or python; see debt help")
     if only_text is not None and command_name != "check":
         stop_with("--only works with check alone; run debt check --only <substring>")
     repo_root = find_root()

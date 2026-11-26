@@ -77,6 +77,14 @@ does not add it back as an apparent omission. Both are the decision's consequenc
 its bullet and move with it when it is superseded. Invariants and non-goals are recorded here, in
 the decision, and nowhere else is their record.
 
+**`Re-check [<kind>]:`** states how to re-verify the constraint that forced the decision. The kind
+says who can run it: `assert` (the backticked command right after the marker exits 0 while the
+constraint holds, and is the whole check), `absent` (a single `rg` command in that place that finds
+nothing while it holds), `gh`, `prod-read`, `manual` or `prose`. A line whose claim goes beyond its
+command is `manual`; review holds that rule. `debt adr check` runs the `assert` and `absent` lines
+weekly, and the pre-commit hook refuses a line without a known kind, whose command is not allowed,
+or that carries text before its command or a second command in the same sentence.
+
 ## Lifecycle
 
 The record is **append-only**. A decision's text is never edited once written; it moves, and the

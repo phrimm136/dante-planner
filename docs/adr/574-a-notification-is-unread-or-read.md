@@ -2,7 +2,7 @@
 epic: none · pr: none
 
 ## Decisions
-- @notification @state — A notification is unread or read, stored as `read_at`, written once. The page only ever deleted: before this change production held 14,410 unread rows, 1,758 deleted rows and none with `read` = 1, so "deleted" was the read state and the 90-day rule for read rows never matched. A read notification is not listed. Re-check: `ops sql "SELECT COUNT(*) FROM notifications WHERE read_at IS NOT NULL"`.
+- @notification @state — A notification is unread or read, stored as `read_at`, written once. The page only ever deleted: before this change production held 14,410 unread rows, 1,758 deleted rows and none with `read` = 1, so "deleted" was the read state and the 90-day rule for read rows never matched. A read notification is not listed. Re-check [prod-read]: `ops sql "SELECT COUNT(*) FROM notifications WHERE read_at IS NOT NULL"`.
   REJECTED: keeping read and deleted as two states — every command must then say what it does to the other, and nothing used the difference.
   REJECTED: listing read notifications — the list shows the newest 20 without paging, so read ones would push unread ones out.
   INVARIANT: the first `read_at` stays when marks overlap — `NotificationReadRaceIT`.

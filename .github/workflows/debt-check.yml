@@ -22,3 +22,7 @@ jobs:
 
       - name: Run every re-check line in the debt ledger
         run: .claude/skills/debt-ledger/bin/debt check
+
+      - name: Run every asserting re-check line in the ADRs
+        if: ${{ !cancelled() }}
+        run: .claude/skills/debt-ledger/bin/debt adr check

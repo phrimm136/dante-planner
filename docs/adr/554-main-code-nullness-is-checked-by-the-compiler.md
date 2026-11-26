@@ -2,7 +2,7 @@
 epic: none · pr: none
 
 ## Decisions
-- @nullness @build @compiler — NullAway runs on the backend's main sources as an Error Prone check in JSpecify mode over `org.danteplanner.backend`: an unannotated reference is non-null, and `org.jspecify.annotations.Nullable` marks where an absent value enters or leaves: an entity field on a NULL column and the projections and SQL parameters that carry it, a wire DTO component the JSON contract allows to be null, a library return, a framework callback, or the parameter of the pure factory that parses one of these into a narrower type. Review under RFC 0002's null-handling rules had let 62 null-literal slots through. Re-check: `rg -c NullAway backend/build.gradle.kts`.
+- @nullness @build @compiler — NullAway runs on the backend's main sources as an Error Prone check in JSpecify mode over `org.danteplanner.backend`: an unannotated reference is non-null, and `org.jspecify.annotations.Nullable` marks where an absent value enters or leaves: an entity field on a NULL column and the projections and SQL parameters that carry it, a wire DTO component the JSON contract allows to be null, a library return, a framework callback, or the parameter of the pure factory that parses one of these into a narrower type. Review under RFC 0002's null-handling rules had let 62 null-literal slots through. Re-check [assert]: `rg -c NullAway backend/build.gradle.kts`.
   REJECTED: review only — it missed those 62 slots.
   REJECTED: `java.util.Optional` for every absent value — rejected as a project preference (taste).
   INVARIANT: a nullable reaching a non-null fails `compileJava` — NullAway at ERROR.

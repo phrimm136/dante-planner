@@ -2,7 +2,7 @@
 epic: none · pr: none
 
 ## Decisions
-- @deploy @crd @prune — CI fails when a rendered custom object has no rendered CRD that serves its version, unless its group is in a list of groups whose CRDs something other than an Application installs. An Application with automated prune deletes what its chart stops rendering, and deleting a CRD deletes every object of its kind: a pruned CRD of External Secrets would take the ExternalSecrets, and their Secrets are owned by them. Re-check: `rg -n 'prune: true' deploy/chart/templates`.
+- @deploy @crd @prune — CI fails when a rendered custom object has no rendered CRD that serves its version, unless its group is in a list of groups whose CRDs something other than an Application installs. An Application with automated prune deletes what its chart stops rendering, and deleting a CRD deletes every object of its kind: a pruned CRD of External Secrets would take the ExternalSecrets, and their Secrets are owned by them. Re-check [assert]: `rg -n 'prune: true' deploy/chart/templates`.
   REJECTED: `Prune=false` on the CRDs — it also stops a deliberate removal, which then takes two merges, because ArgoCD reads the annotation from the live object.
   REJECTED: `creationPolicy: Orphan` on the ExternalSecrets — the values come from AWS again when an ExternalSecret returns, and an orphan outlives the definition that explains it.
   REJECTED: a list of removals that are allowed — whether the objects of the kind are still rendered answers it without a list.

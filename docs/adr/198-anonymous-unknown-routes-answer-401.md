@@ -6,7 +6,7 @@ epic: none · pr: none
   problem body, not 404. `SecurityConfig` closes with `anyRequest().authenticated()`,
   authorization runs before dispatch, and route existence is not disclosed to callers who have
   not authenticated; the 404 problem body of an unmatched route is observed on an
-  authenticated request. Re-check: an anonymous `GET /api/typo` against any running instance
+  authenticated request. Re-check [manual]: an anonymous `GET /api/typo` against any running instance
   answers `401` with `code: UNAUTHORIZED`. The contract spec asserted 404 for the anonymous
   probe from its first version and never passed on trunk; the spec, not the filter chain,
   carried the mistake.
