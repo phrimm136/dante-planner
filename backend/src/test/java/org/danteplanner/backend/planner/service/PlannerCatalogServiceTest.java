@@ -343,6 +343,6 @@ class PlannerCatalogServiceTest {
             String json) {
         StoredContent stored = before.content();
         return before.saved(new ContentWrite(title, stored.status(), category, keywords, json, stored.schemaVersion(),
-                stored.gameContentVersion(), stored.deviceId(), stored.syncVersion() + 1, Instant.EPOCH));
+                stored.gameContentVersion(), stored.device(), stored.syncVersion() + 1, Instant.EPOCH));
     }
 }

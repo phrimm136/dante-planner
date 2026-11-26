@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.repository;
 
 import org.jspecify.annotations.Nullable;
 
+import org.danteplanner.backend.planner.entity.Device;
 import org.danteplanner.backend.planner.entity.Listing;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -44,18 +45,18 @@ public record StoredPlanner(
             int schemaVersion,
             int gameContentVersion,
             long syncVersion,
-            @Nullable UUID deviceId,
+            Device device,
             Instant lastModifiedAt) {
 
         private static StoredContent of(ContentWrite write) {
             return new StoredContent(write.title(), write.status(), write.category(), write.keywords(),
                     write.json(), write.schemaVersion(), write.gameContentVersion(), write.syncVersion(),
-                    write.deviceId(), write.savedAt());
+                    write.device(), write.savedAt());
         }
 
         private StoredContent migrated(String migratedJson, Instant at) {
             return new StoredContent(title, status, category, keywords, migratedJson, schemaVersion,
-                    gameContentVersion, syncVersion, deviceId, at.truncatedTo(ChronoUnit.MICROS));
+                    gameContentVersion, syncVersion, device, at.truncatedTo(ChronoUnit.MICROS));
         }
     }
 
@@ -67,7 +68,7 @@ public record StoredPlanner(
             @Nullable String hiddenReason, @Nullable Instant hiddenAt) {
         this(id, userId, plannerType, createdAt,
                 new StoredContent(title, status, category, keywords == null ? Set.of() : Set.copyOf(keywords), json,
-                        schemaVersion, gameContentVersion, syncVersion, deviceId, lastModifiedAt),
+                        schemaVersion, gameContentVersion, syncVersion, Device.of(deviceId), lastModifiedAt),
                 published ? Publication.listed(id, firstPublishedAt) : Publication.unlisted(firstPublishedAt),
                 ownerNotificationsEnabled ? NotificationSetting.ON : NotificationSetting.OFF,
                 hiddenFromRecommended ? Listing.hidden(id, hiddenBy, hiddenReason, hiddenAt) : new Listing.Listed(),

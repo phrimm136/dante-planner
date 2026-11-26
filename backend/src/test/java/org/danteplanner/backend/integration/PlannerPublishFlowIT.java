@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.planner.entity.Device;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -300,6 +301,26 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
+    void publishWithContent_WhenTheBodyTitleIsBlank_RefusesTheTitleAndRollsTheSaveBack() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, device);
+        JsonNode before = ownerCopy(id);
+
+        sendAs(device, post("/api/planner/md/{id}/publish", id),
+                upsertBody(id, "  ", TestDataFactory.VALID_CONTENT, version))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.detail").value("Invalid planner content structure"));
+
+        JsonNode after = ownerCopy(id);
+        assertThat(after.get("title")).isEqualTo(before.get("title"));
+        assertThat(after.get("syncVersion").asLong()).isEqualTo(version);
+        assertThat(after.get("lastModifiedAt")).isEqualTo(before.get("lastModifiedAt"));
+        assertThat(after.get("published").asBoolean()).isFalse();
+    }
+
+    @Test
     void publishWithContent_WhenStaleResendFromAnotherDevice_ConflictsInsteadOfAcking() throws Exception {
         UUID firstDevice = UUID.randomUUID();
         UUID secondDevice = UUID.randomUUID();
@@ -309,12 +330,12 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
         sendAs(secondDevice, post("/api/planner/md/{id}/publish", id), published)
                 .andExpect(status().isOk());
-        assertThat(stored(id).content().deviceId()).isEqualTo(secondDevice);
+        assertThat(stored(id).content().device()).isEqualTo(new Device.Known(secondDevice));
 
         sendAs(firstDevice, post("/api/planner/md/{id}/publish", id), published)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"));
-        assertThat(stored(id).content().deviceId()).isEqualTo(secondDevice);
+        assertThat(stored(id).content().device()).isEqualTo(new Device.Known(secondDevice));
     }
 
     @Test

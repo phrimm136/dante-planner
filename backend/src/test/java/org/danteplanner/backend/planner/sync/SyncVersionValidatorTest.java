@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.sync;
 
+import org.danteplanner.backend.planner.entity.Device;
 import java.time.Instant;
 import java.util.Set;
 import tools.jackson.databind.ObjectMapper;
@@ -34,7 +35,7 @@ class SyncVersionValidatorTest {
     private final SyncVersionValidator validator = new SyncVersionValidator();
 
     private static StoredContent storedRow() {
-        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), DOCUMENT, 2, 6, 1L, null, Instant.EPOCH);
+        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), DOCUMENT, 2, 6, 1L, new Device.Unknown(), Instant.EPOCH);
     }
 
     private static PlannerChange identicalChange() {
@@ -53,6 +54,7 @@ class SyncVersionValidatorTest {
                 .content(DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
+                .device(new Device.Unknown())
                 .build();
     }
 
@@ -64,6 +66,7 @@ class SyncVersionValidatorTest {
                 .content(OTHER_DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
+                .device(new Device.Unknown())
                 .build();
     }
 
@@ -113,7 +116,7 @@ class SyncVersionValidatorTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void arbitrate_WhenStaleAndTheStoredDocumentIsUnparseable_Throws() {
-        StoredContent unparseable = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), "{\"equipment\":", 2, 6, 1L, null, Instant.EPOCH);
+        StoredContent unparseable = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of(), "{\"equipment\":", 2, 6, 1L, new Device.Unknown(), Instant.EPOCH);
 
         assertRejected(() -> validator.arbitrate(WriteMode.CHECKED, new PlannerConflictException.Requested.Version(4L), 5L,
                 PlannerChange.between(unparseable, identicalWrite(), MAPPER)))

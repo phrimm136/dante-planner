@@ -37,7 +37,7 @@ public class PlannerPublication implements Persistable<UUID> {
     @Column(name = "owner_notifications_enabled", nullable = false)
     private boolean ownerNotificationsEnabled;
 
-    PlannerPublication(UUID plannerId, boolean published, @Nullable Instant firstPublishedAt,
+    public PlannerPublication(UUID plannerId, boolean published, @Nullable Instant firstPublishedAt,
             boolean ownerNotificationsEnabled) {
         this.plannerId = plannerId;
         this.published = published;

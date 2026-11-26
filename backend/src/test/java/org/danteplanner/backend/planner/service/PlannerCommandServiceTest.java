@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.planner.entity.Device;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.Level;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
@@ -774,7 +775,7 @@ class PlannerCommandServiceTest {
             commandService.upsertPlanner(testUser.getId(), null, planner.id(),
                     UpsertRequests.resending(planner).title("Renamed").build(), WriteMode.CHECKED);
 
-            assertThat(replacedWith(planner).deviceId()).isEqualTo(deviceId);
+            assertThat(replacedWith(planner).device()).isEqualTo(new Device.Known(deviceId));
         }
 
         @Test

@@ -1,5 +1,5 @@
 package org.danteplanner.backend.repository;
-import org.danteplanner.backend.planner.entity.PlannerRows;
+import org.danteplanner.backend.support.PlannerRows;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;

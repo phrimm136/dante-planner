@@ -28,7 +28,7 @@ public interface PlannerContentRepository extends JpaRepository<PlannerContent, 
                 c.content = :#{#write.json()},
                 c.contentSchemaVersion = :#{#write.schemaVersion()},
                 c.gameContentVersion = :#{#write.gameContentVersion()},
-                c.deviceId = :#{#write.deviceId()},
+                c.deviceId = :#{#write.device().columnValue()},
                 c.syncVersion = :#{#write.syncVersion()},
                 c.lastModifiedAt = :#{#write.savedAt()}
             WHERE c.plannerId = :plannerId AND c.syncVersion = :readVersion AND c.deletedAt IS NULL

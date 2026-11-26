@@ -1,20 +1,11 @@
 package org.danteplanner.backend.architecture;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.PostLoad;
@@ -42,11 +33,17 @@ import org.danteplanner.fixture.bulkupdate.WriteRuleFixtures;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ImmutableEntityRuleTest {
+
+    static final ArchRule EVERY_ENTITY_IS_IMMUTABLE =
+            classes()
+                    .that().areAnnotatedWith(Entity.class)
+                    .should().beAnnotatedWith(Immutable.class)
+                    .as("every @Entity is @org.hibernate.annotations.Immutable: a change to a stored row is a"
+                            + " conditional command, never a field set on a loaded entity");
 
     static final ArchRule IMMUTABLE_ENTITY_FIELDS_ARE_WRITTEN_ONLY_IN_CONSTRUCTION =
             noClasses()
@@ -55,24 +52,17 @@ class ImmutableEntityRuleTest {
                             + " constructors and @PrePersist, @PostPersist and @PostLoad methods: a field set on"
                             + " an immutable entity is silently never written");
 
-    private static final String LIST_PREFIX = "mutable-entities-";
     private static final String FIXTURE = WriteRuleFixtures.class.getName();
     private static final String MUTABLE = FIXTURE + "$MutableRow";
     private static final String PACKAGE_PRIVATE = FIXTURE + "$PackagePrivateMutableRow";
     private static final String LOOKALIKE = FIXTURE + "$LookalikeRow";
     private static final String LIFECYCLE = FIXTURE + "$LifecycleRow";
     private static final String WRITTEN = FIXTURE + "$WrittenRow";
-    private static final String LIST = LIST_PREFIX + "bulkupdate.txt";
 
     @Test
-    void production_WhenScanned_HoldsExactlyTheListedMutableEntities() {
-        assertThatCode(() -> mutableEntitiesAreExactly(moduleLists(LIST_PREFIX)).check(ImportedClasses.production()))
+    void production_WhenScanned_HoldsOnlyImmutableEntities() {
+        assertThatCode(() -> EVERY_ENTITY_IS_IMMUTABLE.check(ImportedClasses.production()))
                 .doesNotThrowAnyException();
-    }
-
-    @Test
-    void lists_WhenRead_AreSortedWithoutDuplicatesAndHoldOnlyTheirModule() {
-        assertThat(defectsIn(moduleLists(LIST_PREFIX), LIST_PREFIX)).isEmpty();
     }
 
     @Test
@@ -83,47 +73,14 @@ class ImmutableEntityRuleTest {
     }
 
     @Test
-    void mutableEntity_WhenNotListed_FailsByName() {
-        assertThatThrownBy(() -> mutableEntitiesAreExactly(Map.of()).check(fixtureClasses()))
+    void mutableEntity_WhenScanned_FailsByName() {
+        assertThatThrownBy(() -> EVERY_ENTITY_IS_IMMUTABLE.check(fixtureClasses()))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("unlisted " + MUTABLE)
-                .hasMessageContaining("unlisted " + PACKAGE_PRIVATE)
-                .hasMessageContaining("unlisted " + LOOKALIKE)
+                .hasMessageContaining(MUTABLE)
+                .hasMessageContaining(PACKAGE_PRIVATE)
+                .hasMessageContaining(LOOKALIKE)
+                .hasMessageNotContaining(LIFECYCLE)
                 .hasMessageContaining("(3 times)");
-    }
-
-    @Test
-    void mutableEntity_WhenListed_Passes() {
-        assertThatCode(() -> mutableEntitiesAreExactly(Map.of(LIST, List.of(LOOKALIKE, MUTABLE, PACKAGE_PRIVATE)))
-                .check(fixtureClasses()))
-                .doesNotThrowAnyException();
-    }
-
-    @Test
-    void listedEntity_WhenImmutableOrGone_FailsByItsLine() {
-        assertThatThrownBy(() -> mutableEntitiesAreExactly(Map.of(LIST,
-                List.of("gone.Row", LIFECYCLE, LOOKALIKE, MUTABLE, PACKAGE_PRIVATE))).check(fixtureClasses()))
-                .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("delete " + LIFECYCLE + " from backend/config/" + LIST)
-                .hasMessageContaining("delete gone.Row from backend/config/" + LIST)
-                .hasMessageContaining("(2 times)");
-    }
-
-    @Test
-    void list_WhenUnsortedDuplicatedEmptyOrOfAnotherModule_IsADefect() {
-        String first = "org.danteplanner.backend.user.A";
-        String second = "org.danteplanner.backend.user.B";
-        String list = LIST_PREFIX + "user.txt";
-
-        assertThat(defectsIn(Map.of(list, List.of(first, second)), LIST_PREFIX)).isEmpty();
-        assertThat(defectsIn(Map.of(list, List.of(second, first)), LIST_PREFIX))
-                .containsExactly(list + " is not sorted without duplicates");
-        assertThat(defectsIn(Map.of(list, List.of(first, first)), LIST_PREFIX))
-                .containsExactly(list + " is not sorted without duplicates");
-        assertThat(defectsIn(Map.of(list, List.of()), LIST_PREFIX))
-                .containsExactly(list + " is empty; delete it");
-        assertThat(defectsIn(Map.of(list, List.of("org.danteplanner.backend.userland.A")), LIST_PREFIX))
-                .containsExactly(list + " holds org.danteplanner.backend.userland.A of another module");
     }
 
     @Test
@@ -138,34 +95,6 @@ class ImmutableEntityRuleTest {
                 .hasMessageContaining("(5 times)")
                 .hasMessageNotContaining(LIFECYCLE)
                 .hasMessageNotContaining(MUTABLE);
-    }
-
-    static SortedMap<String, List<String>> moduleLists(String prefix) {
-        SortedMap<String, List<String>> lists = new TreeMap<>();
-        try (Stream<Path> files = Files.list(Path.of("config"))) {
-            files.filter(file -> file.getFileName().toString().startsWith(prefix))
-                    .forEach(file -> lists.put(file.getFileName().toString(), ShellBranches.lines(file)));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        return lists;
-    }
-
-    static List<String> defectsIn(Map<String, List<String>> lists, String prefix) {
-        List<String> defects = new ArrayList<>();
-        lists.forEach((file, lines) -> {
-            if (lines.isEmpty()) {
-                defects.add(file + " is empty; delete it");
-            }
-            if (!lines.equals(List.copyOf(new TreeSet<>(lines)))) {
-                defects.add(file + " is not sorted without duplicates");
-            }
-            String module = file.substring(prefix.length(), file.length() - ".txt".length());
-            lines.stream()
-                    .filter(line -> !line.startsWith("org.danteplanner.backend." + module + "."))
-                    .forEach(line -> defects.add(file + " holds " + line + " of another module"));
-        });
-        return defects;
     }
 
     static <T extends HasName.AndFullName & HasDescription> ArchCondition<T> beListed(
@@ -197,16 +126,6 @@ class ImmutableEntityRuleTest {
 
     static JavaClasses fixtureClasses() {
         return new ClassFileImporter().importPackages(WriteRuleFixtures.class.getPackageName());
-    }
-
-    private static ArchRule mutableEntitiesAreExactly(Map<String, List<String>> lists) {
-        return classes()
-                .that().areAnnotatedWith(Entity.class)
-                .should(ImmutableEntityRuleTest.<JavaClass>beListed(lists,
-                        entity -> entity.isAnnotatedWith(Immutable.class)))
-                .as("every @Entity is @org.hibernate.annotations.Immutable except exactly the lines of"
-                        + " backend/config/" + LIST_PREFIX + "MODULE.txt, which only shrink: an unlisted entity is"
-                        + " made immutable, not added");
     }
 
     private static DescribedPredicate<JavaFieldAccess> writesAnImmutableEntityOutsideItsConstructionAndLifecycle() {

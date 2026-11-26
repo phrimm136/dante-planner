@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.dto;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
+import org.danteplanner.backend.planner.entity.Device;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.Publication;
@@ -46,7 +47,10 @@ public record PlannerResponse(
                 .contentVersion(content.gameContentVersion())
                 .plannerType(planner.plannerType())
                 .syncVersion(content.syncVersion())
-                .deviceId(textOf(content.deviceId()))
+                .deviceId(switch (content.device()) {
+                    case Device.Known(UUID deviceId) -> deviceId.toString();
+                    case Device.Unknown unknown -> null;
+                })
                 .createdAt(planner.createdAt())
                 .lastModifiedAt(content.lastModifiedAt())
                 .savedAt(content.lastModifiedAt())
@@ -54,7 +58,4 @@ public record PlannerResponse(
                 .build();
     }
 
-    private static @Nullable String textOf(@Nullable UUID id) {
-        return id != null ? id.toString() : null;
-    }
 }

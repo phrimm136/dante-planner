@@ -1,13 +1,11 @@
 package org.danteplanner.backend.planner.repository;
 
-import org.jspecify.annotations.Nullable;
-
+import org.danteplanner.backend.planner.entity.Device;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
-import java.util.UUID;
 
 public record ContentWrite(
         String title,
@@ -17,7 +15,7 @@ public record ContentWrite(
         String json,
         int schemaVersion,
         int gameContentVersion,
-        @Nullable UUID deviceId,
+        Device device,
         long syncVersion,
         Instant savedAt) {
 

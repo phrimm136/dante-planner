@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.sync;
 
+import org.danteplanner.backend.planner.entity.Device;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -45,7 +46,7 @@ class PlannerChangeTest {
     }
 
     private static StoredContent storedRow(String document) {
-        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of("Combustion", "Sinking"), document, 2, 6, 1L, DEVICE, Instant.EPOCH);
+        return new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of("Combustion", "Sinking"), document, 2, 6, 1L, new Device.Known(DEVICE), Instant.EPOCH);
     }
 
     private static PlannerChange change(StoredContent stored, CarriedWrite carried) {
@@ -65,7 +66,7 @@ class PlannerChangeTest {
                 .content(DOCUMENT)
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
-                .deviceId(DEVICE);
+                .device(new Device.Known(DEVICE));
     }
 
     // stale-identical-save-acks-current-version
@@ -114,7 +115,7 @@ class PlannerChangeTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void isNone_WhenStoredContentIsUnparseable_IsFalse() {
-        StoredContent stored = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of("Combustion", "Sinking"), "{\"equipment\":", 2, 6, 1L, DEVICE, Instant.EPOCH);
+        StoredContent stored = new StoredContent("Stored Title", PlannerStatus.SAVED, "5F", Set.of("Combustion", "Sinking"), "{\"equipment\":", 2, 6, 1L, new Device.Known(DEVICE), Instant.EPOCH);
 
         assertThat(isNone(stored, carryingStoredValues().build())).isFalse();
     }
@@ -154,7 +155,7 @@ class PlannerChangeTest {
     @Test
     void isNone_WhenDeviceIdDiffers_IsFalse() {
         assertThat(isNone(storedRow(),
-                carryingStoredValues().deviceId(UUID.randomUUID()).build())).isFalse();
+                carryingStoredValues().device(new Device.Known(UUID.randomUUID())).build())).isFalse();
     }
 
     @Test

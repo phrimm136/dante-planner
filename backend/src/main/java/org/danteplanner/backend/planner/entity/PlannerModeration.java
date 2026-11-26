@@ -47,7 +47,7 @@ public class PlannerModeration implements Persistable<UUID> {
     @Column(name = "hidden_at")
     private @Nullable Instant hiddenAt;
 
-    PlannerModeration(UUID plannerId, @Nullable Instant takenDownAt, boolean hiddenFromRecommended,
+    public PlannerModeration(UUID plannerId, @Nullable Instant takenDownAt, boolean hiddenFromRecommended,
             @Nullable Long hiddenByModeratorId, @Nullable String hiddenReason, @Nullable Instant hiddenAt) {
         this.plannerId = plannerId;
         this.takenDownAt = takenDownAt;
