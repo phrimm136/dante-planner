@@ -157,7 +157,7 @@ rendered_contract() {
 }
 
 render() {
-  local region counts=()
+  local region probes counts=() renders=()
   [ "${#regions[@]}" -gt 0 ] || fail render "no values-<region>.yaml under $deploy_dir/chart"
   for region in "${regions[@]}"; do
     if ! helm_chart "$region" > "$work/$region.yaml" 2> "$work/$region.render.err"; then
@@ -166,14 +166,19 @@ render() {
     fi
     rendered_contract "$region"
     counts+=("$region: $(awk '/^kind:/ { n++ } END { print n + 0 }' "$work/$region.yaml") resources")
+    renders+=("$work/$region.yaml")
   done
+  if ! probes=$(python3 "$repo/.github/scripts/rendered-redis-probes.py" "${renders[@]}" 2>&1); then
+    echo "$probes" >&2
+    fail render "the Redis containers no longer render their probes (listed above): a TCP liveness probe on 6379, and a readiness probe that passes only when PING answers PONG, so a Redis replaying its AOF (which answers LOADING) leaves its Service; restore them in deploy/chart/templates/redis-auth.yaml or redis-ratelimit.yaml"
+  fi
   chart_refuses seoul --set region=null
   chart_refuses seoul --set region=oregon
   chart_refuses seoul --set backendConfig.DEPLOY_REGION=us-west-2
   chart_refuses seoul --set backendConfig.REDIS_AUTHLOCAL_HOST=null
   chart_refuses seoul --set redisAuth.replicaOf.host=
   chart_refuses oregon --set image.tag=latest
-  pass render "$(printf '%s\n' "${counts[@]}" | paste -sd ',' - | sed 's/,/, /g'), 6 wrong values are refused"
+  pass render "$(printf '%s\n' "${counts[@]}" | paste -sd ',' - | sed 's/,/, /g'), the Redis containers keep their probes, 6 wrong values are refused"
 }
 
 validate() {

@@ -88,6 +88,10 @@ automated sync: it reports OutOfSync until a person syncs it, and then a change 
 next sync by hand. It has no finalizer either, so removing it from the chart deletes the Application
 and leaves the operator running.
 
+The `render` stage runs `.github/scripts/rendered-redis-probes.py` over the region renders: it fails
+when redis-auth or redis-ratelimit loses its TCP liveness probe or its readiness probe that passes
+only when PING answers PONG, which keeps a Redis replaying its AOF out of its Service.
+
 Renovate also raises the pins of the CI scripts:
 
 - The k3s release, in one pull request (group `k3s`) that opens only after it is approved on the
