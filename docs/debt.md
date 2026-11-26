@@ -1841,10 +1841,13 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   manager for the manifests in the same change. An image that moves to an upstream chart leaves
   this entry. Worth doing with the next component that stays hand-written.
   re-check: `rg -q 'image: redis:7-alpine' deploy/chart/templates/redis-auth.yaml`
-- **The Redis and alloy containers have no readiness probe.** Both Redis instances and alloy
-  declare none, so a Redis replaying its AOF file counts as Ready and its Service sends it traffic.
-  Worth doing with the auth Redis entry above.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/redis-auth.yaml 'readinessProbe'`
+- **The alloy log shipper has no liveness probe.** `alloy-logs.yaml` sets no probe, and
+  `kubernetes.baseline.json` keeps CKV_K8S_8 and CKV_K8S_9 for `Deployment.danteplanner.alloy`.
+  No Service sends it traffic, so a readiness probe changes nothing; a hung alloy stops shipping
+  logs and nothing restarts it. Its HTTP server is off (`enableHttpServerPort: false`, listening
+  on 127.0.0.1), so a probe needs that server on the pod address, which the NetworkPolicy unit
+  should scope. Worth doing with the NetworkPolicy entry above.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/alloy-logs.yaml -i 'probe'`
 - **Nothing finds a metric that production never emits.** An alert rule's cases feed it series
   that the case itself writes, and the remote-write keep-list only filters what exists, so a
   rule over a metric with no series in Mimir passes every gate and never fires. Five alerts were

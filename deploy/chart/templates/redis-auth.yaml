@@ -76,6 +76,20 @@ spec:
           ports:
             - name: redis
               containerPort: 6379
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - '[ "$(REDISCLI_AUTH="$REDIS_AUTH_PASSWORD" redis-cli PING)" = PONG ]'
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            periodSeconds: 10
+            failureThreshold: 3
           volumeMounts:
             - name: data
               mountPath: /data

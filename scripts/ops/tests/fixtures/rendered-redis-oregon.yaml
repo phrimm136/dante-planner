@@ -1,0 +1,151 @@
+---
+# Source: danteplanner/templates/redis-ratelimit.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-ratelimit
+  namespace: danteplanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-ratelimit
+  template:
+    metadata:
+      labels:
+        app: redis-ratelimit
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          args:
+            - --save
+            - ""
+            - --appendonly
+            - "no"
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - '[ "$(redis-cli PING)" = PONG ]'
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            periodSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+# Source: danteplanner/templates/redis-auth.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-auth
+  namespace: danteplanner
+spec:
+  serviceName: redis-auth
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-auth
+  template:
+    metadata:
+      labels:
+        app: redis-auth
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          command:
+            - sh
+            - -c
+            - |
+              exec docker-entrypoint.sh redis-server \
+                --appendonly yes \
+                --appendfsync everysec \
+                --aof-use-rdb-preamble yes \
+                --protected-mode yes \
+                --requirepass "$REDIS_AUTH_PASSWORD"
+          env:
+            - name: REDIS_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-runtime-config
+                  key: AUTH_REDIS_PASSWORD
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - '[ "$(REDISCLI_AUTH="$REDIS_AUTH_PASSWORD" redis-cli PING)" = PONG ]'
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            periodSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 8Gi
