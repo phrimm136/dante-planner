@@ -7,5 +7,5 @@ if [ "${1:-}" != "--list-inputs" ]; then
 fi
 
 "$(dirname "$0")/deploy-inputs-changed.sh" --list-inputs
-printf '%s\n' backend testdata .claude/skills/static-checkout \
+printf '%s\n' backend testdata scripts/consistency .claude/skills/static-checkout \
   frontend/package.json frontend/yarn.lock deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml
