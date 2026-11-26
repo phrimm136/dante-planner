@@ -41,8 +41,4 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
             nativeQuery = true)
     int insertIgnore(@Param("userId") Long userId, @Param("plannerId") UUID plannerId,
             @Param("voteType") String voteType, @Param("now") Instant now);
-
-    default PlannerVote insert(PlannerVote vote) {
-        return save(vote);
-    }
 }

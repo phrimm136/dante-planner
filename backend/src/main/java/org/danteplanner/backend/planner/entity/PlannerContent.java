@@ -69,28 +69,22 @@ public class PlannerContent implements Persistable<UUID> {
     @Column(name = "deleted_at")
     private @Nullable Instant deletedAt;
 
-    public PlannerContent(UUID plannerId, String title, PlannerStatus status, String category,
-            @Nullable Set<String> selectedKeywords, String content, int contentSchemaVersion,
-            int gameContentVersion, long syncVersion, @Nullable UUID deviceId, Instant lastModifiedAt,
-            @Nullable Instant deletedAt) {
+    private PlannerContent(UUID plannerId, ContentWrite write) {
         this.plannerId = plannerId;
-        this.title = title;
-        this.status = status;
-        this.category = category;
-        this.selectedKeywords = selectedKeywords;
-        this.content = content;
-        this.contentSchemaVersion = contentSchemaVersion;
-        this.gameContentVersion = gameContentVersion;
-        this.syncVersion = syncVersion;
-        this.deviceId = deviceId;
-        this.lastModifiedAt = lastModifiedAt;
-        this.deletedAt = deletedAt;
+        this.title = write.title();
+        this.status = write.status();
+        this.category = write.category();
+        this.selectedKeywords = write.keywords();
+        this.content = write.json();
+        this.contentSchemaVersion = write.schemaVersion();
+        this.gameContentVersion = write.gameContentVersion();
+        this.syncVersion = write.syncVersion();
+        this.deviceId = write.device().columnValue();
+        this.lastModifiedAt = write.savedAt();
     }
 
     public static PlannerContent created(UUID plannerId, ContentWrite write) {
-        return new PlannerContent(plannerId, write.title(), write.status(), write.category(), write.keywords(),
-                write.json(), write.schemaVersion(), write.gameContentVersion(), write.syncVersion(),
-                write.device().columnValue(), write.savedAt(), null);
+        return new PlannerContent(plannerId, write);
     }
 
     @Transient

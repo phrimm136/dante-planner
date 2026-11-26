@@ -15,6 +15,6 @@ public class PlannerConstructorFixture {
     }
 
     static PlannerContent content() {
-        return new PlannerContent(null, null, null, null, null, null, 0, 0, 0L, null, null, null);
+        return PlannerContent.created(null, null);
     }
 }

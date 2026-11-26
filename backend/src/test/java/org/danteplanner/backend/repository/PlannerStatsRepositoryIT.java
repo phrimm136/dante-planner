@@ -11,7 +11,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -23,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,7 +116,7 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
     @Test
     void incrementUpvotes_WhenAVoteInsertIsPending_KeepsTheVoteAndCountsIt() {
         transactionTemplate.executeWithoutResult(status -> {
-            voteRepository.insert(new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP));
+            voteRepository.insertIgnore(testUser.getId(), testPlanner.id(), VoteType.UP.name(), Instant.now());
             statsRepository.incrementUpvotes(testPlanner.id());
         });
 
