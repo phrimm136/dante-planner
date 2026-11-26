@@ -216,7 +216,7 @@ class PlannerScopeDeclarationTest {
         UUID id = UUID.randomUUID();
 
         commandService(TestDataFactory.contentValidator())
-                .upsertAggregate(OWNER_ID, null, id, UpsertRequests.draft().build(), WriteMode.CHECKED);
+                .upsertAggregate(OWNER_ID, UUID.randomUUID(), id, UpsertRequests.draft().build(), WriteMode.CHECKED);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                 new FreshnessScope.Planner(id), new FreshnessScope.User(OWNER_ID));
@@ -248,7 +248,7 @@ class PlannerScopeDeclarationTest {
         lenient().when(plannerRepository.findOwnershipById(planner.id()))
                 .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
-        commandService(TestDataFactory.contentValidator()).upsertAggregate(OWNER_ID, null, planner.id(),
+        commandService(TestDataFactory.contentValidator()).upsertAggregate(OWNER_ID, UUID.randomUUID(), planner.id(),
                 UpsertRequests.draft().id(planner.id().toString()).title("edited-" + UUID.randomUUID()).build(),
                 WriteMode.FORCED);
     }

@@ -1,6 +1,5 @@
 package org.danteplanner.backend.planner.service;
 
-import org.danteplanner.backend.planner.entity.Device;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.Level;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
@@ -764,18 +763,6 @@ class PlannerCommandServiceTest {
                     "Planner " + planner.id() + " exists for user 1, updating (force=false)",
                     "Upsert of planner " + planner.id()
                             + " would move no field, acknowledging syncVersion 3 without a write");
-        }
-
-        @Test
-        void upsertPlanner_WhenTheRequestCarriesNoDevice_KeepsTheStoredDevice() {
-            StoredPlanner planner = resendable(1L, false, TestDataFactory.VALID_CONTENT).build();
-            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-
-            commandService.upsertPlanner(testUser.getId(), null, planner.id(),
-                    UpsertRequests.resending(planner).title("Renamed").build(), WriteMode.CHECKED);
-
-            assertThat(replacedWith(planner).device()).isEqualTo(new Device.Known(deviceId));
         }
 
         @Test

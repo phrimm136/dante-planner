@@ -14,6 +14,6 @@ public record CarriedWrite(
     String content,
     Integer gameContentVersion,
     Integer contentSchemaVersion,
-    Device device
+    Device.Known device
 ) {
 }

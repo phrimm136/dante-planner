@@ -210,7 +210,7 @@ public class PlannerCommandService {
         }
     }
 
-    private record SaveAttempt(UpsertPlannerRequest request, Device device, WriteMode mode, int schemaVersion) {
+    private record SaveAttempt(UpsertPlannerRequest request, Device.Known device, WriteMode mode, int schemaVersion) {
 
         PlannerChange changeTo(StoredPlanner planner, ObjectMapper mapper) {
             CarriedWrite carried = new CarriedWrite(
@@ -292,16 +292,9 @@ public class PlannerCommandService {
                 document.json(),
                 currentSchemaVersion,
                 request.contentVersion(),
-                carriedOr(attempt.device(), stored.device()),
+                attempt.device(),
                 stored.syncVersion() + 1,
                 now);
-    }
-
-    private static Device carriedOr(Device carried, Device stored) {
-        return switch (carried) {
-            case Device.Known known -> known;
-            case Device.Unknown unknown -> stored;
-        };
     }
 
     private enum TopLevelCopy {
@@ -360,7 +353,7 @@ public class PlannerCommandService {
                 document.json(),
                 currentSchemaVersion,
                 version.value(),
-                Device.of(deviceId),
+                new Device.Known(deviceId),
                 1L,
                 clock.instant());
         plannerRepository.insertAggregate(
@@ -416,7 +409,7 @@ public class PlannerCommandService {
             Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, WriteMode mode) {
         UpsertTarget target = UpsertTarget.of(plannerRepository.findAggregateForOwner(id, userId));
         admit(target, mode);
-        SaveAttempt attempt = new SaveAttempt(request, Device.of(deviceId), mode, currentSchemaVersion);
+        SaveAttempt attempt = new SaveAttempt(request, new Device.Known(deviceId), mode, currentSchemaVersion);
         return switch (UpsertDecision.of(target, attempt, syncVersionValidator, objectMapper)) {
             case UpsertDecision.Create create -> createAtAvailableId(userId, deviceId, id, request);
             case UpsertDecision.Acknowledge(StoredPlanner planner) -> acknowledge(planner, request);
