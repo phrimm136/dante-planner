@@ -5,6 +5,7 @@ import krTable from '@static/data/fontAdvances/KR.json'
 import { NAME_PLATE_UNITS } from '@/lib/constants'
 import { createAdvanceMeasure, fitNodeText, FontAdvanceTableSchema } from '@/shared/cardLayout'
 import { NamePlate, NamePlateSkeleton, StyledSkillName } from '@/shared/gameText'
+import { nameRuns, styledLines } from '../StyledName'
 import { getNamePlatePath } from '@/shared/assets'
 import { SKILL_ATTRIBUTE_TYPES, getAttributeColors } from '@/shared/gameData'
 import { namePlateSliceStyles } from '../../lib/namePlate'
@@ -120,6 +121,24 @@ describe('StyledSkillName', () => {
 })
 
 describe('NamePlate', () => {
+  it('draws a tagged name in italics and never shows the tag', () => {
+    const { container } = render(
+      <NamePlate kind="passive" name="A new, <i>Crimson</i> Voice" attributeType="CRIMSON" />,
+    )
+    const text = container.querySelector('[data-slot="name-text"]')
+    expect(text?.textContent).toBe('A new, Crimson Voice')
+    const italic = [...container.querySelectorAll<HTMLElement>('span')].find(
+      (span) => span.textContent === 'Crimson',
+    )
+    expect(italic?.style.fontStyle).toBe('italic')
+  })
+
+  it('draws an untagged name as plain line text', () => {
+    const { container } = render(<NamePlate kind="passive" name="Name" attributeType="NEUTRAL" />)
+    const line = container.querySelector('[data-slot="name-line"]')
+    expect(line?.innerHTML).toBe('Name')
+  })
+
   it('draws the passive name in the 72.74-unit plate with 30 and 100 unit margins at 40 units', () => {
     const { container } = render(<NamePlate kind="passive" name="Name" attributeType="NEUTRAL" />)
     const { body, name } = nameParts(container)
@@ -365,5 +384,25 @@ describe('NamePlateSkeleton', () => {
     expect(body?.style.fontSize).toBe('0.875rem')
     expect(body?.style.paddingLeft).toBe('0.6563rem')
     expect(body?.style.paddingRight).toBe('2.1875rem')
+  })
+})
+
+describe('styledLines', () => {
+  it('maps each wrapped line back to its runs when the break falls inside the italics', () => {
+    const runs = nameRuns('A new, <i>Crimson Voice</i> here')
+    const plain = runs.map((run) => run.text).join('')
+    const { container } = render(
+      <div>
+        {styledLines(runs, plain, ['A new, Crimson', 'Voice here']).map((line, index) => (
+          <p key={index}>{line}</p>
+        ))}
+      </div>,
+    )
+    const lines = [...container.querySelectorAll('p')]
+    expect(lines.map((line) => line.textContent)).toEqual(['A new, Crimson', 'Voice here'])
+    const italics = [...container.querySelectorAll<HTMLElement>('span')]
+      .filter((span) => span.style.fontStyle === 'italic')
+      .map((span) => span.textContent)
+    expect(italics).toEqual(['Crimson', 'Voice'])
   })
 })
