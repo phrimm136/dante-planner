@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
@@ -20,7 +21,6 @@ import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableExcep
 import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @RegisterExtension
     static final BeforeEachCallback STALE_READ_SOURCE_ON_THE_RUNNER_THREAD =
-            context -> ChosenReadSource.record("stale-" + SEOUL_REPLICA, false);
+            context -> ChosenReadSource.record(source("stale-" + SEOUL_REPLICA, ReadSourceSelector.Authority.REPLICA, null));
 
     @Mock
     private DataSource primary;
@@ -87,8 +87,9 @@ class ReadOnlyRoutingDataSourceTest {
         ChosenReadSource.clear();
     }
 
-    private static ReadSourceSelector.Source source(String name, boolean authoritative, DataSource pool) {
-        return new ReadSourceSelector.Source(name, authoritative, pool, CircuitBreaker.ofDefaults(name));
+    private static ReadSourceSelector.Source source(
+            String name, ReadSourceSelector.Authority authority, DataSource pool) {
+        return new ReadSourceSelector.Source(name, authority, pool, CircuitBreaker.ofDefaults(name));
     }
 
     private ReadOnlyRoutingDataSource routing(DataSource primaryTarget, ReadSourceSelector selector) {
@@ -100,14 +101,14 @@ class ReadOnlyRoutingDataSourceTest {
 
     private ReadSourceSelector seoulSelector() {
         return new ReadSourceSelector(List.of(
-                source(SEOUL_REPLICA, false, replicaPool),
-                source(ReadSourceProperties.PRIMARY, true, primaryReadPool)));
+                source(SEOUL_REPLICA, ReadSourceSelector.Authority.REPLICA, replicaPool),
+                source(ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, primaryReadPool)));
     }
 
     private ReadSourceSelector oregonSelector() {
         return new ReadSourceSelector(List.of(
-                source(ReadSourceProperties.PRIMARY, true, primary),
-                source(SEOUL_REPLICA, false, replicaPool)));
+                source(ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, primary),
+                source(SEOUL_REPLICA, ReadSourceSelector.Authority.REPLICA, replicaPool)));
     }
 
     private static DataSource capturing(DataSource pool) {
@@ -244,7 +245,7 @@ class ReadOnlyRoutingDataSourceTest {
         assertThat(routing.getConnection()).isSameAs(primaryReadConnection);
         verify(primary, never()).getConnection();
         verify(replicaPool, never()).getConnection();
-        assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(ReadSourceProperties.PRIMARY);
     }
 
     @Test
@@ -254,7 +255,7 @@ class ReadOnlyRoutingDataSourceTest {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
         assertThat(routing.getConnection()).isSameAs(primaryConnection);
-        assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(ReadSourceProperties.PRIMARY);
     }
 
     @Test
@@ -269,7 +270,7 @@ class ReadOnlyRoutingDataSourceTest {
         assertThat(Proxy.isProxyClass(lent.getClass())).isTrue();
         verify(primary).getConnection();
         verify(primaryReadPool, never()).getConnection();
-        assertThat(ChosenReadSource.name()).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
     }
 
     @Test
@@ -287,6 +288,6 @@ class ReadOnlyRoutingDataSourceTest {
         assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
         assertThat(thrown.getCause().getCause()).hasSuppressedException(linkFailure);
         verify(primary, never()).getConnection();
-        assertThat(ChosenReadSource.name()).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
     }
 }

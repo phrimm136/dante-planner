@@ -9,9 +9,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class FreshnessStampFilter extends OncePerRequestFilter {
 

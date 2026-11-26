@@ -33,10 +33,10 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,9 +85,9 @@ class FreshnessReadAspectTest {
         ChosenReadSource.clear();
         lenient().when(seoulPool.getConnection()).thenReturn(seoulConnection);
         lenient().when(primaryPool.getConnection()).thenReturn(primaryConnection);
-        seoul = new ReadSourceSelector.Source(SEOUL, false, seoulPool, breaker(SEOUL));
+        seoul = new ReadSourceSelector.Source(SEOUL, ReadSourceSelector.Authority.REPLICA, seoulPool, breaker(SEOUL));
         ReadSourceSelector.Source primary = new ReadSourceSelector.Source(
-                ReadSourceProperties.PRIMARY, true, primaryPool, breaker(ReadSourceProperties.PRIMARY));
+                ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, primaryPool, breaker(ReadSourceProperties.PRIMARY));
         selector = new ReadSourceSelector(List.of(seoul, primary));
         FreshnessReadGuard guard = new FreshnessReadGuard(scopes -> {
             markerReads.add(List.copyOf(scopes));
@@ -142,7 +142,7 @@ class FreshnessReadAspectTest {
         }
 
         private Attempt attempt() {
-            Attempt attempt = new Attempt(ChosenReadSource.name().orElse(""),
+            Attempt attempt = new Attempt(ChosenReadSource.source().map(ReadSourceSelector.Source::name).orElse(""),
                     TransactionSynchronizationManager.isActualTransactionActive(),
                     TransactionSynchronizationManager.isCurrentTransactionReadOnly());
             attempts.add(attempt);

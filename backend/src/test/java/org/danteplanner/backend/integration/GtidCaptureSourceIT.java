@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 import org.junit.jupiter.api.AfterEach;
@@ -40,14 +41,14 @@ class GtidCaptureSourceIT {
     void commit_WhenTheDriverDoesNotTrackSessionState_CapturesTheSuperset() throws SQLException {
         insert(CausalHarnessSupport.PRIMARY.getJdbcUrl());
 
-        assertThat(capture.takeCapture()).hasValueSatisfying(taken -> assertThat(taken.tracked()).isFalse());
+        assertThat(capture.takeCapture()).hasValueSatisfying(taken -> assertThat(taken.origin()).isEqualTo(GtidOrigin.FALLBACK));
     }
 
     @Test
     void commit_WhenDriverAndServerTrack_CapturesTheTransactionsOwnGtid() throws SQLException {
         insert(trackingUrl());
 
-        assertThat(capture.takeCapture()).hasValueSatisfying(taken -> assertThat(taken.tracked()).isTrue());
+        assertThat(capture.takeCapture()).hasValueSatisfying(taken -> assertThat(taken.origin()).isEqualTo(GtidOrigin.TRACKER));
     }
 
     @Test

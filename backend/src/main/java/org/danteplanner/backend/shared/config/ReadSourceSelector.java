@@ -23,7 +23,6 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class ReadSourceSelector extends AbstractDataSource {
 
@@ -36,7 +35,12 @@ public class ReadSourceSelector extends AbstractDataSource {
             UnknownHostException.class,
             SocketTimeoutException.class);
 
-    public record Source(String name, boolean authoritative, DataSource dataSource, CircuitBreaker breaker) {
+    public enum Authority {
+        PRIMARY,
+        REPLICA
+    }
+
+    public record Source(String name, Authority authority, DataSource dataSource, CircuitBreaker breaker) {
     }
 
     private static final ThreadLocal<Set<String>> SKIPPED = new ThreadLocal<>();
@@ -48,7 +52,7 @@ public class ReadSourceSelector extends AbstractDataSource {
     }
 
     private static List<Source> withAnAuthority(List<Source> sources) {
-        if (sources.stream().noneMatch(Source::authoritative)) {
+        if (sources.stream().map(Source::authority).noneMatch(Authority.PRIMARY::equals)) {
             throw new IllegalArgumentException("a read source list needs an authoritative source");
         }
         return sources;
@@ -124,7 +128,7 @@ public class ReadSourceSelector extends AbstractDataSource {
             try {
                 Connection connection = connect.from(source.dataSource());
                 source.breaker().onSuccess(System.nanoTime() - start, TimeUnit.NANOSECONDS);
-                ChosenReadSource.record(source.name(), source.authoritative());
+                ChosenReadSource.record(source);
                 return connection;
             } catch (SQLException | RuntimeException e) {
                 if (!isConnectionFailure(e)) {

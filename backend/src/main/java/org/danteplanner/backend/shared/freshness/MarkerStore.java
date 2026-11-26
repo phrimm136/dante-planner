@@ -116,10 +116,6 @@ public class MarkerStore implements AutoCloseable {
                 meterRegistry.counter(WAIT_TIMEOUTS), meterRegistry.counter(RAISE_ABANDONED), System::nanoTime);
     }
 
-    public static List<Source> sourceOrder(boolean readsPrimaryFirst, Source local, Source auth) {
-        return readsPrimaryFirst ? List.of(auth) : List.of(local, auth);
-    }
-
     public void raise(Collection<FreshnessScope> scopes, String gtidSet) {
         if (scopes.isEmpty()) {
             return;

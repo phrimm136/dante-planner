@@ -242,16 +242,10 @@ final class RaiseBatcher implements AutoCloseable {
     }
 
     private Link.Linked linked(long deadline) {
-        return switch (LinkUse.of(link, isLinkOpen())) {
-            case LinkUse.Keep keep -> keep.linked();
-            case LinkUse.Replace replace -> relink(deadline);
-        };
-    }
-
-    private boolean isLinkOpen() {
         return switch (link) {
-            case Link.Linked linked -> linked.connection().isOpen();
-            case Link.Unlinked unlinked -> false;
+            case Link.Linked linked when linked.connection().isOpen() -> linked;
+            case Link.Linked linked -> relink(deadline);
+            case Link.Unlinked unlinked -> relink(deadline);
         };
     }
 
@@ -305,23 +299,6 @@ final class RaiseBatcher implements AutoCloseable {
         }
 
         record Endpointed(Endpoint endpoint) implements Opened {
-        }
-    }
-
-    private sealed interface LinkUse {
-
-        record Keep(Link.Linked linked) implements LinkUse {
-        }
-
-        record Replace() implements LinkUse {
-        }
-
-        static LinkUse of(Link link, boolean open) {
-            return switch (link) {
-                case Link.Linked linked when open -> new Keep(linked);
-                case Link.Linked linked -> new Replace();
-                case Link.Unlinked unlinked -> new Replace();
-            };
         }
     }
 

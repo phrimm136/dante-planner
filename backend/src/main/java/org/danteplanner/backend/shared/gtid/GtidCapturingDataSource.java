@@ -107,7 +107,7 @@ public class GtidCapturingDataSource extends AbstractDataSource {
             // @@session.transaction_read_only unless useLocalSessionState is on.
             switch (OwnGtid.of(readOwnGtid(target))) {
                 case OwnGtid.Named named -> {
-                    capture.recordCommit(named.gtid(), true);
+                    capture.recordCommit(named.gtid(), GtidOrigin.TRACKER);
                     return;
                 }
                 case OwnGtid.None none -> { }
@@ -118,7 +118,7 @@ public class GtidCapturingDataSource extends AbstractDataSource {
             if (trackerActive(target)) {
                 return;
             }
-            capture.recordCommit(readGlobalGtidExecuted(target), false);
+            capture.recordCommit(readGlobalGtidExecuted(target), GtidOrigin.FALLBACK);
         } catch (SQLException e) {
             log.warn("Could not capture the committed GTID for the freshness markers", e);
         }

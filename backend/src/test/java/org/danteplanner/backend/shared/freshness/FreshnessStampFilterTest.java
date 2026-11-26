@@ -11,18 +11,24 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FreshnessStampFilterTest {
+
+    private static final ReadSourceSelector.Source SEOUL_REPLICA = new ReadSourceSelector.Source(
+            "seoul-replica", ReadSourceSelector.Authority.REPLICA, null, CircuitBreaker.ofDefaults("seoul-replica"));
 
     private static final String GTID = "3e11fa47-71ca-11e1-9e33-c80aa9429562:1-5";
     private static final String OTHER_GTID = "8f9e0d1c-2b3a-4c5d-6e7f-8a9b0c1d2e3f:1-50";
@@ -48,7 +54,7 @@ class FreshnessStampFilterTest {
         return (request, response) -> {
             FreshnessDeclarations.declare(scopes);
             if (gtid != null) {
-                writeCapture.recordCommit(gtid, true);
+                writeCapture.recordCommit(gtid, GtidOrigin.TRACKER);
             }
         };
     }
@@ -99,7 +105,7 @@ class FreshnessStampFilterTest {
     void request_WhenTheChainThrows_ClearsTheChosenReadSource() {
         RuntimeException boom = new RuntimeException("chain blew up");
         FilterChain throwingChain = (req, res) -> {
-            ChosenReadSource.record("seoul-replica", false);
+            ChosenReadSource.record(SEOUL_REPLICA);
             throw boom;
         };
 
@@ -107,16 +113,16 @@ class FreshnessStampFilterTest {
                 new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(), throwingChain))
                 .isSameAs(boom);
 
-        assertThat(ChosenReadSource.name()).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
     }
 
     @Test
     void request_WhenAStaleSourceIsRecordedOnTheThread_StartsWithNoneRecorded() throws Exception {
-        ChosenReadSource.record("seoul-replica", false);
+        ChosenReadSource.record(SEOUL_REPLICA);
         List<Optional<String>> recorded = new ArrayList<>();
 
         filter.doFilter(new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(),
-                (req, res) -> recorded.add(ChosenReadSource.name()));
+                (req, res) -> recorded.add(ChosenReadSource.source().map(ReadSourceSelector.Source::name)));
 
         assertThat(recorded).containsExactly(Optional.empty());
     }
@@ -175,7 +181,7 @@ class FreshnessStampFilterTest {
         RuntimeException boom = new RuntimeException("chain blew up");
         FilterChain throwingChain = (req, res) -> {
             FreshnessDeclarations.declare(new FreshnessScope.Global());
-            writeCapture.recordCommit(GTID, true);
+            writeCapture.recordCommit(GTID, GtidOrigin.TRACKER);
             throw boom;
         };
 

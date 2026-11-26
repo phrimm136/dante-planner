@@ -32,16 +32,16 @@ class GtidWriteCaptureTest {
 
     @Test
     void ownGtidUnionAcrossCommits_WhenTwoCommits_UnionsGtids() {
-        capture.recordCommit(UUID_A + ":100", true);
-        capture.recordCommit(UUID_A + ":101", true);
+        capture.recordCommit(UUID_A + ":100", GtidOrigin.TRACKER);
+        capture.recordCommit(UUID_A + ":101", GtidOrigin.TRACKER);
 
         assertThat(capture.pollCapturedGtid()).contains(UUID_A + ":100-101");
     }
 
     @Test
     void ownGtidUnionAcrossCommits_WhenOneCommitSuppliedTheSuperset_CoversBoth() {
-        capture.recordCommit(UUID_A + ":100", true);
-        capture.recordCommit(GLOBAL_GTID, false);
+        capture.recordCommit(UUID_A + ":100", GtidOrigin.TRACKER);
+        capture.recordCommit(GLOBAL_GTID, GtidOrigin.FALLBACK);
 
         assertThat(capture.pollCapturedGtid())
                 .as("a union covering only part of the request would raise the marker below a commit")
@@ -51,7 +51,7 @@ class GtidWriteCaptureTest {
     @Test
     void ownGtidUnionAcrossCommits_WhenNoWindowOpen_RecordsNothing() {
         capture.clear();
-        capture.recordCommit(UUID_A + ":100", true);
+        capture.recordCommit(UUID_A + ":100", GtidOrigin.TRACKER);
 
         assertThat(capture.pollCapturedGtid())
                 .as("a commit on a thread serving no request must leave no state behind")
@@ -60,7 +60,7 @@ class GtidWriteCaptureTest {
 
     @Test
     void publishIdempotentStateTargeted_WhenCommitWroteNothing_CapturesNothing() {
-        capture.recordCommit(null, true);
+        capture.recordCommit(null, GtidOrigin.TRACKER);
 
         assertThat(capture.pollCapturedGtid())
                 .as("an idempotent no-op leaves no trace, so it must raise no marker")
@@ -74,8 +74,8 @@ class GtidWriteCaptureTest {
 
     @Test
     void gtidCaptureCounter_WhenTrackerAndFallbackBothRecorded_TagsEachSource() {
-        capture.recordCommit(UUID_A + ":100", true);
-        capture.recordCommit(GLOBAL_GTID, false);
+        capture.recordCommit(UUID_A + ":100", GtidOrigin.TRACKER);
+        capture.recordCommit(GLOBAL_GTID, GtidOrigin.FALLBACK);
 
         assertThat(meterRegistry.counter("gtid.capture", "source", "tracker").count())
                 .as("a silent degradation is only visible if the branch is counted")
@@ -86,26 +86,26 @@ class GtidWriteCaptureTest {
 
     @Test
     void takeCapture_WhenOnlyTheFallbackRecorded_IsUntracked() {
-        capture.recordCommit(GLOBAL_GTID, false);
+        capture.recordCommit(GLOBAL_GTID, GtidOrigin.FALLBACK);
 
-        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, false));
+        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, GtidOrigin.FALLBACK));
     }
 
     @Test
     void takeCapture_WhenAFallbackAndATrackerCommitRecorded_IsTracked() {
-        capture.recordCommit(GLOBAL_GTID, false);
-        capture.recordCommit(UUID_A + ":201", true);
+        capture.recordCommit(GLOBAL_GTID, GtidOrigin.FALLBACK);
+        capture.recordCommit(UUID_A + ":201", GtidOrigin.TRACKER);
 
-        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(UUID_A + ":1-201", true));
+        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(UUID_A + ":1-201", GtidOrigin.TRACKER));
     }
 
     @Test
     void takeCapture_WhenTaken_LeavesNothingAndForgetsTheTrackedFlag() {
-        capture.recordCommit(UUID_A + ":100", true);
+        capture.recordCommit(UUID_A + ":100", GtidOrigin.TRACKER);
         capture.takeCapture();
 
         assertThat(capture.takeCapture()).isEmpty();
-        capture.recordCommit(GLOBAL_GTID, false);
-        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, false));
+        capture.recordCommit(GLOBAL_GTID, GtidOrigin.FALLBACK);
+        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, GtidOrigin.FALLBACK));
     }
 }

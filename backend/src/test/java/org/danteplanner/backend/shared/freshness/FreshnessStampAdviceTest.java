@@ -12,6 +12,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 
@@ -23,7 +24,7 @@ class FreshnessStampAdviceTest {
 
     private static final class SingleTakeCapture extends GtidWriteCapture {
 
-        private Optional<Capture> pending = Optional.of(new Capture(GTID, true));
+        private Optional<Capture> pending = Optional.of(new Capture(GTID, GtidOrigin.TRACKER));
 
         private SingleTakeCapture() {
             super(new SimpleMeterRegistry());

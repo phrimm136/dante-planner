@@ -9,6 +9,7 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -113,10 +114,10 @@ class CausalReadIT extends ReplicaRoutingHarnessSupport {
         save(author, plannerId, PRIMARY_ONLY_TITLE);
 
         GtidWriteCapture.Capture capture = writeCapture.taken().getFirst();
-        assertThat(capture.tracked())
+        assertThat(capture.origin())
                 .as("the write's GTID must come from the OWN_GTID tracker; a fallback to SELECT @@gtid_executed "
                         + "still marks correctly and so passes every other assertion here")
-                .isTrue();
+                .isEqualTo(GtidOrigin.TRACKER);
         assertThat(capture.gtidSet())
                 .as("a tracker-sourced capture names this request's commits, not the primary's whole history")
                 .doesNotMatch(REACHES_THE_FIRST_TRANSACTION);

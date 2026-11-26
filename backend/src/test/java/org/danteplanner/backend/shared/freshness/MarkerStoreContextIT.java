@@ -76,7 +76,7 @@ class MarkerStoreContextIT {
                         ReadSourceBinding.class)
                 .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
                 .withBean(ReadSourceSelector.class, () -> new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
-                        ReadSourceProperties.PRIMARY, true, primaryReadSource,
+                        ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, primaryReadSource,
                         CircuitBreaker.ofDefaults(ReadSourceProperties.PRIMARY + UUID.randomUUID())))))
                 .withBean(EntityManagerFactory.class, () -> entityManagerFactory)
                 .withBean(DataSource.class, () -> dataSource)

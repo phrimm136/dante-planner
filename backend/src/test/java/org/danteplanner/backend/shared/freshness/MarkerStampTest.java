@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
@@ -77,7 +78,7 @@ class MarkerStampTest {
     @Test
     void stamp_WhenFailFastAndATrackedCommitDeclaredNothing_ThrowsAndRaisesNothing() {
         MarkerStamp stamp = stamp(OnUndeclared.FAIL);
-        writeCapture.recordCommit(TRACKED_GTID, true);
+        writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
 
         assertThatThrownBy(stamp::stamp)
                 .isInstanceOf(IllegalStateException.class)
@@ -90,7 +91,7 @@ class MarkerStampTest {
     @Test
     void stamp_WhenNotFailFastAndATrackedCommitDeclaredNothing_CountsIt() {
         MarkerStamp stamp = stamp(OnUndeclared.COUNT);
-        writeCapture.recordCommit(TRACKED_GTID, true);
+        writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
 
         stamp.stamp();
 
@@ -112,7 +113,7 @@ class MarkerStampTest {
     void stamp_WhenScopesAreDeclared_RaisesThemToTheGtidOnceAndNothingOnTheSecondStamp() {
         MarkerStamp stamp = stamp(OnUndeclared.FAIL);
         FreshnessScope user = new FreshnessScope.User(7);
-        writeCapture.recordCommit(TRACKED_GTID, true);
+        writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
         FreshnessDeclarations.declare(user);
 
         stamp.stamp();
@@ -124,7 +125,7 @@ class MarkerStampTest {
     @Test
     void stamp_WhenNoneIsDeclaredInFailFast_RaisesNothing() {
         MarkerStamp stamp = stamp(OnUndeclared.FAIL);
-        writeCapture.recordCommit(TRACKED_GTID, true);
+        writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
         FreshnessDeclarations.declareNone("no read renders it");
 
         stamp.stamp();
@@ -136,7 +137,7 @@ class MarkerStampTest {
     @Test
     void stamp_WhenOnlyTheFallbackCapturedAndNothingIsDeclaredInFailFast_RaisesAndCountsNothing() {
         MarkerStamp stamp = stamp(OnUndeclared.FAIL);
-        writeCapture.recordCommit(FALLBACK_GTID, false);
+        writeCapture.recordCommit(FALLBACK_GTID, GtidOrigin.FALLBACK);
 
         stamp.stamp();
 
@@ -147,7 +148,7 @@ class MarkerStampTest {
     @Test
     void stamp_WhenOnlyTheFallbackCapturedAndNothingIsDeclaredOutsideFailFast_RaisesAndCountsNothing() {
         MarkerStamp stamp = stamp(OnUndeclared.COUNT);
-        writeCapture.recordCommit(FALLBACK_GTID, false);
+        writeCapture.recordCommit(FALLBACK_GTID, GtidOrigin.FALLBACK);
 
         stamp.stamp();
 
@@ -158,8 +159,8 @@ class MarkerStampTest {
     @Test
     void stamp_WhenAFallbackAndATrackedCommitDeclaredNothingInFailFast_Throws() {
         MarkerStamp stamp = stamp(OnUndeclared.FAIL);
-        writeCapture.recordCommit(FALLBACK_GTID, false);
-        writeCapture.recordCommit(TRACKED_GTID, true);
+        writeCapture.recordCommit(FALLBACK_GTID, GtidOrigin.FALLBACK);
+        writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
 
         assertThatThrownBy(stamp::stamp).isInstanceOf(IllegalStateException.class)
                 .hasMessage(MarkerStamp.UNDECLARED_MESSAGE);
@@ -179,7 +180,7 @@ class MarkerStampTest {
     @Test
     void onUndeclared_WhenThePropertyIsFail_Throws() {
         settings().withPropertyValues(ON_UNDECLARED + "=fail").run(context -> {
-            writeCapture.recordCommit(TRACKED_GTID, true);
+            writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
 
             assertThatThrownBy(configuredStamp(context.getBean(MarkerStore.Settings.class))::stamp)
                     .isInstanceOf(IllegalStateException.class)
@@ -190,7 +191,7 @@ class MarkerStampTest {
     @Test
     void onUndeclared_WhenThePropertyIsCount_Counts() {
         settings().withPropertyValues(ON_UNDECLARED + "=count").run(context -> {
-            writeCapture.recordCommit(TRACKED_GTID, true);
+            writeCapture.recordCommit(TRACKED_GTID, GtidOrigin.TRACKER);
 
             configuredStamp(context.getBean(MarkerStore.Settings.class)).stamp();
 
