@@ -96,7 +96,16 @@ test('a 401 delete ends in a tombstone', async ({ page, context, baseURL }) => {
     await authenticateContext(context, fixture.user.id, baseURL!)
     await page.goto('/planner/md', { waitUntil: 'domcontentloaded' })
     await expect(page.getByText(fixture.title)).toBeVisible({ timeout: 30_000 })
+    // A stream that opens after the cookie is gone is refused first and ends the session, so
+    // the delete would run as a guest's; an open stream is not checked again. The list page
+    // opens a stream of its own, which must not stand in for the detail page's.
+    const streamOpened = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/sse/subscribe') && page.url().includes(fixture.plannerId),
+      { timeout: 20_000 },
+    )
     await openDetail(page, fixture.plannerId)
+    await streamOpened
 
     await context.clearCookies({ name: ACCESS_TOKEN_COOKIE })
     await confirmDelete(page, [401])
