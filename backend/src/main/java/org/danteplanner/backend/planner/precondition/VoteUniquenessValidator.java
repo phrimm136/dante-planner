@@ -1,27 +1,15 @@
 package org.danteplanner.backend.planner.precondition;
 
-import org.danteplanner.backend.planner.api.VoteAlreadyExistsException;
-import org.danteplanner.backend.planner.entity.Upvote;
-import org.danteplanner.backend.shared.failure.Parsed;
-import org.springframework.stereotype.Component;
-
 import java.util.UUID;
 
-@Component
-public class VoteUniquenessValidator {
+import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 
-    @Parsed
-    public record FirstVote(UUID plannerId, Long userId) {
+public final class VoteUniquenessValidator {
 
-        private static FirstVote parse(Upvote prior, UUID plannerId, Long userId) {
-            return switch (prior) {
-                case NONE -> new FirstVote(plannerId, userId);
-                case CAST -> throw new VoteAlreadyExistsException(plannerId, userId);
-            };
-        }
+    private VoteUniquenessValidator() {
     }
 
-    public FirstVote requireFirstVote(Upvote prior, UUID plannerId, Long userId) {
-        return FirstVote.parse(prior, plannerId, userId);
+    public static VoteAlreadyExistsException alreadyVoted(UUID plannerId, Long userId) {
+        return new VoteAlreadyExistsException(plannerId, userId);
     }
 }

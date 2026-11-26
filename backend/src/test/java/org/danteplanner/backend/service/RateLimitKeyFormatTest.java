@@ -65,30 +65,30 @@ class RateLimitKeyFormatTest {
 
     private static final List<FrozenKey> FROZEN_KEYS = List.of(
             new FrozenKey(RateLimitPolicy.CRUD, "7:vote", CRUD_CAPACITY, String.valueOf(USER_ID), "vote",
-                    ChargeKey.parseUser(RateLimitPolicy.CRUD, USER_ID, "vote")),
+                    ChargeKey.User.parse(RateLimitPolicy.CRUD, USER_ID, "vote")),
             new FrozenKey(RateLimitPolicy.SSE, "7:sse", SSE_CAPACITY, String.valueOf(USER_ID), "sse",
-                    ChargeKey.parseUser(RateLimitPolicy.SSE, USER_ID, "")),
+                    ChargeKey.User.parse(RateLimitPolicy.SSE, USER_ID, "")),
             new FrozenKey(RateLimitPolicy.COMMENT, "7:comment", COMMENT_CAPACITY, String.valueOf(USER_ID), "comment",
-                    ChargeKey.parseUser(RateLimitPolicy.COMMENT, USER_ID, "")),
+                    ChargeKey.User.parse(RateLimitPolicy.COMMENT, USER_ID, "")),
             new FrozenKey(RateLimitPolicy.REPORT, "7:report", REPORT_CAPACITY, String.valueOf(USER_ID), "report",
-                    ChargeKey.parseUser(RateLimitPolicy.REPORT, USER_ID, "")),
+                    ChargeKey.User.parse(RateLimitPolicy.REPORT, USER_ID, "")),
             new FrozenKey(RateLimitPolicy.MODERATION, "7:moderation", MODERATION_CAPACITY, String.valueOf(USER_ID), "moderation",
-                    ChargeKey.parseUser(RateLimitPolicy.MODERATION, USER_ID, "")),
+                    ChargeKey.User.parse(RateLimitPolicy.MODERATION, USER_ID, "")),
             new FrozenKey(RateLimitPolicy.AUTH, "ip:203.0.113.9:auth", AUTH_CAPACITY, "null", "auth",
-                    ChargeKey.parseClient(RateLimitPolicy.AUTH, "ip:203.0.113.9")),
+                    ChargeKey.Client.parse(RateLimitPolicy.AUTH, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.PLANNER_COMMENT_SSE,
                     "device:3f2504e0-4f89-41d3-9a0c-0305e82c3301:planner-comment-sse",
                     SSE_CAPACITY, "null", "planner-comment-sse",
-                    ChargeKey.parseClient(RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
+                    ChargeKey.Client.parse(RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
             new FrozenKey(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9:public-read",
                     PUBLIC_READ_CAPACITY, "null", "public-read",
-                    ChargeKey.parseClient(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")),
+                    ChargeKey.Client.parse(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9:planner-stats",
                     PLANNER_STATS_CAPACITY, "null", "planner-stats",
-                    ChargeKey.parseClient(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9")),
+                    ChargeKey.Client.parse(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9:view-record",
                     VIEW_RECORD_CAPACITY, "null", "view-record",
-                    ChargeKey.parseClient(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9")));
+                    ChargeKey.Client.parse(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9")));
 
     @TestFactory
     Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {

@@ -53,7 +53,7 @@ public class CommentEngagementService {
                 statsRepository.incrementUpvoteCount(commentId);
                 FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
             }
-            case NOTHING -> throw CommentStateValidator.alreadyVoted(plannerId, userId);
+            case NOTHING -> throw CommentStateValidator.alreadyVoted(commentPublicId, userId);
         }
 
         CommentVoteResponse response = new CommentVoteResponse(

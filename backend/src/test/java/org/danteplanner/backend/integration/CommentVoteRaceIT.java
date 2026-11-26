@@ -30,13 +30,13 @@ import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
+import org.danteplanner.backend.comment.exception.CommentVoteAlreadyExistsException;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.api.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
@@ -119,7 +119,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
             UUID comment = comment();
 
             assertThat(atOnce(comment, this::upvoteByFirst, this::upvoteByFirst)).singleElement()
-                    .isInstanceOf(VoteAlreadyExistsException.class);
+                    .isInstanceOf(CommentVoteAlreadyExistsException.class);
 
             assertThat(voters(comment)).containsExactly(first.getId());
             assertThat(shown(comment, first).upvoteCount()).isEqualTo(1);
@@ -139,7 +139,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
                         .andExpect(status().isConflict())
                         .andExpect(jsonPath("$.code").value("VOTE_ALREADY_EXISTS"))
                         .andExpect(jsonPath("$.detail").value("User " + first.getId()
-                                + " has already voted on planner " + planner.id()
+                                + " has already voted on comment " + comment
                                 + ". Votes are permanent and cannot be changed."));
             } catch (Exception e) {
                 throw new AssertionError(e);

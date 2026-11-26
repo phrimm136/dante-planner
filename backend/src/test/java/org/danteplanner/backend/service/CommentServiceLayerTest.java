@@ -3,6 +3,7 @@ import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
+import org.danteplanner.backend.comment.exception.CommentVoteAlreadyExistsException;
 import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
 import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
@@ -534,7 +535,9 @@ class CommentServiceLayerTest {
             when(commentVoteRepository.insertIgnore(10L, testUser.getId(), "UP")).thenReturn(0);
 
             assertRejected(() -> engagementService.toggleUpvote(commentPublicId, testUser.getId()))
-                    .withCode("VOTE_ALREADY_EXISTS");
+                    .withCode("VOTE_ALREADY_EXISTS")
+                    .isInstanceOfSatisfying(CommentVoteAlreadyExistsException.class,
+                            refusal -> assertThat(refusal.getCommentPublicId()).isEqualTo(commentPublicId));
             verifyNoInteractions(statsRepository);
         }
 

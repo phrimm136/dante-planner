@@ -115,11 +115,11 @@ class RateLimitServiceIT {
     }
 
     private ConsumptionProbe chargeUser(RateLimitPolicy policy, long userId, String endpoint) {
-        return rateLimitService.charge(policy, ChargeKey.parseUser(policy, userId, endpoint));
+        return rateLimitService.charge(policy, ChargeKey.User.parse(policy, userId, endpoint));
     }
 
     private ConsumptionProbe chargeClient(RateLimitPolicy policy, String identifier) {
-        return rateLimitService.charge(policy, ChargeKey.parseClient(policy, identifier));
+        return rateLimitService.charge(policy, ChargeKey.Client.parse(policy, identifier));
     }
 
     @Nested
@@ -519,7 +519,7 @@ class RateLimitServiceIT {
             RateLimitService service = new RateLimitService(proxyManager, ttlProperties);
 
             // Consume one token for the known key "1:ttl-probe"
-            service.charge(RateLimitPolicy.CRUD, ChargeKey.parseUser(RateLimitPolicy.CRUD, 1L, "ttl-probe"));
+            service.charge(RateLimitPolicy.CRUD, ChargeKey.User.parse(RateLimitPolicy.CRUD, 1L, "ttl-probe"));
 
             // The bucket key must exist in the local rate-limit Redis...
             assertThat(rateLimitTemplate.hasKey("1:ttl-probe")).isTrue();
@@ -547,7 +547,7 @@ class RateLimitServiceIT {
             RateLimitService service = new RateLimitService(proxyManager, authProbeProperties);
 
             // Consume one token for the known key "2:auth-probe"
-            service.charge(RateLimitPolicy.CRUD, ChargeKey.parseUser(RateLimitPolicy.CRUD, 2L, "auth-probe"));
+            service.charge(RateLimitPolicy.CRUD, ChargeKey.User.parse(RateLimitPolicy.CRUD, 2L, "auth-probe"));
 
             // Present in the local rate-limit Redis, absent from the auth Redis.
             assertThat(rateLimitTemplate.hasKey("2:auth-probe")).isTrue();

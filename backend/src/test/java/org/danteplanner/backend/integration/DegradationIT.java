@@ -383,7 +383,7 @@ class DegradationIT {
     private boolean rateLimiterAnswers() {
         try {
             rateLimitService.charge(RateLimitPolicy.CRUD,
-                    ChargeKey.parseUser(RateLimitPolicy.CRUD, TestDataFactory.nextUserId(), "degradation-probe"));
+                    ChargeKey.User.parse(RateLimitPolicy.CRUD, TestDataFactory.nextUserId(), "degradation-probe"));
             return true;
         } catch (RuntimeException e) {
             return false;

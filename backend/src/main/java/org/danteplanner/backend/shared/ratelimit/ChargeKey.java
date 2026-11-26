@@ -2,26 +2,48 @@ package org.danteplanner.backend.shared.ratelimit;
 
 import org.danteplanner.backend.shared.failure.Parsed;
 
-@Parsed
-public record ChargeKey(String subject, String endpoint, String refusedUser) {
+public sealed interface ChargeKey {
 
-    private static final String NO_USER = "null";
+    String spelled();
 
-    public static ChargeKey parseClient(RateLimitPolicy policy, String clientIdentifier) {
-        return new ChargeKey(clientIdentifier, fixedEndpoint(policy), NO_USER);
+    RateLimitExceededException refusal(long retryAfterSeconds);
+
+    @Parsed
+    record Client(String identifier, String endpoint) implements ChargeKey {
+
+        private static final String REFUSED_USER_TEXT = "null";
+
+        public static Client parse(RateLimitPolicy policy, String clientIdentifier) {
+            return new Client(clientIdentifier, fixedEndpoint(policy));
+        }
+
+        @Override
+        public String spelled() {
+            return identifier + ":" + endpoint;
+        }
+
+        @Override
+        public RateLimitExceededException refusal(long retryAfterSeconds) {
+            return new RateLimitExceededException(REFUSED_USER_TEXT, endpoint, retryAfterSeconds);
+        }
     }
 
-    public static ChargeKey parseUser(RateLimitPolicy policy, long userId, String declaredEndpoint) {
-        String endpoint = declaredEndpoint.isEmpty() ? fixedEndpoint(policy) : declaredEndpoint;
-        return new ChargeKey(String.valueOf(userId), endpoint, String.valueOf(userId));
-    }
+    @Parsed
+    record User(long userId, String endpoint) implements ChargeKey {
 
-    public String spelled() {
-        return subject + ":" + endpoint;
-    }
+        public static User parse(RateLimitPolicy policy, long userId, String declaredEndpoint) {
+            return new User(userId, declaredEndpoint.isEmpty() ? fixedEndpoint(policy) : declaredEndpoint);
+        }
 
-    public RateLimitExceededException refusal(long retryAfterSeconds) {
-        return new RateLimitExceededException(refusedUser, endpoint, retryAfterSeconds);
+        @Override
+        public String spelled() {
+            return userId + ":" + endpoint;
+        }
+
+        @Override
+        public RateLimitExceededException refusal(long retryAfterSeconds) {
+            return new RateLimitExceededException(String.valueOf(userId), endpoint, retryAfterSeconds);
+        }
     }
 
     private static String fixedEndpoint(RateLimitPolicy policy) {
