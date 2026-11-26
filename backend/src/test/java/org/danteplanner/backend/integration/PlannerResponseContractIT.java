@@ -17,7 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
@@ -80,6 +81,9 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerVoteRepository voteRepository;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private User owner;
     private String token;
     private StoredPlanner published;
@@ -125,7 +129,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     private void engageAsOwner() {
-        voteRepository.insert(new PlannerVote(owner.getId(), published.id(), VoteType.UP));
+        transactionTemplate.executeWithoutResult(status -> voteRepository.insertIgnore(
+                owner.getId(), published.id(), VoteType.UP.name(), Instant.now()));
     }
 
     @Test

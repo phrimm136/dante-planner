@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.Takedown;
 
+import org.danteplanner.backend.planner.repository.ContentWrite;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
@@ -33,9 +34,9 @@ public final class PlannerRows {
 
     public static PlannerContent content(StoredPlanner planner) {
         StoredContent content = planner.content();
-        return new PlannerContent(planner.id(), content.title(), content.status(), content.category(),
-                content.keywords(), content.json(), content.schemaVersion(), content.gameContentVersion(),
-                content.syncVersion(), content.device().columnValue(), content.lastModifiedAt(), null);
+        return PlannerContent.created(planner.id(), new ContentWrite(content.title(), content.status(),
+                content.category(), content.keywords(), content.json(), content.schemaVersion(),
+                content.gameContentVersion(), content.device(), content.syncVersion(), content.lastModifiedAt()));
     }
 
     public static PlannerPublication publication(StoredPlanner planner) {
