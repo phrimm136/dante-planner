@@ -3,9 +3,10 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<EOF
-usage: $0 <clean|all|check|PATCH> [--seeds K] [--out FILE]
+usage: $0 <clean|all|check|compile|PATCH> [--seeds K] [--out FILE]
   PATCH  a planted bug: a file name under backend/src/test/resources/consistency/planted/ without .patch
   check  git apply --check every planted bug against the checkout
+  compile  apply each planted bug in turn, compile main, test and consistency sources with -PplantedBug, revert
   all    clean, then every planted bug
   --seeds K   seeds per variant (default 20)
   --out FILE  markdown table the row is appended to (default backend/build/consistency/planted-bugs.md)
@@ -161,6 +162,33 @@ apply_patch() {
   applied_patch=$patch
   git -C "$repo" apply "$patch" || return 1
   echo "applied $1 to $file"
+}
+
+compile_patches() {
+  require_targets_at_head
+  local name compile_rc status=0
+  for name in $(patch_names); do
+    apply_patch "$name" || return 1
+    echo "compile $name: gradlew classes testClasses consistencyClasses -PplantedBug"
+    "$repo/backend/gradlew" -p "$repo/backend" --console=plain -q classes testClasses consistencyClasses -PplantedBug &
+    gradle_pid=$!
+    set +e
+    wait "$gradle_pid"
+    compile_rc=$?
+    set -e
+    gradle_pid=""
+    if ! restore; then
+      echo "compile $name aborted: the planted bug was not reverted" >&2
+      exit 1
+    fi
+    if [ "$compile_rc" -ne 0 ]; then
+      echo "planted bug does not compile: $name" >&2
+      status=1
+    else
+      echo "compiles: $name"
+    fi
+  done
+  return "$status"
 }
 
 require_targets_at_head() {
@@ -341,6 +369,9 @@ run_variant() {
 case $variant in
   check)
     check_patches
+    ;;
+  compile)
+    compile_patches
     ;;
   all)
     check_patches
