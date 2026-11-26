@@ -814,6 +814,46 @@ class PlanTest(RepoCase):
             self.assertIn(f"{backend_name} is not in this checkout", str(raised_error.exception))
         self.assertEqual((fake_effects.stream_calls, fake_effects.capture_calls), ([], []))
 
+    def plan_rds_with_data_dir(self, data_dir_text):
+        fake_effects = FakeEffects(stream_exit=1)
+        with unittest.mock.patch.dict(os.environ):
+            os.environ.pop("TF_DATA_DIR", None)
+            if data_dir_text is not None:
+                os.environ["TF_DATA_DIR"] = data_dir_text
+            self.run_main(["tf", "plan", "rds"], fake_effects)
+        return fake_effects
+
+    def test_an_unset_data_dir_takes_the_stack_terraform_directory(self):
+        self.assertNotEqual(self.plan_rds_with_data_dir(None).stream_calls, [])
+
+    def test_an_empty_data_dir_takes_the_stack_terraform_directory(self):
+        stack_dir = self.repo_root / "terraform" / "rds"
+        self.assertNotEqual(self.plan_rds_with_data_dir("").stream_calls, [])
+        (stack_dir / ".terraform").rmdir()
+        with self.assertRaisesRegex(ops_cli.OpsError, f"\\({stack_dir / '.terraform'} is missing"):
+            self.plan_rds_with_data_dir("")
+
+    def test_an_absolute_data_dir_is_the_initialized_directory(self):
+        stack_dir = self.repo_root / "terraform" / "rds"
+        data_dir = self.repo_root / "elsewhere"
+        data_dir.mkdir()
+        (stack_dir / ".terraform").rmdir()
+        self.assertNotEqual(self.plan_rds_with_data_dir(str(data_dir)).stream_calls, [])
+        data_dir.rmdir()
+        (stack_dir / ".terraform").mkdir()
+        with self.assertRaisesRegex(ops_cli.OpsError, f"not initialized in this checkout \\({data_dir} is missing"):
+            self.plan_rds_with_data_dir(str(data_dir))
+
+    def test_a_relative_data_dir_resolves_under_the_stack(self):
+        stack_dir = self.repo_root / "terraform" / "rds"
+        (stack_dir / ".terraform").rmdir()
+        (stack_dir / "own-data").mkdir()
+        self.assertNotEqual(self.plan_rds_with_data_dir("own-data").stream_calls, [])
+        (stack_dir / "own-data").rmdir()
+        (stack_dir / ".terraform").mkdir()
+        with self.assertRaisesRegex(ops_cli.OpsError, f"\\({stack_dir / 'own-data'} is missing"):
+            self.plan_rds_with_data_dir("own-data")
+
     def test_a_management_stack_defaults_to_mgmt_and_names_its_backend_file(self):
         (self.repo_root / "terraform" / "backend.management.hcl").write_text("bucket = \"x\"\n")
         with self.assertRaises(ops_cli.OpsError) as raised_error:

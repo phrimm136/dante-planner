@@ -11,6 +11,8 @@
 set -uo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+# shellcheck source=lib/terraform-guard.sh
+source "$REPO_DIR/scripts/ops/lib/terraform-guard.sh"
 GH_REPO="phrimm136/dante-planner"
 ISSUE_LABEL="terraform-drift"
 STACKS=(oregon seoul rds secrets cloudflare)
@@ -24,10 +26,6 @@ declare -A VAR_FILE=(
   [cloudflare]=prod.tfvars
 )
 caller_account=""
-
-# Stacks that keep more than one workspace. The default workspace holds different resources, so
-# planning without selecting reports the whole stack as absent.
-declare -A WORKSPACE=( [cloudflare]=prod-fleet )
 
 BACKEND_CONFIG="${BACKEND_CONFIG:-$REPO_DIR/terraform/backend.prod.hcl}"
 
@@ -67,21 +65,13 @@ for stack in "${STACKS[@]}"; do
     continue
   fi
 
-  if [ ! -d "$dir/.terraform" ]; then
+  if [ ! -d "$(tf_guard_data_dir "$dir")" ]; then
     "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" init -input=false -no-color \
       -backend-config="$BACKEND_CONFIG" >"$log" 2>&1 || {
       failed+=("$stack")
       summary+="- \`$stack\`: init FAILED (log: $log)"$'\n'
       continue
     }
-  fi
-
-  if [ -n "${WORKSPACE[$stack]:-}" ]; then
-    if ! "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" workspace select "${WORKSPACE[$stack]}" >>"$log" 2>&1; then
-      failed+=("$stack")
-      summary+="- \`$stack\`: workspace ${WORKSPACE[$stack]} select FAILED (log: $log)"$'\n'
-      continue
-    fi
   fi
 
   "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" plan "${args[@]}" >"$log" 2>&1
