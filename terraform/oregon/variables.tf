@@ -35,11 +35,6 @@ variable "public_subnet_cidrs" {
   default     = ["10.20.0.0/24", "10.20.1.0/24"]
 }
 
-variable "ingress_allowed_cidrs" {
-  description = "CIDRs allowed to reach the ingress node on 443. Production value = Cloudflare edge ranges + Global Accelerator health-check ranges only (requirements: Entry plane). The mTLS Authenticated Origin Pull at the origin is the real gate; this SG is defense-in-depth."
-  type        = list(string)
-}
-
 variable "redis_cross_region_cidr" {
   description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in the stack's var-file when Seoul goes live. Never 0.0.0.0/0."
   type        = string
@@ -155,11 +150,6 @@ variable "tags" {
   }
 }
 
-variable "rds_vpc_id" {
-  description = "RDS (prod) VPC id to peer with for private RDS access. Set in the stack's gitignored var-file — do not commit."
-  type        = string
-}
-
 variable "enable_global_accelerator" {
   description = "Allowlist the GA managed prefix list on the ingress SG (443) for GA direct health checks. Set true when applying terraform/global-accelerator. Default false = unchanged SG."
   type        = bool
@@ -179,6 +169,16 @@ variable "aws_account_id" {
   validation {
     condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
     error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
+}
+
+variable "environment" {
+  description = "Environment the plan runs under, which names the SSM path of the private inputs (inputs.tf). Set in envs/<env>.tfvars."
+  type        = string
+
+  validation {
+    condition     = contains(["prod", "staging"], var.environment)
+    error_message = "environment must be prod or staging."
   }
 }
 

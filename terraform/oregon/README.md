@@ -31,8 +31,11 @@ account reproduces the region (Done-When: rebuild proves the bootstrap).
 ## Prereqs
 
 - A dedicated least-privilege **provisioning identity** assumed via STS (as in `terraform/rds`).
-- `cp environment.tfvars.example prod.tfvars` and set `ingress_allowed_cidrs`
-  (Cloudflare + GA-health ranges). `*.tfvars` is gitignored.
+- The settings of each environment are tracked in `envs/<env>.tfvars`. `ingress_allowed_cidrs` is
+  read from SSM Parameter Store (us-west-2) at `/danteplanner/<env>/oregon/ingress_allowed_cidrs`
+  (`inputs.tf`), which `scripts/ops/provision/seed-tf-inputs.sh --env <env>` writes; `rds_vpc_id` is
+  read from the `rds` stack's state (`remote-state.tf`), so `rds` is applied first.
+  `aws_account_id` comes from `ops tf plan`.
 - The JWT material must already exist in **AWS Secrets Manager** as one JSON bundle at
   `danteplanner/jwt/material` with all three keys (the backend fails fast at boot without them):
   `rs256_private_key` (the PEM private key), `rs256_public_key` (the X.509 public key), and
@@ -45,7 +48,7 @@ account reproduces the region (Done-When: rebuild proves the bootstrap).
 export AWS_PROFILE=<your-provisioning-profile>
 terraform init
 terraform validate
-.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars   # READ IT
+.claude/skills/ops/bin/ops tf plan oregon                            # READ IT
 .claude/skills/ops/bin/ops tf apply <plan file printed above>        # the user, as the printed ! line
 terraform output backend_ecr_repository_url
 ```

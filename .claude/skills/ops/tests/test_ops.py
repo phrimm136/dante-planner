@@ -1143,10 +1143,12 @@ class RealSettingsTest(unittest.TestCase):
             with self.subTest(settings_path=str(settings_path.relative_to(REPO_ROOT))):
                 self.assertEqual(account_bound_shapes(settings_path.read_text()), [])
 
-    def test_the_real_rds_stack_is_moved_and_takes_the_account(self):
-        rds_stack = ops_cli.stack_info(REPO_ROOT, "rds")
-        self.assertEqual((rds_stack.is_moved, rds_stack.takes_account), (True, True))
-        self.assertFalse(ops_cli.stack_info(REPO_ROOT, "oregon").is_moved)
+    def test_the_real_moved_stacks_take_the_account(self):
+        for stack_name in ("rds", "oregon", "seoul", "secrets"):
+            with self.subTest(stack_name=stack_name):
+                moved_stack = ops_cli.stack_info(REPO_ROOT, stack_name)
+                self.assertEqual((moved_stack.is_moved, moved_stack.takes_account), (True, True))
+        self.assertFalse(ops_cli.stack_info(REPO_ROOT, "cloudflare").is_moved)
 
     def test_settings_files_are_tracked_and_other_tfvars_stay_ignored(self):
         for relative_path, ignore_exit in (("terraform/rds/envs/prod.tfvars", 1), ("terraform/oregon/envs/prod.tfvars", 1),
@@ -1604,9 +1606,13 @@ HOOK_CASES = (
      f"{CLI_TEXT} tf plan rds -- -refresh=false"),
     ("scripts/ops/terraform-run.sh -chdir=terraform/rds plan -var-file prod.tfvars", f"{CLI_TEXT} tf plan rds"),
     ("scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars -refresh=false",
-     f"{CLI_TEXT} tf plan oregon -- -var-file=prod.tfvars -refresh=false"),
+     f"{CLI_TEXT} tf plan oregon -- -refresh=false"),
     ("AWS_PROFILE=staging scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=staging.tfvars",
-     f"{CLI_TEXT} --env staging tf plan secrets -- -var-file=staging.tfvars"),
+     f"{CLI_TEXT} --env staging tf plan secrets"),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars -refresh=false",
+     f"{CLI_TEXT} tf plan cloudflare -- -var-file=prod.tfvars -refresh=false"),
+    ("AWS_PROFILE=staging scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=staging.tfvars",
+     f"{CLI_TEXT} --env staging tf plan cloudflare -- -var-file=staging.tfvars"),
     ("scripts/ops/access/metrics-query.sh 'rate(x[5m])' 6h 1m",
      f"{CLI_TEXT} metrics 'rate(x[5m])' --since 6h --step 1m"),
     ("scripts/ops/access/logs-query.sh --day 2026-07-23 '{app=\"backend\"}' 9",

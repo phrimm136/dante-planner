@@ -29,5 +29,5 @@ printf %s "$value" | put_secret "$region" "$name"
 unset value
 
 echo "done. Next:"
-echo "  1. .claude/skills/ops/bin/ops --env <env> tf plan secrets -- -var-file=<env>.tfvars, then the printed ! ... ops tf apply line   # enrols the container for replication"
+echo "  1. .claude/skills/ops/bin/ops --env <env> tf plan secrets, then the printed ! ... ops tf apply line   # enrols the container for replication"
 echo "  2. .claude/skills/ops/bin/ops --env <env> tf plan rds   # must show NO change"

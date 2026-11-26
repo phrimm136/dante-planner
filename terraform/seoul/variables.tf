@@ -44,16 +44,6 @@ variable "rds_region" {
   default     = "us-west-2"
 }
 
-variable "rds_vpc_id" {
-  description = "Primary RDS VPC id to peer with (cross-region). Set in the stack's var-file — do not commit."
-  type        = string
-}
-
-variable "ingress_allowed_cidrs" {
-  description = "CIDRs allowed to reach the Seoul ingress on 443 (Cloudflare edge + Global Accelerator health-check ranges), same posture as Oregon."
-  type        = list(string)
-}
-
 variable "tags" {
   description = "Resource tags."
   type        = map(string)
@@ -70,6 +60,16 @@ variable "aws_account_id" {
   validation {
     condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
     error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
+}
+
+variable "environment" {
+  description = "Environment the plan runs under, which names the SSM path of the private inputs (inputs.tf). Set in envs/<env>.tfvars."
+  type        = string
+
+  validation {
+    condition     = contains(["prod", "staging"], var.environment)
+    error_message = "environment must be prod or staging."
   }
 }
 
