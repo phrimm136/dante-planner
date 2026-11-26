@@ -263,18 +263,46 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    void subscriptionRequests_WhenThePlannerIsMissingOrUnpublished_AnswerAsTheToggleDoes() throws Exception {
+    void joinRequests_WhenThePlannerIsMissingOrUnpublished_AnswerAsTheToggleDoes() throws Exception {
         User reader = reader();
         UUID unpublished = TestDataFactory.createTestPlanner(plannerRepository, author, false).id();
 
         for (UUID id : List.of(UUID.randomUUID(), unpublished)) {
-            for (MockHttpServletRequestBuilder request : subscriptionRequests(id)) {
+            for (MockHttpServletRequestBuilder request : List.of(post("/api/planner/md/{id}/subscribe", id),
+                    put("/api/planner/md/{id}/subscription", id))) {
                 perform(request, reader)
                         .andExpect(status().isNotFound())
                         .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
             }
             assertThat(subscriptionRepository.findEnabledOf(reader.getId(), id)).isEmpty();
         }
+    }
+
+    @Test
+    void removeSubscription_WhenThePlannerWasWithdrawn_Returns200AndTurnsTheSubscriptionOff() throws Exception {
+        User reader = reader();
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
+                .andExpect(status().isOk());
+        perform(post("/api/planner/md/{id}/unpublish", publishedPlanner.id()), author)
+                .andExpect(status().isOk());
+
+        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.id()), reader)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscribed").value(false));
+
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.id())).contains(false);
+    }
+
+    @Test
+    void removeSubscription_WhenThePlannerDoesNotExist_AnswersUnsubscribed() throws Exception {
+        User reader = reader();
+        UUID missing = UUID.randomUUID();
+
+        perform(delete("/api/planner/md/{id}/subscription", missing), reader)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscribed").value(false));
+
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), missing)).isEmpty();
     }
 
     @Test

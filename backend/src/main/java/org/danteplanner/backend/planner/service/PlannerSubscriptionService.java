@@ -82,8 +82,6 @@ public class PlannerSubscriptionService {
 
     @Transactional
     public void unsubscribe(Long userId, UUID plannerId) {
-        accessGuard.checkPublished(plannerId);
-
         subscriptionRepository.unsubscribe(userId, plannerId);
         FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
         log.debug("User {} unsubscribed from planner {}", userId, plannerId);

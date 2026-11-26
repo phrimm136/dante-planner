@@ -99,6 +99,16 @@ class UserWriteRaceIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
+    void updateUsernameEpithet_WhenTheAccountIsSoftDeleted_RefusesAsDeletedAndKeepsTheEpithet() {
+        lifecycleService.deleteAccount(owner.getId());
+        String before = column("username_epithet", String.class);
+
+        assertRejected(() -> userService.updateUsernameEpithet(owner.getId(), "NAIVE")).withCode("UNAUTHORIZED");
+
+        assertThat(column("username_epithet", String.class)).isEqualTo(before);
+    }
+
+    @Test
     void changeRole_WhenABanCommitsAfterTheRead_KeepsTheBan() {
         afterABanCommits(() -> users.changeRole(admin.getId(), owner.getId(), UserRole.MODERATOR));
 
@@ -200,6 +210,18 @@ class UserWriteRaceIT extends ExclusiveDatabaseSupport {
         lifecycleService.reactivateAccount(owner.getId());
 
         assertThat(userRepository.findById(owner.getId()).orElseThrow()).usingRecursiveComparison().isEqualTo(before);
+    }
+
+    @Test
+    void updateSettings_WhenTheAccountIsSoftDeleted_RefusesAsDeletedAndKeepsTheSettings() {
+        UserSettingsResponse before = userSettingsService.updateSettings(owner.getId(),
+                new UpdateUserSettingsRequest(null, true, null, null));
+        lifecycleService.deleteAccount(owner.getId());
+
+        assertRejected(() -> userSettingsService.updateSettings(owner.getId(),
+                new UpdateUserSettingsRequest(null, false, false, false))).withCode("UNAUTHORIZED");
+
+        assertThat(storedSettings()).isEqualTo(before);
     }
 
     @Test

@@ -36,6 +36,7 @@ public interface UserSettingsRepository extends JpaRepository<UserSettings, Long
                 s.notifyRecommendations = COALESCE(:#{#request.notifyRecommendations()}, s.notifyRecommendations),
                 s.notifyNewPublications = COALESCE(:#{#request.notifyNewPublications()}, s.notifyNewPublications)
             WHERE s.userId = :userId
+                AND EXISTS (SELECT u.id FROM User u WHERE u.id = :userId AND u.deletedAt IS NULL)
             """)
     int update(@Param("userId") Long userId, @Param("request") UpdateUserSettingsRequest request);
 }

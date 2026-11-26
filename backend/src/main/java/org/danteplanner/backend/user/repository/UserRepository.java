@@ -52,7 +52,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameSuffixAndDeletedAtIsNull(String usernameSuffix);
 
     @Modifying
-    @Query("UPDATE User u SET u.usernameEpithet = :epithet, u.updatedAt = :now WHERE u.id = :id")
+    @Query("UPDATE User u SET u.usernameEpithet = :epithet, u.updatedAt = :now "
+            + "WHERE u.id = :id AND u.deletedAt IS NULL")
     int changeEpithet(@Param("id") Long id, @Param("epithet") String epithet, @Param("now") Instant now);
 
     @Modifying

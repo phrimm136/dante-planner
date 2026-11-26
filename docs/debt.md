@@ -1014,12 +1014,12 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   opt out of both before its Cache Rule is enabled.
   re-check: `rg -qF 'return request.getDispatcherType() == DispatcherType.ASYNC;' backend/src/main/java/org/danteplanner/backend/shared/security/CsrfDoubleSubmitFilter.java`
 - **The forwarded-for fallback trusts the leftmost hop.** `ClientIpResolver.firstHop` takes
-  the client-written entry once the direct peer is a trusted proxy;
+  the client-written entry once the direct peer is a trusted proxy (`IpClaim.forwarded`);
   `ClientIpResolverTest.resolve_WhenHeaderCarriesAChainOfHops_ReturnsTheLeftmost` pins that
   as the spec. Latent while `CF-Connecting-IP` is always present on the tunnel-only path. Replace
   with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
   an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
-  re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
+  re-check: `rg -q 'new Claimed\(firstHop\(header\)\)' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
 
 ## 2026-09-18 consistency without an LLM (scheduled ratchet)
 
@@ -1285,14 +1285,14 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   with its own `@DynamicPropertySource` exceeds the context budget of 15 in
   `TestIsolationConventionTest`.
   re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java 'setTaskExecutor'`
-- `MarkerStore` keeps its own `Source` record and `sourceOrder` and asks `RedisRoleHealth.isAvailable`
-  itself, where the auth reads go through `RoleGated` (same roles, same primary-first rule); it is
+- `MarkerStore` keeps its own `Source` record and asks `RedisRoleHealth.isAvailable`
+  itself (its order now comes from the shared `ReadOrder`), where the auth reads go through `RoleGated` (same roles, same primary-first rule); it is
   the one frozen entry of the role-health rule in `RedisRoleGateRule`. Left apart because another
   open change rewrites the marker read path. Worth doing when that change has landed: build its
   sources as `RoleGated` and delete its own record, ordering and availability check. Its read falls
   through to the next source on a command error and `AuthReadSources.read` does not, so it cannot
   simply read through `AuthReadSources`.
-  re-check: `rg -q 'static List<Source> sourceOrder' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
+  re-check: `rg -q 'public record Source\(RedisRole role' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
 
 - `NotificationRepository.deleteReadBefore` deletes on `read_at < :cutoff` and no index leads with
   `read_at`, so the nightly purge likely scans and locks the whole `notifications` table
@@ -1867,7 +1867,3 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   can run so (`controller.type: daemonset`, `alloy.mounts.varlog`). Worth deciding when a fault
   during a shutdown has to be explained and its log lines are missing.
   re-check: `rg -q 'loki.source.kubernetes' deploy/chart/templates/alloy-logs.yaml`
-- `UserRepository.changeEpithet` does not require `deleted_at IS NULL`, so an account scheduled for
-  deletion can still change its epithet with a live token. Worth deciding when account deletion is next
-  changed.
-  re-check: `rg -qF 'u.usernameEpithet = :epithet, u.updatedAt = :now WHERE u.id = :id"' backend/src/main/java/org/danteplanner/backend/user/repository/UserRepository.java`

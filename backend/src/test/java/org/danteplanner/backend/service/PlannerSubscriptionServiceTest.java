@@ -152,22 +152,19 @@ class PlannerSubscriptionServiceTest {
     }
 
     @Test
-    void unsubscribe_WhenPublished_WritesTheUnsubscribedStateWhetherOrNotARowMatched() {
-        published();
-
+    void unsubscribe_WhenThePlannerIsNotReadable_WritesTheUnsubscribedStateWithoutAskingForIt() {
         subscriptionService.unsubscribe(testUser.getId(), plannerId);
 
         verify(subscriptionRepository).unsubscribe(testUser.getId(), plannerId);
         verifyNoMoreInteractions(subscriptionRepository);
+        verifyNoInteractions(plannerRepository);
     }
 
     @Test
-    void subscribeAndUnsubscribe_WhenPlannerMissing_WriteNothing() {
+    void subscribe_WhenPlannerMissing_WritesNothing() {
         when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
 
         assertRejected(() -> subscriptionService.subscribe(testUser.getId(), plannerId)).withCode("PLANNER_NOT_FOUND");
-        assertRejected(() -> subscriptionService.unsubscribe(testUser.getId(), plannerId))
-                .withCode("PLANNER_NOT_FOUND");
 
         verifyNoInteractions(subscriptionRepository);
     }

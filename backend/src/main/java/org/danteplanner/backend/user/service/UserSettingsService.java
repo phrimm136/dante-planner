@@ -52,7 +52,7 @@ public class UserSettingsService implements NotificationPreferenceProvider {
     public UserSettingsResponse updateSettings(Long userId, UpdateUserSettingsRequest request) {
         UserSettings settings = getOrCreateEntity(userId);
 
-        WrittenAccount written = WrittenAccount.of(userId,
+        WrittenAccount written = WrittenAccount.ofOwnAccount(userId,
                 WriteOutcome.of(userSettingsRepository.update(userId, request)));
         FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
 
