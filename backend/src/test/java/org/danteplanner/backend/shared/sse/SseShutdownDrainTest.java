@@ -24,6 +24,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -168,7 +169,11 @@ class SseShutdownDrainTest {
         return URI.create("http://localhost:" + port + "/probe/stream");
     }
 
-    private static ServletWebServerApplicationContext start() {
+    static URI streamUri(int port, UUID deviceId) {
+        return URI.create(streamUri(port) + "/" + deviceId);
+    }
+
+    static ServletWebServerApplicationContext start() {
         return (ServletWebServerApplicationContext) new SpringApplicationBuilder(ProbeApplication.class)
                 .web(WebApplicationType.SERVLET)
                 .profiles(PROFILE)
@@ -232,6 +237,11 @@ class SseShutdownDrainTest {
         SseEmitter stream() throws Exception {
             return service.subscribe();
         }
+
+        @GetMapping("/probe/stream/{deviceId}")
+        SseEmitter stream(@PathVariable UUID deviceId) throws Exception {
+            return service.subscribe(deviceId);
+        }
     }
 
     static class ProbeSseService extends AbstractSseService<String> {
@@ -244,7 +254,11 @@ class SseShutdownDrainTest {
         }
 
         SseEmitter subscribe() throws Exception {
-            SseEmitter emitter = register("probe", UUID.randomUUID(), new Viewer.Guest());
+            return subscribe(UUID.randomUUID());
+        }
+
+        SseEmitter subscribe(UUID deviceId) throws Exception {
+            SseEmitter emitter = register("probe", deviceId, new Viewer.Guest());
             emitter.onCompletion(completed::countDown);
             return emitter;
         }
@@ -256,6 +270,11 @@ class SseShutdownDrainTest {
 
         int openCount() {
             return connectionCount("probe");
+        }
+
+        List<SseEmitter> openEmitters() {
+            var connections = emitters.get("probe");
+            return connections == null ? List.of() : connections.stream().map(EmitterEntry::emitter).toList();
         }
 
         @Override

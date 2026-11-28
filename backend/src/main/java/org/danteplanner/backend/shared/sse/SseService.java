@@ -75,7 +75,7 @@ public class SseService extends AbstractSseService<Long> {
                 log.debug("Sent {} to user {} device {}", eventType, userId, entry.deviceId());
             } catch (IOException | IllegalStateException e) {
                 log.debug("Failed to send {} to user {} device {}, removing emitter", eventType, userId, entry.deviceId());
-                removeConnection(userId, entry.deviceId());
+                remove(userId, entry);
             }
         }
     }
@@ -108,7 +108,7 @@ public class SseService extends AbstractSseService<Long> {
                 } catch (IOException | IllegalStateException e) {
                     log.debug("Broadcast failed for user {} device {}, removing emitter",
                             userId, emitterEntry.deviceId());
-                    removeConnection(userId, emitterEntry.deviceId());
+                    remove(userId, emitterEntry);
                 }
             }
         }

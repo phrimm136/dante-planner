@@ -55,18 +55,18 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
 
     private void open(K key, UUID deviceId, Viewer subscriber, SseEmitter emitter) throws IOException {
         emitter.send(SseEmitter.event().name("connected").data("{}"));
+        EmitterEntry entry = new EmitterEntry(deviceId, subscriber, emitter);
         emitters.compute(key, (k, existing) -> {
             var connections = existing != null ? existing : new CopyOnWriteArrayList<EmitterEntry>();
-            connections.removeIf(e -> e.deviceId().equals(deviceId));
             beforeRegister(key, connections);
-            connections.add(new EmitterEntry(deviceId, subscriber, emitter));
+            connections.add(entry);
             return connections;
         });
         afterRegister(key);
 
-        emitter.onCompletion(() -> removeConnection(key, deviceId));
-        emitter.onTimeout(() -> removeConnection(key, deviceId));
-        emitter.onError(e -> removeConnection(key, deviceId));
+        emitter.onCompletion(() -> remove(key, entry));
+        emitter.onTimeout(() -> remove(key, entry));
+        emitter.onError(e -> remove(key, entry));
 
         switch (Phase.of(closing)) {
             case CLOSING -> emitter.complete();
@@ -74,13 +74,13 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
         }
     }
 
-    public void removeConnection(K key, UUID deviceId) {
+    protected void remove(K key, EmitterEntry entry) {
         boolean[] keyRemoved = {false};
         emitters.compute(key, (k, connections) -> {
             if (connections == null) {
                 return null;
             }
-            connections.removeIf(e -> e.deviceId().equals(deviceId));
+            connections.remove(entry);
             if (connections.isEmpty()) {
                 keyRemoved[0] = true;
                 return null;
@@ -90,7 +90,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
         if (keyRemoved[0]) {
             afterKeyRemoved(key);
         }
-        onUnsubscribed(key, deviceId);
+        onUnsubscribed(key, entry.deviceId());
     }
 
     protected int connectionCount(K key) {
@@ -114,7 +114,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
             entry.emitter().send(SseEmitter.event().comment("heartbeat"));
         } catch (IOException | IllegalStateException e) {
             onHeartbeatFailure(key, entry.deviceId());
-            removeConnection(key, entry.deviceId());
+            remove(key, entry);
         }
     }
 
@@ -126,7 +126,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
                 try {
                     connection.emitter().send(SseEmitter.event().comment("probe"));
                 } catch (IOException | IllegalStateException e) {
-                    removeConnection(key, connection.deviceId());
+                    remove(key, connection);
                     removed++;
                 }
             }

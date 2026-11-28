@@ -35,8 +35,8 @@ import static org.mockito.Mockito.when;
 /**
  * Characterization tests pinning the observable emitter-lifecycle behavior of
  * {@link PlannerCommentSseService}: subscriber registration, the per-planner capacity
- * cap, dead-emitter removal on broadcast/heartbeat/cleanup, removal idempotency, and the
- * JSON-serialization error path.
+ * cap, dead-emitter removal on broadcast/heartbeat/cleanup, and the JSON-serialization error
+ * path.
  *
  * <p>These tests exercise only the public API. A dead connection is simulated by calling
  * {@link SseEmitter#complete()} on the returned emitter; the next {@code send} then throws
@@ -89,13 +89,13 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
+        void subscribe_WhenSameDeviceReconnects_KeepsBothRegistered() throws IOException {
             UUID deviceId = UUID.randomUUID();
 
             service.subscribe(plannerId, deviceId, GUEST);
             service.subscribe(plannerId, deviceId, GUEST);
 
-            assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
+            assertThat(service.getSubscriberCount(plannerId)).isEqualTo(2);
         }
 
         @Test
@@ -123,15 +123,16 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        void subscribe_WhenSameDeviceReconnectsAtCapacity_IsAdmitted() throws IOException {
+        void subscribe_WhenSameDeviceReconnectsAtCapacity_IsRefused() throws IOException {
             UUID deviceId = UUID.randomUUID();
             service.subscribe(plannerId, deviceId, GUEST);
             for (int i = 0; i < MAX_CONNECTIONS_PER_PLANNER - 1; i++) {
                 service.subscribe(plannerId, UUID.randomUUID(), GUEST);
             }
 
-            assertThatCode(() -> service.subscribe(plannerId, deviceId, GUEST))
-                    .doesNotThrowAnyException();
+            assertThatThrownBy(() -> service.subscribe(plannerId, deviceId, GUEST))
+                    .isInstanceOf(SseCapacityExceededException.class)
+                    .hasMessageStartingWith("SSE connection limit reached for planner " + plannerId);
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
         }
 
@@ -153,6 +154,23 @@ class PlannerCommentSseServiceTest {
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
 
             service.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString()), new SseEnvelope.UserExclusion.None());
+
+            assertThat(service.getSubscriberCount(plannerId)).isZero();
+        }
+
+        @Test
+        void broadcast_WhenOneOfTwoSameDeviceEmittersIsDead_RemovesOnlyThatConnection() throws IOException {
+            UUID deviceId = UUID.randomUUID();
+            SseEmitter firstTab = service.subscribe(plannerId, deviceId, GUEST);
+            SseEmitter secondTab = service.subscribe(plannerId, deviceId, GUEST);
+            firstTab.complete();
+
+            service.broadcast(plannerId, "comment:added", Map.of("id", "c1"), new SseEnvelope.UserExclusion.None());
+
+            assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
+
+            secondTab.complete();
+            service.broadcast(plannerId, "comment:added", Map.of("id", "c2"), new SseEnvelope.UserExclusion.None());
 
             assertThat(service.getSubscriberCount(plannerId)).isZero();
         }
@@ -222,23 +240,6 @@ class PlannerCommentSseServiceTest {
             service.cleanupZombieConnections();
 
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
-        }
-    }
-
-    @Nested
-    class RemoveConnection {
-
-        @Test
-        void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
-            UUID deviceId = UUID.randomUUID();
-            service.subscribe(plannerId, deviceId, GUEST);
-
-            service.removeConnection(plannerId, deviceId);
-            assertThat(service.getSubscriberCount(plannerId)).isZero();
-
-            assertThatCode(() -> service.removeConnection(plannerId, deviceId))
-                    .doesNotThrowAnyException();
-            assertThat(service.getSubscriberCount(plannerId)).isZero();
         }
     }
 

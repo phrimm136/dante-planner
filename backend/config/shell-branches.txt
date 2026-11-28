@@ -103,7 +103,7 @@ org.danteplanner.backend.shared.security.ProblemAccessDeniedHandler.handle(jakar
 org.danteplanner.backend.shared.security.SpringContextAdapter.attribute(java.lang.String) # 1
 org.danteplanner.backend.shared.sse.AbstractSseService.connectionCount(java.lang.Object) # 1
 org.danteplanner.backend.shared.sse.AbstractSseService.open(java.lang.Object, java.util.UUID, org.danteplanner.backend.shared.security.Viewer, org.springframework.web.servlet.mvc.method.annotation.SseEmitter) # 1
-org.danteplanner.backend.shared.sse.AbstractSseService.removeConnection(java.lang.Object, java.util.UUID) # 3
+org.danteplanner.backend.shared.sse.AbstractSseService.remove(java.lang.Object, org.danteplanner.backend.shared.sse.AbstractSseService$EmitterEntry) # 3
 org.danteplanner.backend.shared.sse.SseService.broadcastToAll(org.danteplanner.backend.shared.sse.SseEnvelope$UserExclusion, java.lang.String, java.lang.Object) # 2
 org.danteplanner.backend.shared.sse.SseService.cleanupZombieConnections() # 1
 org.danteplanner.backend.shared.sse.SseService.sendToUser(java.lang.Long, java.lang.String, java.lang.Object) # 3
