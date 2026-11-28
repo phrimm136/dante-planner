@@ -18,6 +18,12 @@ asset pipeline.
   sees every resend as a change and ADR 136's hidden floors are lost. Worth doing when a consumer
   needs a content shape the stored JSON cannot give, or the double hold causes a drift bug.
   re-check: `rg -qF 'this.content = write.json();' backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerContent.java && rg -qF 'private final String json;' backend/src/main/java/org/danteplanner/backend/planner/validation/PlannerDocument.java`
+- An account's event streams are not bounded: the registry holds one entry per connection and a
+  browser opens one stream per tab, so a user with 40 tabs holds 40 streams, each heartbeated
+  every 10 s. Worth doing when the client still opens a stream per tab after the one-stream-per-
+  browser work, or a pod's stream count shows up in its memory or heartbeat worker queue: refuse
+  the arrival past a per-account cap, as the comment registry does per planner.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src/shared/sse/hooks/useSseEngine.ts -i 'navigator\.locks'`
 - A 429's `Retry-After` is on the wire, but `CorsConfig` does not list it as an exposed header, so
   the frontend's cross-origin fetches cannot read it (inferred from the config, not checked
   against prod), and the SSE client, which reads it (`sseStream.ts`), gets null and waits its own

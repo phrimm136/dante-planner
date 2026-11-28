@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 /**
  * Characterization tests pinning the observable emitter-lifecycle behavior of
  * {@link SseService}: connection registration, dead-emitter removal on send/heartbeat/
- * cleanup, removal idempotency, and the JSON-serialization error path.
+ * cleanup, and the JSON-serialization error path.
  *
  * <p>These tests exercise only the public API. A dead connection is simulated by
  * calling {@link SseEmitter#complete()} on the returned emitter; the next {@code send}
@@ -82,13 +82,17 @@ class SseServiceTest {
         }
 
         @Test
-        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
+        void subscribe_WhenSameDeviceHoldsFortyStreams_RegistersOneMore() throws IOException {
+            Long userId = 7L;
+            users.add(UsersContract.newUser().id(userId).build());
             UUID deviceId = UUID.randomUUID();
+            for (int i = 0; i < 40; i++) {
+                sseService.subscribe(userId, deviceId);
+            }
 
-            sseService.subscribe(USER_ID, deviceId);
-            sseService.subscribe(USER_ID, deviceId);
+            sseService.subscribe(userId, deviceId);
 
-            assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
+            assertThat(sseService.getActiveConnectionCount(userId)).isEqualTo(41);
         }
 
         @Test
@@ -247,23 +251,6 @@ class SseServiceTest {
             sseService.cleanupZombieConnections();
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
-        }
-    }
-
-    @Nested
-    class RemoveConnection {
-
-        @Test
-        void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
-            UUID deviceId = UUID.randomUUID();
-            sseService.subscribe(USER_ID, deviceId);
-
-            sseService.removeConnection(USER_ID, deviceId);
-            assertThat(sseService.getActiveConnectionCount(USER_ID)).isZero();
-
-            assertThatCode(() -> sseService.removeConnection(USER_ID, deviceId))
-                    .doesNotThrowAnyException();
-            assertThat(sseService.getActiveConnectionCount(USER_ID)).isZero();
         }
     }
 }

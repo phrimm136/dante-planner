@@ -65,7 +65,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> implement
                 sent++;
             } catch (IOException | IllegalStateException e) {
                 log.debug("Failed to send {} to planner {} device {}, removing", eventName, plannerId, entry.deviceId());
-                removeConnection(plannerId, entry.deviceId());
+                remove(plannerId, entry);
             }
         }
 
